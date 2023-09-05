@@ -1,0 +1,3 @@
+[submodule "nfa-bench"]
+	path = nfa-bench
+	url = git@github.com:VeriFIT/nfa-bench.git
