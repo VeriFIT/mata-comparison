@@ -16,3 +16,6 @@
 [submodule "tools/vata"]
 	path = tools/vata
 	url = git@github.com:VeriFIT/mata-comparison-vata.git
+[submodule "tools/mona"]
+	path = tools/mona
+	url = git@github.com:VeriFIT/mata-comparsion-mona.git
