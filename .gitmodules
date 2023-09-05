@@ -4,3 +4,6 @@
 [submodule "results"]
 	path = results
 	url = git@github.com:VeriFIT/mata-comparison-results.git
+[submodule "tools/mata"]
+	path = tools/mata
+	url = git@github.com:VeriFIT/mata.git
