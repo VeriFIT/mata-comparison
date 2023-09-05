@@ -13,3 +13,6 @@
 [submodule "tools/brics"]
 	path = tools/brics
 	url = git@github.com:VeriFIT/mata-comparison-brics.git
+[submodule "tools/vata"]
+	path = tools/vata
+	url = git@github.com:VeriFIT/mata-comparison-vata.git
