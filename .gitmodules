@@ -10,3 +10,6 @@
 [submodule "tools/Automata"]
 	path = tools/Automata
 	url = git@github.com:VeriFIT/Automata.git
+[submodule "tools/brics"]
+	path = tools/brics
+	url = git@github.com:VeriFIT/mata-comparison-brics.git
