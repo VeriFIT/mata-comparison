@@ -1,0 +1,5 @@
+mata:
+    cmd: /home/experiments/bin/mata-automata-inclusion $1 $2
+
+automata:
+    cmd: /home/experiments/bin/automata /home/experiments/programs/automata_inclusion.emp $1 $2
