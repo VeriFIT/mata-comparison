@@ -1,3 +1,6 @@
 [submodule "nfa-bench"]
 	path = nfa-bench
 	url = git@github.com:VeriFIT/nfa-bench.git
+[submodule "results"]
+	path = results
+	url = git@github.com:VeriFIT/mata-comparison-results.git
