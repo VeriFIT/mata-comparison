@@ -7,3 +7,6 @@
 [submodule "tools/mata"]
 	path = tools/mata
 	url = git@github.com:VeriFIT/mata.git
+[submodule "tools/Automata"]
+	path = tools/Automata
+	url = git@github.com:VeriFIT/Automata.git
