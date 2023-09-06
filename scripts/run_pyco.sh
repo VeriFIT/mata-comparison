@@ -16,6 +16,7 @@ usage() { {
         echo "  -j|--jobs                   number of paralel jobs"
         echo "  -s|--suffix                 adds suffix to the target file"
         echo "  -v|--verbose                adds verbosity to pycobench"
+        echo "  -d|--test-run               will run only single benchmark from each input"
     } >&2
 }
 
@@ -35,7 +36,8 @@ suffix=""
 basedir=$(realpath $(dirname "$0"))
 rootdir=$(realpath "$basedir/..")
 config="$rootdir/jobs/tacas-24-automata-inclusion.yaml"
-verbose=false
+verbose=""
+testrun=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -55,11 +57,14 @@ while [ $# -gt 0 ]; do
             jobs=$2
             shift 2;;
         -v|--verbose)
-            verbose=true
+            verbose="-v"
             shift 1;;
         -m|--methods)
             methods="-m $2"
             shift 2;;
+        -d|--test-run)
+            testrun=true
+            shift 1;;
         *)
             benchmarks+=( $1 )
             shift 1;;
@@ -125,10 +130,10 @@ do
     echo "[!] Performing benchmarks"
     sub_result_file="$result_file.log"
     intermediate+=( $sub_result_file )
-    if [ "$verbose" = true ]; then
-      "$basedir/"pycobench $methods -v -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
+    if [ "$testrun" = true ]; then
+      cat "$benchmark_file" | head -1 | "$basedir/"pycobench $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file"
     else
-      "$basedir/"pycobench $methods -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
+      "$basedir/"pycobench $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
     fi
 
     number_of_params=$(($(head -1 < "$benchmark_file"  | tr -cd ';' | wc -c) + 1))
