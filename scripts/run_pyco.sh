@@ -109,7 +109,7 @@ rm "$tmp_output"
 
 # Prepares configuration
 config=$(escape_extension "$config" "yaml")
-result_dir=$rootdir/results
+result_dir=$rootdir/results/data
 mkdir -p "$result_dir"
 
 [ ${#benchmarks[@]} -gt 0 ] 2>/dev/null || die "error: you must specify some *.input file with benchmarks"

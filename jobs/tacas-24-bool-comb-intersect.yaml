@@ -1,0 +1,5 @@
+mata:
+    cmd: /home/experiments/bin/mata-bool-comb-intersect $1
+
+automata:
+    cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_intersect.emp $1

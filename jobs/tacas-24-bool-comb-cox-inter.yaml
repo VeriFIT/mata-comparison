@@ -1,0 +1,5 @@
+mata:
+    cmd: /home/experiments/bin/mata-bool-comb-cox-inter $1 $2
+
+automata:
+    cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2

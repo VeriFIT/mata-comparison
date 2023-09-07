@@ -1,0 +1,5 @@
+mata:
+    cmd: /home/experiments/bin/mata-email-filter $1 $2 $3 $4 $5
+
+automata:
+    cmd: /home/experiments/bin/automata /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
