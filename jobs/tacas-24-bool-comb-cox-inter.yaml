@@ -1,5 +1,14 @@
-mata:
+mata-bin:
     cmd: /home/experiments/bin/mata-bool-comb-cox-inter $1 $2
 
 automata:
     cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+mata:
+    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+vata:
+    cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+awali:
+    cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2

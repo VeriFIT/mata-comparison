@@ -1,5 +1,14 @@
-mata:
+mata-bin:
     cmd: /home/experiments/bin/mata-bool-comb-intersect $1
 
 automata:
     cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_intersect.emp $1
+
+mata:
+    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
+
+vata:
+    cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
+
+awali:
+    cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
