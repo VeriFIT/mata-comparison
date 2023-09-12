@@ -38,6 +38,9 @@ rootdir=$(realpath "$basedir/..")
 config="$rootdir/jobs/tacas-24-automata-inclusion.yaml"
 verbose=""
 testrun=false
+GR='\033[0;32m'
+RD='\033[0;31m'
+NC='\033[0m' # No Color
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -122,7 +125,8 @@ do
     # The result contains information about date, timeout, number of jobs and measured subset of tools (if specified)
     # Run the script with -s|--suffix to append other information to your benchmarks
     benchmark_name=$(basename "$benchmark")
-    result_file=$result_dir/${benchmark_name%.*}-$(date +%Y-%m-%d-%H-%M-%S)-timeout-$timeout-jobs-$jobs$methods$suffix
+    job_name=$(basename "$config")
+    result_file=$result_dir/${job_name%.*}-${benchmark_name%.*}-$(date +%Y-%m-%d-%H-%M-%S)-timeout-$timeout-jobs-$jobs$methods$suffix
     result_file=$(echo -e "${result_file// /-}")
 
     # Perform actual runs
@@ -141,6 +145,15 @@ do
     echo "[$i] Benchmark measured"
     "$basedir"/process_pyco.sh -o "$result_file.csv" -p $number_of_params ${intermediate[@]}
     echo "[$i] Benchmark processed"
+
+    if [ "$testrun" = true ]; then
+      errors=$(grep "error" ${intermediate[@]} | wc -l)
+      if [ $errors = "0" ]; then
+        echo -e "${GR}[✓] $job_name ready for full benchmarking!${NC}"
+      else
+        echo -e "${RD}[✗] $job_name contains $errors errors.${NC}"
+      fi
+    fi
 
     # All intermediate files are deleted
     # rm ${intermediate[@]}

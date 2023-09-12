@@ -246,7 +246,7 @@ Executes one benchmark.
             if x > len(in_params):
                 raise Exception("parameter " + cmd[i] +
                                 " not provided (only " + str(len(in_params)) +
-                                " parameters passed)")
+                                " parameters passed) in `" + " ".join(cmd) + '`')
             else:
                 cmd[i] = in_params[x-1]
 
