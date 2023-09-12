@@ -19,3 +19,6 @@
 [submodule "tools/mona"]
 	path = tools/mona
 	url = git@github.com:VeriFIT/mata-comparsion-mona.git
+[submodule "tools/nfa-program-parser"]
+	path = tools/nfa-program-parser
+	url = git@github.com:VeriFIT/nfa-program-parser.git
