@@ -1,0 +1,29 @@
+{"Description":"Zmin-FA which computes the length of the shortest block of 'a'"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"Z-min-plus"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0 "Name":"s0"},
+      {"Id":1 "Name":"s1"},
+      {"Id":2 "Name":"s2"}]
+    },
+    {"Initial States":[0,1]},
+    {"Final States":[1,2]},
+    {"Transitions":[
+      {"Src":0 "Dst":0 "Label":"a"},
+      {"Src":0 "Dst":0 "Label":"b"},
+      {"Src":2 "Dst":2 "Label":"a"},
+      {"Src":2 "Dst":2 "Label":"b"},
+      {"Src":1 "Dst":1 "Label":"a" "Weight":"1"},
+      {"Src":0 "Dst":1 "Label":"b"},
+      {"Src":1 "Dst":2 "Label":"b"}]
+    }]
+  }]
+}

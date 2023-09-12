@@ -1,0 +1,32 @@
+{"Description":"Z-max-plus automaton, heap model with 2 pieces"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"Z-max-plus"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":2 "Name":"s0"},
+      {"Id":3 "Name":"s1"},
+      {"Id":4 "Name":"s2"}]
+    },
+    {"Initial States":[2,3,4]},
+    {"Final States":[2,3,4]},
+    {"Transitions":[
+      {"Id":6 "Src":2 "Dst":2 "Label":"a" "Weight":"5"},
+      {"Id":7 "Src":2 "Dst":3 "Label":"a" "Weight":"6"},
+      {"Id":8 "Src":3 "Dst":2 "Label":"a" "Weight":"1"},
+      {"Id":9 "Src":3 "Dst":3 "Label":"a" "Weight":"2"},
+      {"Id":10 "Src":4 "Dst":4 "Label":"a"},
+      {"Id":11 "Src":2 "Dst":2 "Label":"b"},
+      {"Id":12 "Src":3 "Dst":3 "Label":"b" "Weight":"2"},
+      {"Id":13 "Src":3 "Dst":4 "Label":"b" "Weight":"4"},
+      {"Id":14 "Src":4 "Dst":3 "Label":"b" "Weight":"4"},
+      {"Id":15 "Src":4 "Dst":4 "Label":"b" "Weight":"6"}]
+    }]
+  }]
+}

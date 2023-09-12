@@ -1,0 +1,43 @@
+5  <--  number of tests (automatically extracted by CMake)
+
+# - Lines starting with # are ignored (beware leading spaces are meaningful)
+# - Completely empty lines are ignored (beware, lines containing spaces are not)
+# - 1 test per non-ignored line (i.e., linebreaks are meaningful)
+# - 1 test consists of a left part, a right part and a token in the middle
+#   - left and right part must be valid shell commands; if Cora is supposed to
+#     return a plain string, then use `echo <string>`; if the correct answer is
+#     a file in the `cora/tests` directory then use `cat <filename>`.
+#   - left and right pars may contain special string ${CORA} that
+#     will be replaced at runtime by the correct path of executable `cora`
+#   - middle token may be any of {==,~=,~~}; == means that both commands should
+#     return exactly the same output, ~= means that both commands are expected
+#     to return automata that are isomorphic, similarly ~~ means that both
+#     commands sould return equivalent automata.  
+
+#                >>                                           <<
+#                >> Please number the tests for easier lookup <<
+#                >>                                           <<
+# (This numbers are *not* meaningful, test `cora-n` corresponds to the n-th
+# line that is not ignored.)
+
+
+
+# 01 - Tests determinization of a1
+${CORA} determinize a1 ~= ${CORA} cat private::a1_determinization
+
+# 02 - Tests that exp-to-aut produces an automaton equivalent to a1
+${CORA} exp-to-aut '(a+b)*(ab)(a+b)*' \| are-equivalent - a1 == echo true
+
+# 03 - Tests that `derived_term` and `standard` produce equivalent automata
+${CORA} exp-to-aut -Aabc -Mderived_term '(a+b)*(b+c)**ccc' ~~ ${CORA} exp-to-aut -Aabc -Mstandard '(a+b)*(b+c)**ccc'
+
+# 04 - statistics states
+${CORA} statistics states a1 == echo 3
+
+# 05 - eval
+${CORA} proper url-validator \| eval - 'https://www.reddit.com/r/regex/comments/5hqyce/need_help_with_url_validation_regex/?user=marsault' == echo true
+
+
+
+
+

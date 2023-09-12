@@ -1,0 +1,31 @@
+{"kind":"Rational Expression",
+ "metadata":
+  {"name":"conway-exp",
+   "caption":"Running example of an expression in Conway's book Regular Algebra and Finite Machines"},
+ "context":
+  {"labels":
+    {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+   "weights":
+    {"semiring":"B"}
+  },
+ "data":
+  {"star":
+    {"sum":[
+      {"prod":[
+        {"star":
+          {"label":"a"}
+        },
+        {"label":"b"}]
+      },
+      {"prod":[
+        {"prod":[
+          {"label":"b"},
+          {"star":
+            {"label":"b"}
+          }]
+        },
+        {"label":"a"}]
+      }]
+    }
+  }
+}

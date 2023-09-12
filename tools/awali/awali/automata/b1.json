@@ -1,0 +1,20 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"b1",
+    "caption":"Z-FA that counts the number of 'b' in words of {a,b}*",
+    "creator": {"programName":"awali", "version":"2.0.7"},
+    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+    "weights":{"semiring":"Z"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"p", "initial":1}, {"id":1, "name":"q", "final":1}],
+    "transitions":
+      [{"source":0, "destination":0, "label":"a"},
+       {"source":0, "destination":0, "label":"b"},
+       {"source":1, "destination":1, "label":"a"},
+       {"source":1, "destination":1, "label":"b"},
+       {"source":0, "destination":1, "label":"b"}]}}

@@ -1,0 +1,28 @@
+{"Description":"NFA which recognizes words with factor 'ab'"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"C"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0 "Name":"s0"},
+      {"Id":1 "Name":"s1"},
+      {"Id":2 "Name":"s2"}]
+    },
+    {"Initial States":[0]},
+    {"Final States":[2]},
+    {"Transitions":[
+      {"Src":0 "Dst":0 "Label":"a" "Weight":"-i"},
+      {"Src":0 "Dst":0 "Label":"b" "Weight":"+i"},
+      {"Src":2 "Dst":2 "Label":"a" "Weight":"2+3i"},
+      {"Src":2 "Dst":2 "Label":"b" "Weight":"2.4-3.2123i"},
+      {"Src":0 "Dst":1 "Label":"a" "Weight":"-2.4+3.2123i"},
+      {"Src":1 "Dst":2 "Label":"b" "Weight":"34.2"}]
+    }]
+  }]
+}

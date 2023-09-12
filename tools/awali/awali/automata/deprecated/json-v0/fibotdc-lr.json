@@ -1,0 +1,34 @@
+{"Description":"Sequential transducer which tries to replace 'abb' by 'baa'"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Tuple":[
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":["a","b"]},
+        {"Label Type":"Words" "Alphabet":["a","b"]}]
+      },
+      {"Weights":
+        {"Semiring":"B"}
+      }]
+    },
+    {"Content":[
+      {"States":[
+        {"Id":0 "Name":"s0"},
+        {"Id":1 "Name":"s1"},
+        {"Id":2 "Name":"s2"},
+        {"Id":3 "Name":"s3"}]
+      },
+      {"Initial States":[0]},
+      {"Final States":[0,3]},
+      {"Transitions":[
+        {"Src":0 "Dst":0 "Label":["b","b"]},
+        {"Src":0 "Dst":1 "Label":["a",""]},
+        {"Src":1 "Dst":1 "Label":["a","a"]},
+        {"Src":1 "Dst":2 "Label":["b",""]},
+        {"Src":2 "Dst":1 "Label":["a","ab"]},
+        {"Src":2 "Dst":1 "Label":["b","ba"]},
+        {"Src":1 "Dst":3 "Label":["","a"]},
+        {"Src":2 "Dst":3 "Label":["","ab"]}]
+      }]
+    }]
+  }
+}

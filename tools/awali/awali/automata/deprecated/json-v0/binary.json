@@ -1,0 +1,26 @@
+{"Description":"Z-FA which converts binary sequences into values"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["0","1"]}
+    },
+    {"Weights":
+      {"Semiring":"Z"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0 "Name":"s0"},
+      {"Id":1 "Name":"s1"}]
+    },
+    {"Initial States":[0]},
+    {"Final States":[1]},
+    {"Transitions":[
+      {"Src":0 "Dst":0 "Label":"0"},
+      {"Src":0 "Dst":0 "Label":"1"},
+      {"Src":1 "Dst":1 "Label":"0" "Weight":"2"},
+      {"Src":1 "Dst":1 "Label":"1" "Weight":"2"},
+      {"Src":0 "Dst":1 "Label":"1"}]
+    }]
+  }]
+}

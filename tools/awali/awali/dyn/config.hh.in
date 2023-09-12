@@ -1,0 +1,39 @@
+// This file is part of Awali.
+// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+//
+// Awali is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+#ifndef DYN_CONFIG_H
+#define DYN_CONFIG_H
+
+#cmakedefine CXX_COMPILER @CMAKE_CXX_COMPILER@
+#cmakedefine CXX_FLAGS @CMAKE_CXX_FLAGS@
+
+#cmakedefine AWALI_SHARE_PATH @AWALI_SHARE_PATH@
+#cmakedefine AWALI_INCLUDE_PATH @AWALI_INCLUDE_PATH@
+#cmakedefine AWALI_DYNLIB_PATH @AWALI_DYNLIB_PATH@
+#cmakedefine AWALI_DYN_CONFIG_HH_PATH @AWALI_DYN_CONFIG_HH_PATH@
+#cmakedefine AWALI_TMP_DIR @AWALI_TMP_DIR@
+
+#cmakedefine AWALICPP_MODULE_INSTALL_DIR @AWALICPP_MODULE_INSTALL_DIR@
+#cmakedefine AWALICPP_SHARE_INSTALL_PREFIX @AWALICPP_SHARE_INSTALL_PREFIX@
+#cmakedefine AWALICPP_HEADER_INSTALL_PREFIX @AWALICPP_HEADER_INSTALL_PREFIX@
+#cmakedefine AWALICPP_DYNLIB_INSTALL_DIR @AWALICPP_DYNLIB_INSTALL_DIR@
+
+#cmakedefine CMAKE_OSX_SYSROOT @CMAKE_OSX_SYSROOT@
+
+#cmakedefine DOT_BIN @DOT_BIN@
+
+
+#endif

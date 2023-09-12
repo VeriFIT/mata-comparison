@@ -1,0 +1,6 @@
+@manual{Awali@VERSION_MAJOR@.@VERSION_MINOR@,
+  title = {@NAME_DISPLAY@, @NAME_DESC@ (version @VERSION_MAJOR@.@VERSION_MINOR@)},
+  author = {@AUTHOR_BIB_LIST@},
+  year = {@YEAR_BIB@},
+  note = {Software available at {http://vaucanson-project.org/Awali}},
+}

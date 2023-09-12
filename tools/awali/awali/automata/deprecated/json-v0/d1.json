@@ -1,0 +1,27 @@
+{"Description":"Z-FA which computes the difference between the numbers of 'a' and 'b'"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"Z"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0 "Name":"s0"},
+      {"Id":1 "Name":"s1"}]
+    },
+    {"Initial States":[0]},
+    {"Final States":[1]},
+    {"Transitions":[
+      {"Src":0 "Dst":0 "Label":"a"},
+      {"Src":0 "Dst":0 "Label":"b"},
+      {"Src":1 "Dst":1 "Label":"a"},
+      {"Src":1 "Dst":1 "Label":"b"},
+      {"Src":0 "Dst":1 "Label":"a"},
+      {"Src":0 "Dst":1 "Label":"b" "Weight":"-1"}]
+    }]
+  }]
+}

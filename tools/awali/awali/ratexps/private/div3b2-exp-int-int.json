@@ -1,0 +1,34 @@
+{"kind":"Rational Expression",
+ "metadata":
+  {"name":"div3b2-exp-int-int",
+   "caption":"Writing in base 2 of the integers divisible by 3"},
+ "context":
+  {"labels":
+    {"labelKind":"Letters", "letterType":"Integer", "alphabet":[0,1]},
+   "weights":
+    {"semiring":"B"}
+  },
+ "data":
+  {"star":
+    {"sum":[
+      {"label":0},
+      {"prod":[
+        {"prod":[
+          {"label":1},
+          {"star":
+            {"prod":[
+              {"prod":[
+                {"label":0},
+                {"star":
+                  {"label":1}
+                }]
+              },
+              {"label":0}]
+            }
+          }]
+        },
+        {"label":1}]
+      }]
+    }
+  }
+}

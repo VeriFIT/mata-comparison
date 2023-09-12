@@ -1,0 +1,47 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"flipper",
+    "caption":"Transducer that mimics a flipper game",
+    "creator": {"programName":"awali", "version":"2.0.7"},
+    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Multi-tape",
+       "tapeLabels":
+         [{"labelKind":"Letters",
+           "letterType":"Char",
+           "allowEpsilon":true,
+           "alphabet":["a","b"]},
+          {"labelKind":"Letters",
+           "letterType":"Char",
+           "allowEpsilon":true,
+           "alphabet":["c","d"]}]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"LLH", "initial":true, "final":true},
+       {"id":1, "name":"LLV", "final":true},
+       {"id":2, "name":"LRH", "final":true},
+       {"id":3, "name":"LRV", "final":true},
+       {"id":4, "name":"RLH", "final":true},
+       {"id":5, "name":"RLV", "final":true},
+       {"id":6, "name":"RRH", "final":true},
+       {"id":7, "name":"RRV", "final":true}],
+    "transitions":
+      [{"source":0, "destination":4, "label":["a","c"]},
+       {"source":0, "destination":3, "label":["b","c"]},
+       {"source":1, "destination":5, "label":["a","c"]},
+       {"source":1, "destination":2, "label":["b","d"]},
+       {"source":2, "destination":6, "label":["a","c"]},
+       {"source":2, "destination":0, "label":["b","d"]},
+       {"source":3, "destination":7, "label":["a","c"]},
+       {"source":3, "destination":1, "label":["b","d"]},
+       {"source":4, "destination":1, "label":["a","d"]},
+       {"source":4, "destination":7, "label":["b","c"]},
+       {"source":5, "destination":0, "label":["a","c"]},
+       {"source":5, "destination":6, "label":["b","d"]},
+       {"source":6, "destination":3, "label":["a","d"]},
+       {"source":6, "destination":4, "label":["b","d"]},
+       {"source":7, "destination":2, "label":["a","c"]},
+       {"source":7, "destination":5, "label":["b","d"]}]}}

@@ -1,0 +1,16 @@
+{"kind":"Automaton",
+ "metadata":
+  {"timestamp":
+    {"day":"2020-04-12", "UTCtime":"16:42:19"},
+   "name":"mpty-b"
+  },
+ "context":
+  {"labels":
+    {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+   "weights":
+    {"semiring":"B"}
+  },
+ "data":
+  {"states":[],
+   "transitions":[]}
+}

@@ -1,0 +1,27 @@
+{"Description":"C automaton realizing a rotation"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a"]}
+    },
+    {"Weights":
+      {"Semiring":"C"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":2 "Name":"s0"},
+      {"Id":3 "Name":"s1"}]
+    },
+    {"Initial States":[2,
+      {"Id":3 "Weight":"i"}]
+    },
+    {"Final States":[2]},
+    {"Transitions":[
+      {"Id":4 "Src":2 "Dst":2 "Label":"a" "Weight":"3"},
+      {"Id":5 "Src":2 "Dst":3 "Label":"a" "Weight":"-4"},
+      {"Id":6 "Src":3 "Dst":2 "Label":"a" "Weight":"4"},
+      {"Id":7 "Src":3 "Dst":3 "Label":"a" "Weight":"3"}]
+    }]
+  }]
+}

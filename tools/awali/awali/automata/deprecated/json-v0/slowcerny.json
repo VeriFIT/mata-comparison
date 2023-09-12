@@ -1,0 +1,38 @@
+{"Description":"NFA which recognizes words with factor 'ab'"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters" "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"B"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0 "Name":"s0"},
+      {"Id":1 "Name":"s1"},
+      {"Id":2 "Name":"s2"},
+      {"Id":3 "Name":"s3"},
+      {"Id":4 "Name":"s4"},
+      {"Id":5 "Name":"s5"}]
+    },
+   {"Initial States":[0,1,2,3,4,5]},
+    {"Final States":[2]},
+    {"Transitions":[
+      {"Src":0 "Dst":1 "Label":"a"},
+      {"Src":1 "Dst":2 "Label":"a"},
+      {"Src":2 "Dst":0 "Label":"a"},
+      {"Src":3 "Dst":4 "Label":"a"},
+      {"Src":4 "Dst":5 "Label":"a"},
+      {"Src":5 "Dst":3 "Label":"a"},
+      {"Src":0 "Dst":0 "Label":"b"},
+      {"Src":1 "Dst":1 "Label":"b"},
+      {"Src":2 "Dst":3 "Label":"b"},
+      {"Src":3 "Dst":2 "Label":"b"},
+      {"Src":4 "Dst":4 "Label":"b"},
+      {"Src":5 "Dst":2 "Label":"b"}]
+    }]
+  }]
+}
+

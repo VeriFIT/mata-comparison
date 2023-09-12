@@ -1,0 +1,30 @@
+{"Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Label Type":"Letters", "Alphabet":["a","b"]}
+    },
+    {"Weights":
+      {"Semiring":"B"}
+    }]
+  },
+  {"Content":[
+    {"States":[
+      {"Id":0, "Name":"s0", "History":"{s0}"},
+      {"Id":1, "Name":"s1", "History":"{s0, s1}"},
+      {"Id":2, "Name":"s2", "History":"{s0, s2}"},
+      {"Id":3, "Name":"s3", "History":"{s0, s1, s2}"}]
+    },
+    {"Initial States":[0]},
+    {"Final States":[2,3]},
+    {"Transitions":[
+      {"Src":0, "Dst":1, "Label":"a"},
+      {"Src":0, "Dst":0, "Label":"b"},
+      {"Src":1, "Dst":1, "Label":"a"},
+      {"Src":1, "Dst":2, "Label":"b"},
+      {"Src":2, "Dst":3, "Label":"a"},
+      {"Src":2, "Dst":2 ,"Label":"b"},
+      {"Src":3, "Dst":3, "Label":"a"},
+      {"Src":3, "Dst":2, "Label":"b"}]
+    }]
+  }]
+}

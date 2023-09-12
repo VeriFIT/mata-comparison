@@ -1,0 +1,28 @@
+{"Description":"Sequential transducer..."
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Tuple":[
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":["a","b"]},
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":["a","b"]}]
+      },
+      {"Weights":
+        {"Semiring":"B"}
+      }]
+    },
+    {"Content":[
+      {"States":[
+        {"Id":0 "Name":"s0"},
+        {"Id":1 "Name":"s1"}]
+      },
+      {"Initial States":[0]},
+      {"Final States":[0,1]},
+      {"Transitions":[
+        {"Src":0 "Dst":0 "Label":["b","b"]},
+        {"Src":0 "Dst":1 "Label":["a","a"]},
+        {"Src":1 "Dst":0 "Label":["a","b"]},
+        {"Src":1 "Dst":1 "Label":["b","a"]}]
+      }]
+    }]
+  }
+}

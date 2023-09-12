@@ -1,0 +1,80 @@
+{"Description":"Transducer that converts words using Morse code"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Tuple":[
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":[" ","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]},
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":[" ","-",".","/"]}]
+      },
+      {"Weights":
+        {"Semiring":"B"}
+      }]
+    },
+    {"Content":[
+      {"States":[
+        {"Id":0 "Name":"i"},
+        {"Id":1 "Name":"-"},
+        {"Id":2 "Name":"---"},
+        {"Id":3 "Name":"..."},
+        {"Id":4 "Name":".-."},
+        {"Id":5 "Name":".."},
+        {"Id":6 "Name":"."},
+        {"Id":7 "Name":"space"},
+        {"Id":8 "Name":"-."},
+        {"Id":9 "Name":"--"},
+        {"Id":10 "Name":".-"},
+        {"Id":11 "Name":"-.."},
+        {"Id":12 "Name":"--."},
+          {"Id":13 "Name":"-.-"},
+        {"Id":14 "Name":"..-"},
+        {"Id":15 "Name":".--"}]
+      },
+      {"Initial States":[0]},
+      {"Final States":[0]},
+      {"Transitions":[
+        {"Src":0 "Dst":1 "Label":["a","."]},
+        {"Src":1 "Dst":7 "Label":["","-"]},
+        {"Src":7 "Dst":0 "Label":[""," "]},
+        {"Src":0 "Dst":3 "Label":["b","-"]},
+        {"Src":3 "Dst":5 "Label":["","."]},
+        {"Src":5 "Dst":6 "Label":["","."]},
+        {"Src":6 "Dst":7 "Label":["","."]},
+        {"Src":0 "Dst":4 "Label":["c","-"]},
+        {"Src":4 "Dst":8 "Label":["","."]},
+        {"Src":8 "Dst":6 "Label":["","-"]},
+        {"Src":0 "Dst":5 "Label":["d","-"]},
+        {"Src":0 "Dst":7 "Label":["e","."]},
+        {"Src":0 "Dst":4 "Label":["f","."]},
+        {"Src":0 "Dst":8 "Label":["g","-"]},
+        {"Src":0 "Dst":3 "Label":["h","."]},
+        {"Src":0 "Dst":6 "Label":["i","."]},
+        {"Src":2 "Dst":9 "Label":["","-"]},
+        {"Src":9 "Dst":1 "Label":["","-"]},
+        {"Src":0 "Dst":2 "Label":["j","."]},
+        {"Src":0 "Dst":10 "Label":["k","-"]},
+        {"Src":10 "Dst":1 "Label":["","."]},
+        {"Src":11 "Dst":5 "Label":["","-"]},
+        {"Src":0 "Dst":11 "Label":["l","."]},
+        {"Src":0 "Dst":1 "Label":["m","-"]},
+        {"Src":0 "Dst":6 "Label":["n","-"]},
+        {"Src":0 "Dst":9 "Label":["o","-"]},
+        {"Src":12 "Dst":8 "Label":["","-"]},
+        {"Src":0 "Dst":12 "Label":["p","."]},
+        {"Src":13 "Dst":10 "Label":["","-"]},
+        {"Src":0 "Dst":13 "Label":["q","-"]},
+        {"Src":0 "Dst":8 "Label":["r","."]},
+        {"Src":0 "Dst":5 "Label":["s","."]},
+        {"Src":0 "Dst":7 "Label":["t","-"]},
+        {"Src":0 "Dst":10 "Label":["u","."]},
+        {"Src":14 "Dst":10 "Label":["","."]},
+        {"Src":0 "Dst":14 "Label":["v","."]},
+        {"Src":0 "Dst":9 "Label":["w","."]},
+        {"Src":0 "Dst":14 "Label":["x","-"]},
+        {"Src":15 "Dst":9 "Label":["","."]},
+        {"Src":0 "Dst":15 "Label":["y","-"]},
+        {"Src":0 "Dst":11 "Label":["z","-"]},
+        {"Src":0 "Dst":7 "Label":[" ","/"]}]
+      }]
+    }]
+  }
+}

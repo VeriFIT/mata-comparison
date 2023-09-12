@@ -1,0 +1,193 @@
+#Last modifications VM (2016-09-26)
+
+
+  1.    SUMMARY DIAGRAM
+===========================================================================
+
+
+                   -------------------------------------------------------
+                  |         Transducer        |         Automata          |        Going down Layers
+ -------------------------------------------------------------------------|
+|Python layer     |      class Transducer     |      class Automaton      |
+|                 |                  \        |       /                   |
+|                 |     inherite from \       |      / inherits from      |
+|                 |                    \      |     /                     | -------+
+|                 |                 class _Basic_Automaton                |        |
+|                 |         (has an attribute _this of                    |        | using attribute _this
+|                 |                     type basic_automaton_t)           |        | possibly casting it
+|-------------------------------------------------------------------------|        | to simple_transducer_t
+|bridge-to-dyn    |    simple_transducer_t    |    simple_automaton_t     |        | or simple_automaton_t
+|                 |                   \       |       /                   |   <----+
+|                 |      inherits from \      |      / inherits from      |
+|                 |                     \     |     /                     | -------+
+|                 |                     basic_automaton_t                 |        | explicit cast
+|-------------------------------------------------------------------------|        | to automaton_t
+|C++ dyn layer    |                       automaton_t                     |    <---+
+ -------------------------------------------------------------------------
+
+
+
+                   ---------------------------
+                  |    Rational Expression    |     Going down Layers
+ ---------------------------------------------|
+|Python layer     |       class RatExp        | ---------------+
+|---------------------------------------------|                | using attribute _this
+|bridge-to-dyn    |       simple_ratexp_t     | -------+   <---+
+|---------------------------------------------|        |
+|C++ dyn layer    |           ratexp_t        |    <---+ explicit cast to ratexp_t
+ ---------------------------------------------         |
+
+
+
+
+
+
+
+  2.    BRIDGE TO THE DYNAMICAL LAYER
+===========================================================================
+
+directory: python/bridge-to-dyn
+files: algos.hh
+       automaton.hh
+       basic_automaton.hh
+       ratexp.hh
+       transducer.hh
+
+
+The c++ types of the dynamic layer turned out be impossible to lift to
+python, especially because of `any'.  The directory `dyn/simpletypes'
+contains simplified classes and functions that only use basic c++ types
+(vector, string, int).
+
+Due to the absence of `any', a label of transducers is a vector<string>
+while a label of automata is a string.  It was then easier to make two
+separate classes: simple_automaton_t and simple_transducer_t.  In order not
+to introduce too much duplicates, both classes inherit from another new
+class basic_automaton_t which is used whenever label-type does not matter.
+Note that the three types may be cast to one another without problem since
+they are just wrappers for `abstract_automaton_t'.
+
+In order to prevent name-clashes, the non-method C++ functions (defined in
+`dyn/simpletypes/algos.hh') have an extra `_' appended to their name : eg.,
+    weight_t eval(automaton_t aut, any word)
+    [from dyn/all.hh]
+becomes
+    std::string eval_(simple_automaton_t aut, const std::string& word)
+    [from python/bridge-to-dyn/algos.hh].
+(Note also the simplification of types.)
+However, the C++ methods (of basic_automaton_t, simple_automaton_t,
+simple_transducer_t and simple_ratexp_t) do not require the extra `_'.
+
+
+  2.1.  Exceptions
+---------------------------------------------------------------------------
+
+Some method from the static layer simply call `assert' for efficiency
+reasons.  Failing an assert stops the program and cannot be propagated as
+an exception to the python layer.  When such behaviour was observed,
+relevant verifications have been added and when it is appropriate, a
+standard c++ exception is raised (in order to be propagated to the python
+layer). For instance, any function whose argument (an int) is supposed to
+be a state would simply assert that the state indeed exists; a prior call
+to has_state() is then added in the functions of the simpletype layer that
+have states as arguments.
+
+
+  3.    PYTHON
+===========================================================================
+
+  3.1  Classes
+---------------------------------------------------------------------------
+
+directory : python
+files: *pyx
+
+There are four classes:
+    _BasicAutomaton
+    Automaton
+    Transducer
+    RatExp
+and a special fused-type Automaton_or_Transducer which allows to have
+a unique non-method function with some name (eg. add_transition) that
+takes arguments of different types depending on the first parameter.
+
+The class _BasicAutomaton features an attribute `_this' which is of the C++
+type `basic_automaton_t' and implements all functionalities that are
+identical for Automata and Transducers.  Automaton and Transducer both have
+a method `_to_cpp_class()' that respectively cast `_this' to either
+`simple_automaton_t' or `simple_transducer_t'.  _BasicAutomaton is a class
+that is not supposed to be instantiated, only Automaton and Transducer are.
+
+The RatExp class has an attribute '_this' which is of the C++
+type `simple_ratexp_t'.
+
+
+  3.2  Files
+---------------------------------------------------------------------------
+Each class has three files:
+  - `<class>_1_include.pyx' : contains the declaration of the functions of
+    the "bridge" sub-layer that concerns <class>;
+  - `<class>_2_class.pyx' : contains the definition of <class> at the
+    python level
+  - `<class>_3_function.pyx' : contains the definition of the non-method
+    functions that takes as a first argument <class>.
+
+Note that the functions that have the same action on Automata and
+Transducers are located in `basic_automaton...'.
+
+In addition, the functions that exist both for Automata and Transducers but
+have a different signature and/or behaviour are treated in the file
+`fused_Automaton_or_Transducer.pyx'.
+
+Finally, `common.pyx' contains a few utility functions and 'automaton.h'
+is a convenience include file for the dynamic library plus the bridge
+layer.
+
+
+  3.3  Method forwarding
+---------------------------------------------------------------------------
+
+Almost every non-method function xxxxx takes necessarily a first argument
+of one of the following type (thereafter denoted by YYY)
+    _BasicAutomaton
+    Automaton
+    Transducer
+    RatExp
+    Automaton_or_Transducer
+
+Non-method function simply call the appropriate method:
+  def xxxxx(YYY aut_or_tdc_or_exp, other arguments): return aut_or_tdc_or_exp.xxxxx(other arguments)
+
+In class YYY, we denote by zzzzzzz the appropriate C++ type, that is
+  - if YYY is RatExp or _BasicAutomaton, then zzzzzzz=self._this
+  - if YYY is either Automaton or Transducer, then zzzzzzz=self._to_cpp_class()
+  - if YYY is Automaton_or_Transducer, then one method simply is added in
+  both the classes Automata and Transducer.
+
+If xxxxx does not return  an automaton, a transducer or a rational
+expression, then it is either
+  def xxxxx(self, other arguments): return zzzzzzz.xxxxx(otherarguments)
+or
+  def xxxxx(self, other arguments): return xxxxx_(zzzzzzz, otherarguments)
+depending if the C++ function is respectively defined as a method or not.
+
+On the other hand, if xxxxx returns an automaton, a transducer or a
+rational expression then the C++ function will return a type from the
+bridge-to-dyn sub-layer and needs to be wrapped into a Python class: it is
+done thanks to the functions _Automaton, _Transducer and _RatExp.  They
+basically serve as internal constructors for the classes.
+There is also a wrapper _BasicAutomaton_ that decide at execution time
+whether an automaton_t is an automaton or a transducer (used for instance
+when loading automata/transducers from files).
+
+
+  3.4  Method overloading
+---------------------------------------------------------------------------
+
+A few methods (such as `has_transition') can take either a transition (an
+int) as argument or two states and a label defining the transition (two int
+plus either a str or a str list), that is either 1 or 3 arguments.  Such
+methods have no meaning if exactly 2 arguments are given and would usually
+break with a cryptic error message. In that case, the function
+`_bad_arg_number_' [from common.pyx] is used to give the user something
+readable.

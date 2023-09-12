@@ -1,0 +1,30 @@
+{"kind":"Automaton",
+ "metadata":
+  {"timestamp":
+    {"day":"2020-02-13", "UTCtime":"08:33:09"},
+   "name":"det-a1",
+   "caption":"Determinization of a1"
+  },
+ "context":
+  {"labels":
+    {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+   "weights":
+    {"semiring":"B"}
+  },
+ "data":
+  {"states":[
+    {"id":0, "name":"s0", "history":"{s0}", "initial":true},
+    {"id":1, "name":"s1", "history":"{s0, s1}"},
+    {"id":2, "name":"s2", "history":"{s0, s2}", "final":true},
+    {"id":3, "name":"s3", "history":"{s0, s1, s2}", "final":true}],
+   "transitions":[
+    {"source":0, "destination":1, "label":"a"},
+    {"source":0, "destination":0, "label":"b"},
+    {"source":1, "destination":1, "label":"a"},
+    {"source":1, "destination":2, "label":"b"},
+    {"source":2, "destination":3, "label":"a"},
+    {"source":2, "destination":2, "label":"b"},
+    {"source":3, "destination":3, "label":"a"},
+    {"source":3, "destination":2, "label":"b"}]
+  }
+}

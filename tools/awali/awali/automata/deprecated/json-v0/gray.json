@@ -1,0 +1,36 @@
+{"Description":"Gray code increment"
+ "Automaton":[
+  {"Context":[
+    {"Labels":
+      {"Tuple":[
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":["0","1"]},
+        {"Label Type":"Letters" "Epsilon transitions":true "Alphabet":["0","1"]}]
+      },
+      {"Weights":
+        {"Semiring":"B"}
+      }]
+    },
+    {"Content":[
+      {"States":[
+        {"Id":0 "Name":"s0"},
+        {"Id":1 "Name":"s1"},
+        {"Id":2 "Name":"s2"},
+        {"Id":3 "Name":"s3"},
+        {"Id":4 "Name":"s4"}]
+      },
+      {"Initial States":[0,1]},
+      {"Final States":[2,4]},
+      {"Transitions":[
+        {"Src":0 "Dst":0 "Label":["0","0"]},
+        {"Src":0 "Dst":1 "Label":["1","1"]},
+        {"Src":1 "Dst":2 "Label":["0","1"]},
+        {"Src":1 "Dst":3 "Label":["1","0"]},
+        {"Src":2 "Dst":2 "Label":["0","0"]},
+        {"Src":2 "Dst":3 "Label":["1","1"]},
+        {"Src":3 "Dst":3 "Label":["0","0"]},
+        {"Src":3 "Dst":2 "Label":["1","1"]},
+        {"Src":1 "Dst":4 "Label":["","1"]}]
+      }]
+    }]
+  }
+}

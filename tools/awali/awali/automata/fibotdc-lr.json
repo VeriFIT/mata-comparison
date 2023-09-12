@@ -1,0 +1,32 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"fibotdc-lr",
+    "caption":"Sequential transducer which tries to replace 'abb' by 'baa'",
+    "creator": {"programName":"awali", "version":"2.0.7"},
+    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Multi-tape",
+       "tapeLabels":
+         [{"labelKind":"Letters",
+           "letterType":"Char",
+           "allowEpsilon":true,
+           "alphabet":["a","b"]},
+          {"labelKind":"Words", "letterType":"Char", "alphabet":["a","b"]}]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"s0", "initial":true, "final":true},
+       {"id":1, "name":"s1"},
+       {"id":2, "name":"s2"},
+       {"id":3, "name":"s3", "final":true}],
+    "transitions":
+      [{"source":0, "destination":0, "label": ["b", ["b"]]},
+       {"source":0, "destination":1, "label":["a",[]]},
+       {"source":1, "destination":1, "label": ["a", ["a"]]},
+       {"source":1, "destination":2, "label":["b",[]]},
+       {"source":2, "destination":1, "label": ["a", ["a","b"]]},
+       {"source":2, "destination":1, "label": ["b", ["b","a"]]},
+       {"source":1, "destination":3, "label": [[], ["a"]]},
+       {"source":2, "destination":3, "label": [[], ["a","b"]]}]}}

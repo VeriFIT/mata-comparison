@@ -1,0 +1,23 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"a1",
+    "caption":"NFA that accepts words with at least one factor 'ab'",
+    "creator": {"programName":"awali", "version":"2.0.7"},
+    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"p", "initial":true},
+       {"id":1, "name":"q"},
+       {"id":2, "name":"r", "final":true}],
+    "transitions":
+      [{"source":0, "destination":0, "label":"a"},
+       {"source":0, "destination":0, "label":"b"},
+       {"source":2, "destination":2, "label":"a"},
+       {"source":2, "destination":2, "label":"b"},
+       {"source":0, "destination":1, "label":"a"},
+       {"source":1, "destination":2, "label":"b"}]}}

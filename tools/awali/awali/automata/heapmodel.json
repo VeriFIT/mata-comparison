@@ -1,0 +1,27 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"Heap model",
+    "caption":"Z-max-plus automaton, heap model with 2 pieces",
+    "creator": {"programName":"awali", "version":"2.0.7"},
+    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
+    "weights":{"semiring":"Z-max-plus"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"s0", "initial":0, "final":0},
+       {"id":1, "name":"s1", "initial":0, "final":0},
+       {"id":2, "name":"s2", "initial":0, "final":0}],
+    "transitions":
+      [{"source":0, "destination":0, "label":"a", "weight":5},
+       {"source":0, "destination":1, "label":"a", "weight":6},
+       {"source":1, "destination":0, "label":"a", "weight":1},
+       {"source":1, "destination":1, "label":"a", "weight":2},
+       {"source":2, "destination":2, "label":"a", "weight":0},
+       {"source":0, "destination":0, "label":"b", "weight":0},
+       {"source":1, "destination":1, "label":"b", "weight":2},
+       {"source":1, "destination":2, "label":"b", "weight":4},
+       {"source":2, "destination":1, "label":"b", "weight":4},
+       {"source":2, "destination":2, "label":"b", "weight":6}]}}

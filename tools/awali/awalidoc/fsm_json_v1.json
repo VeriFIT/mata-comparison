@@ -1,0 +1,119 @@
+{"$comment":"This file is an attempt to formalise format FSM JSON v1",
+ "type":"object",
+ "properties":{
+   "format":{"type":"object", 
+             "properties":{"name":{"type":"string"}, 
+                           "version":{"type":"string"}}},
+   "kind":{"type":"string", "enum":["Automaton","Rational Expression"]},
+   "metadata":{},
+   "context":{
+     "type":"object",
+     "properties":{ 
+       "labels":{
+         "type":"object",
+         "properties":{"labelKind":{"type":"string",
+                                    "enum":["Letters", "Multi-Tape", "Words"]},
+                       "letterType":{"type":"string", 
+                                     "enum":["Char","Integer"]},
+                       "tapeLabels":{"type":"array",
+                                     "items":{"$ref":"#context/labels",
+                                              "properties":{"labelKind":{"enum":["Letters","Words"]}}}},
+                       "alphabet":{"type":"array"}},
+         "required":["labelKind"],
+         "definitions":{
+          "label_type":{"$comment":"Defined later depending on value associated with labelKind, letterType and tapeLabels", 
+                        "$id":"#label_type"}
+         },
+         "valueDependencies":{
+           "labelKind":{
+             "Multi-Tape":{"required":["tapelabels"]},
+             "Letters":{"required":["letterType"]},
+             "Words":{"required":["letterType"]}},
+           "letterType":{
+             "Char":{
+               "properties":{
+                 "alphabet":{"items":{"type":"string","maxLength":"1"}}},
+               "required":["alphabet"]
+             },
+             "Integer":{
+               "properties":{
+                 "alphabet":{"items":{"type":"integer"}}},
+               "required":["alphabet"]
+             }
+           }
+         }
+       },
+       "weights":{
+        "type":"object", 
+        "properties":{"semiring":{"type":"string"}, 
+                      "characteristic":{"type":"integer"}},
+        "definitions":{
+          "weight":{"$id":"#weight_type"}},
+        "required":["semiring"],
+        "valueDependencies":{
+          "semiring":{
+            "B":{"definitions":{"weight":{"type":"boolean"}}},
+            "N":{"definitions":{"weight":{"type":"integer"}}},
+            "Z":{"definitions":{"weight":{"type":"integer"}}},
+            "Q":{"definitions":{"weight":{"type":["integer","array"],
+                                          "items":{"type":"integer"},
+                                          "minItems":2,
+                                          "maxItems":2 }}},
+            "R":{"definitions":{"weight":{"type":"number"}}},
+            "C":{"definitions":{"weight":{"type":"array",
+                                           "items":{"type":"number"},
+                                           "minItems":2,
+                                           "maxItems":2 }}},
+            "Z-min-plus":{"definitions":{"weight":{"type":"integer"}}},
+            "Z-max-plus":{"definitions":{"weight":{"type":"integer"}}},
+            "R-max-prod":{"definitions":{"weight":{"type":"number"}}},
+            "Fuzzy": {"definitions":{"weight":{"type":"number"}}},
+            "Cyclic": {"required":["characteristic"], 
+                       "definitions":{"weight":{"type":"integer"}}},
+            "Bounded": {"required":["characteristic"], 
+                        "definitions":{"weight":{"type":"integer"}}},
+            "N-oo": {"definitions":{"weight":{"type":"integer"}}},
+            "F2":{"definitions":{"weight":{"type":"boolean"}}}
+          }
+        }
+       }
+     },
+     "required":["labels","weights"] 
+   },
+   "data":{"$comment":"Entirely different between automaton"}
+ },
+ "required":["kind","context","data"],
+ "valueDependencies":{
+   "kind":{
+      "Automaton":{
+        "properties":{"states":{"type":"array",
+                                "items":{
+                                  "type":"object",
+                                  "properties":{
+                                    "id":{"type":"integer"},
+                                    "name":{"type":"string"},
+                                    "history":{"type":"string"},
+                                    "initial":{"$ref":"#weight_type"},
+                                    "final":{"$ref":"#weight_type"}
+                                  },
+                                  "required":["id"]
+                                }},
+                      "transitions":{"type":"array",
+                                     "items":{
+                                       "item":"object",
+                                       "properties":{
+                                         "source":{"type":"integer"},
+                                         "destination":{"type":"integer"},
+                                         "label":{"$ref":"#label_type"},
+                                         "weight":{"$ref":"#weight_type"}
+                                       }
+                                     }
+                      }
+                     },
+        "required":["states","transitions"]
+      },
+      "Rational Expression":{"todo":true}
+   }
+
+ }
+}
