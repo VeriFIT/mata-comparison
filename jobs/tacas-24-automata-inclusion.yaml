@@ -12,3 +12,15 @@ vata:
 
 awali:
     cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/automata_inclusion.emp $1 $2
+
+mona:
+    cmd: /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/automata_inclusion.emp $1 $2
+
+pymata:
+    cmd: pyinterpret MataEngine /home/experiments/programs/automata_inclusion.emp $1 $2
+
+pyfado:
+    cmd: pyinterpret FadoEngine /home/experiments/programs/automata_inclusion.emp $1 $2
+
+pyautomata-lib:
+    cmd: pyinterpret AutomataLibEngine /home/experiments/programs/automata_inclusion.emp $1 $2

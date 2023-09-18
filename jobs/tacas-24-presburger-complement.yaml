@@ -1,0 +1,23 @@
+automata:
+    cmd: /home/experiments/bin/automata /home/experiments/programs/complement.emp $1
+
+mata:
+    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/complement.emp $1
+
+vata:
+    cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/complement.emp $1
+
+awali:
+    cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/complement.emp $1
+
+mona:
+    cmd: /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/complement.emp $1
+
+pymata:
+    cmd: pyinterpret MataEngine /home/experiments/programs/complement.emp $1
+
+pyfado:
+    cmd: pyinterpret FadoEngine /home/experiments/programs/complement.emp $1
+
+pyautomata-lib:
+    cmd: pyinterpret AutomataLibEngine /home/experiments/programs/complement.emp $1
