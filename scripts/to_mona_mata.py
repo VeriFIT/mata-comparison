@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import sympy
 from sympy.logic.boolalg import to_dnf
 
@@ -29,6 +30,13 @@ def break_transitions(trans):
     as_str = str(dnf_expr).replace('~', '!')
     return as_str.split(' | ')
 
+def key_sorter(item):
+    pos = re.sub("[^0-9]", "", item)
+    try:
+        return int(pos)
+    except ValueError:
+        return -1
+
 
 def to_mona_mata(automata_sources: list[str]) -> list[str]:
     automata_type = peak_type(automata_sources[0]).strip()
@@ -50,8 +58,9 @@ def to_mona_mata(automata_sources: list[str]) -> list[str]:
                         src, *trans, tgt = input_line.split(' ')
                         broken = break_transitions(" ".join(trans))
                         for trans in broken:
-                            sorted_trans = ' '.split(trans)
-                            transitions.append((src, trans, tgt))
+                            sorted_trans = ' & '.join(sorted(trans.split(' & '), key=key_sorter))
+                            sorted_trans = sorted_trans.replace('(', '').replace(')', '')
+                            transitions.append((src, "(" + sorted_trans + ")", tgt))
                 transitions = sorted(transitions, key=lambda x: x[0])
                 lines.extend([f'{s} {t} {tt}' for (s, t, tt) in transitions])
 
