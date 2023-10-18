@@ -1,0 +1,4 @@
+.*
+!.gitignore
+!.gitmodules
+tools/awali/_build
