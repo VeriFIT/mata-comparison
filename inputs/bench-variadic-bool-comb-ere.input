@@ -345,7 +345,6 @@
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-contains_month_weekday_sat_9-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-contains_month_weekday_sat_9-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-contains_month_weekday_sat_ignorecase-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-contains_month_weekday_sat_ignorecase-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date1_sat-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date1_sat-*.mata
-/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date2_sat-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date2_sat-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days_months_complete-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days_months_complete-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days_months_complete_complement-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/date-sat-date_format_days_months_complete_complement-*.mata
@@ -373,7 +372,6 @@
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat1-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat1-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat2-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat2-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat3-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat3-*.mata
-/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat4-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-sat-passw_sat4-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_eq_sat1-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_eq_sat1-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_eq_sat2-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_eq_sat2-*.mata
 /home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_minimal2_unsat-program.emp;/home/experiments/nfa-bench/benchmarks/bool_comb/ere/password-unsat-passw_minimal2_unsat-*.mata
