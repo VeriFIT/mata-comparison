@@ -1,0 +1,45 @@
+explicit-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/to_mona_mata.py $1 $2
+
+minterm-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/massage_arguments.py $1 $2
+
+automata:
+    cmd: /home/experiments/bin/automata $1 $2
+
+automata-min:
+    cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata $1 $2
+
+mata:
+    cmd: /home/experiments/bin/mata-emp-interpreter $1 $2
+
+mata-sim:
+    cmd: /home/experiments/bin/mata-emp-interpreter $1 --sim $2
+
+mata-old:
+    cmd: /home/experiments/bin/mata-emp-interpreter-old $1 $2
+
+vata:
+    cmd: /home/experiments/bin/vata-emp-interpreter $1 $2
+
+awali:
+    cmd: /home/experiments/bin/awali-emp-interpreter $1 $2
+
+mona:
+    cmd: /home/experiments/scripts/run_mona.sh /home/experiments/bin/mona-emp-interpreter $1 $2
+
+pymata:
+    cmd: pyinterpret MataEngine $1 $2
+
+pyfado:
+    cmd: pyinterpret FadoEngine $1 $2
+
+pyautomata-lib:
+    cmd: pyinterpret AutomataLibEngine $1 $2
+
+java-automatalib:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar $1 $2
+
+java-brics:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar $1 $2
+

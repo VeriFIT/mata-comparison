@@ -1,11 +1,24 @@
-mata-bin:
-    cmd: /home/experiments/bin/mata-bool-comb-cox-inter $1 $2
+explicit-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/to_mona_mata.py $1 $2
+
+minterm-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/massage_arguments.py $1 $2
 
 automata:
     cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
 
+automata-min:
+    cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
 mata:
     cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+mata-sim:
+    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp --sim $1 $2
+
+
+mata-old:
+    cmd: /home/experiments/bin/mata-emp-interpreter-old /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
 
 vata:
     cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
@@ -14,7 +27,7 @@ awali:
     cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
 
 mona:
-    cmd: /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: /home/experiments/scripts/run_mona.sh /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
 
 pymata:
     cmd: pyinterpret MataEngine /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
@@ -24,3 +37,10 @@ pyfado:
 
 pyautomata-lib:
     cmd: pyinterpret AutomataLibEngine /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+java-automatalib:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+
+java-brics:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+

@@ -1,11 +1,23 @@
-mata-bin:
-    cmd: /home/experiments/bin/mata-bool-comb-intersect $1
+explicit-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/to_mona_mata.py $1
+
+minterm-stats:
+    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/massage_arguments.py $1
 
 automata:
     cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_intersect.emp $1
 
+automata-min:
+    cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata /home/experiments/programs/bool_comb_intersect.emp $1
+
 mata:
     cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
+
+mata-sim:
+    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp --sim $1
+
+mata-old:
+    cmd: /home/experiments/bin/mata-emp-interpreter-old /home/experiments/programs/bool_comb_intersect.emp $1
 
 vata:
     cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
@@ -14,7 +26,7 @@ awali:
     cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
 
 mona:
-    cmd: /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
+    cmd: /home/experiments/scripts/run_mona.sh /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/bool_comb_intersect.emp $1
 
 pymata:
     cmd: pyinterpret MataEngine /home/experiments/programs/bool_comb_intersect.emp $1
@@ -24,3 +36,10 @@ pyfado:
 
 pyautomata-lib:
     cmd: pyinterpret AutomataLibEngine /home/experiments/programs/bool_comb_intersect.emp $1
+
+java-automatalib:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar /home/experiments/programs/bool_comb_intersect.emp $1
+
+java-brics:
+    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar /home/experiments/programs/bool_comb_intersect.emp $1
+
