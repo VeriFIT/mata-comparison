@@ -221,22 +221,11 @@ measured using system "time" command.
     return result
 
 
-###########################################
-def execute_benchmark(params):
-    """execute_benchmark(params) -> None
-
-Executes one benchmark.
-"""
-    global g_cmd_dict
-    name = params['method']
-    in_params = params['params']
-    cmd = g_cmd_dict[name]['cmd']
-    cmd = cmd.split()
-    # in_params = in_params.split()
-
+def substitute_cmd(in_cmd, in_params):
+    cmd = in_cmd[:]
     # substitute $1, $2, etc. with the real parameters
     for i in range(len(cmd)):
-        if len(cmd[i]) == 2 and cmd[i][0] == '$':
+        if len(cmd[i]) == 2 and cmd[i][0] == '$' and cmd[i][1] != '(':
             try:
                 x = int(cmd[i][1])
             except Exception:
@@ -249,6 +238,22 @@ Executes one benchmark.
                                 " parameters passed) in `" + " ".join(cmd) + '`')
             else:
                 cmd[i] = in_params[x-1]
+    return cmd[:]
+
+
+###########################################
+def execute_benchmark(params):
+    """execute_benchmark(params) -> None
+
+Executes one benchmark.
+"""
+    global g_cmd_dict
+    name = params['method']
+    in_params = params['params']
+    cmd = g_cmd_dict[name]['cmd']
+    cmd = cmd.split()
+    # in_params = in_params.split()
+    cmd = substitute_cmd(cmd, in_params)
 
     try:
         # result = run_subproc(cmd)
@@ -326,7 +331,7 @@ christian]).
         g_cnt_finished_tasks,
         g_cnt_tasks,
         result['method'],
-        result['params'],
+        f"[{' '.join(substitute_cmd(g_cmd_dict[result['method']]['cmd'].split(), result['params']))}]",
         res_string)))
 
 
@@ -409,6 +414,16 @@ Runs the main program according to the arguments obtained from the parser.
                 raise Exception("Invalid method selected: {}".format(m))
 
             new_cmd_dict[m] = g_cmd_dict[m]
+
+        g_cmd_dict = new_cmd_dict
+
+    if args.exclude:
+        methods = args.exclude.split(';')
+        methods = [meth for meth in methods if meth != ""]
+        new_cmd_dict = dict()
+        for m in g_cmd_dict:
+            if m not in methods:
+                new_cmd_dict[m] = g_cmd_dict[m]
 
         g_cmd_dict = new_cmd_dict
 
@@ -512,6 +527,10 @@ if __name__ == '__main__':
                         dest='methods',
                         help="Which methods from the configuration file to "
                         "execute, separated by ';' (default: all)")
+    parser.add_argument('-e', '--exclude', metavar='METHODS', type=str,
+                        dest='exclude',
+                        help="Which methods from the configuration file will be ignored,"
+                        "separated by ';' (default=None)")
     parser.add_argument('-v', '--verbose', action="store_true",
                         help="verbose output")
     parser.add_argument('-c', '--conf', metavar='config.yaml', nargs=1, required=True,

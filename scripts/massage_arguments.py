@@ -14,6 +14,13 @@ def peak_type(automaton: str):
         return line
 
 
+def should_regenerate(automata):
+    for aut in automata:
+        if not os.path.exists(aut):
+            return True
+    return False
+
+
 def massage_automata(automata_sources: list[str]) -> list[str]:
     automata_type = peak_type(automata_sources[0]).strip()
     if '@NFA-bits' in automata_type:
@@ -21,21 +28,21 @@ def massage_automata(automata_sources: list[str]) -> list[str]:
         for aut_src in automata_sources:
             aut_tgt = os.path.splitext(aut_src)[0] + MATA_EXT + MINTERM_EXT
             targets.append(aut_tgt)
-        if any(not os.path.exists(aut) for aut in targets):
-            alphabet = alph.OnTheFlyAlphabet()
-            parsed_automata = ps.from_mata(automata_sources, alphabet)
-            for aut, tgt in zip(parsed_automata, targets):
-                initial = " ".join(f"q{i}" for i in aut.initial_states)
-                final = " ".join(f"q{i}" for i in aut.final_states)
-                transitions = "\n".join(
-                    f"q{t.source} {t.symbol} q{t.target}" for t in aut.iterate()
-                )
+        alphabet = alph.OnTheFlyAlphabet()
+        parsed_automata = ps.from_mata(automata_sources, alphabet)
+        for aut, tgt in zip(parsed_automata, targets):
+            initial = " ".join(f"q{i}" for i in aut.initial_states)
+            final = " ".join(f"q{i}" for i in aut.final_states)
+            transitions = "\n".join(
+                f"q{t.source} {t.symbol} q{t.target}" for t in aut.iterate()
+            )
 
-                with open(tgt, 'w') as tgt_handle:
-                    tgt_handle.write(f"@NFA-explicit\n")
-                    tgt_handle.write(f"%Initial {initial}\n")
-                    tgt_handle.write(f"%Final {final}\n")
-                    tgt_handle.write(transitions)
+            with open(tgt, 'w') as tgt_handle:
+                tgt_handle.write(f"@NFA-explicit\n")
+                tgt_handle.write(f"%Initial {initial}\n")
+                tgt_handle.write(f"%Final {final}\n")
+                tgt_handle.write(transitions)
+                tgt_handle.write('\n')
 
         return targets
     else:

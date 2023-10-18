@@ -13,6 +13,7 @@ usage() { {
         echo "  -c|--config <conf.yaml>     configuration file in yaml format [default=jobs/bench-cade-23.yaml]"
         echo "  -t|--timeout <int>         timeout for each benchmark in seconds [default=60s]"
         echo "  -m|--methods                will measure only selected tools"
+        echo "  -e|--exclude                will exclude selected tools"
         echo "  -j|--jobs                   number of paralel jobs"
         echo "  -s|--suffix                 adds suffix to the target file"
         echo "  -v|--verbose                adds verbosity to pycobench"
@@ -32,6 +33,7 @@ timeout=60
 benchmarks=()
 jobs=6
 methods=
+exclude=
 suffix=""
 basedir=$(realpath $(dirname "$0"))
 rootdir=$(realpath "$basedir/..")
@@ -64,6 +66,9 @@ while [ $# -gt 0 ]; do
             shift 1;;
         -m|--methods)
             methods="-m $2"
+            shift 2;;
+        -e|--exclude)
+            exclude="-e $2"
             shift 2;;
         -d|--test-run)
             testrun=true
@@ -135,9 +140,9 @@ do
     sub_result_file="$result_file.log"
     intermediate+=( $sub_result_file )
     if [ "$testrun" = true ]; then
-      cat "$benchmark_file" | head -1 | "$basedir/"pycobench $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file"
+      cat "$benchmark_file" | head -1 | "$basedir/"pycobench $exclude $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file"
     else
-      "$basedir/"pycobench $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
+      "$basedir/"pycobench $exclude $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
     fi
 
     number_of_params=$(($(head -1 < "$benchmark_file"  | tr -cd ';' | wc -c) + 1))
