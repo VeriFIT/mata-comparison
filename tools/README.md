@@ -63,7 +63,7 @@ The parser for `.emp` files is our own.
   * Either use `run_mona.sh` script or run directly as follows:
 
 ```shell
-  /home/debian/tools/mata2mona/main input.emp
+  ~/tools/mata2mona/main input.emp
 ```
 
   * The output is either `EMPTY` or `NOT EMPTY`
@@ -81,7 +81,7 @@ This is a library implementing NFA; available at [libvata](https://github.com/on
   * Run directly as follows:
 
 ```shell
-  /home/debian/tools/afa-emptiness-checker-vata/build/src/nfa-emptiness-checker input.emp
+  ~/tools/afa-emptiness-checker-vata/build/src/nfa-emptiness-checker input.emp
 ```
 
   * The output is either `EMPTY` or `NOT EMPTY`
