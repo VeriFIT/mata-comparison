@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,12 +34,44 @@ namespace awali {
     {
       return false;
     }
+    
+    inline
+    bool operator<=(empty_t, empty_t)
+    {
+      return true;
+    }
+    
+    // So that we can make a map with empty_t as key, for
+    // mutable_automaton's entries.
+    inline
+    bool operator>(empty_t, empty_t)
+    {
+      return false;
+    }
+    
+    inline
+    bool operator>=(empty_t, empty_t)
+    {
+      return true;
+    }
 
     // For unordered containers.
     inline
     bool operator==(empty_t, empty_t)
     {
       return true;
+    }
+    
+    inline
+    bool operator!=(empty_t, empty_t)
+    {
+      return false;
+    }
+    
+    inline
+    empty_t& operator--(empty_t& e)
+    {
+      return e;
     }
   }
 }//end of ns awali::stc
@@ -56,7 +88,7 @@ namespace std
     }
   };
 
-  std::ostream& operator<< (std::ostream& o, const awali::sttc::empty_t& e) {
+  std::ostream& operator<< (std::ostream& o, const awali::sttc::empty_t&) {
     return o;
   }
 }

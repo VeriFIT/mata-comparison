@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ namespace awali {
           notnullset0_t nnlset0 =get_not_nullableset(std::get<0>(lsets));
           auto ret = make_mutable_automaton(ret_context_t{
               ret_labelset_t(std::make_tuple(nnlset0, wset1)),*tdc->context().weightset()});
-          copy_into(res,ret,keep_history);
+          copy_into(res,ret,keep_history,false,true);
           if(keep_history) {
             auto final_history = std::make_shared<single_history<Tdc>>(tdc);
             auto & ret_history = ret->history()->template as<single_history<decltype(*res)>>();

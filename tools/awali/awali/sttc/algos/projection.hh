@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -103,8 +103,12 @@ namespace awali { namespace sttc {
       {
         // Copy the states.  We cannot iterate on the transitions
         // only, as we would lose the states without transitions.
-        for (auto s: in_->states())
-            out_state[s] = out_->add_state();
+        for (auto s: in_->states()) {
+	  out_state[s] = s;
+	  out_->add_state(s);
+	  if(in_->has_name(s))
+	    out_->set_state_name(s, in_->get_state_name(s));	     
+	}
         out_state[in_->pre()]= out_->pre();
         out_state[in_->post()]= out_->post();
 
@@ -123,8 +127,12 @@ namespace awali { namespace sttc {
       void set_history() {
         auto history = std::make_shared<single_history<Aut>>(in_);
         out_->set_history(history);
-        for (auto p: in_->all_states())
+        for (auto p: in_->all_states()) {
             history->add_state(out_state[p], p);
+	    if(in_->has_name(p)) {
+	      out_->set_state_name(out_state[p], in_->get_state_name(p));
+	    }	    
+	}
       }
 
       /// Input automaton.
@@ -161,8 +169,12 @@ namespace awali { namespace sttc {
       {
         // Copy the states.  We cannot iterate on the transitions
         // only, as we would lose the states without transitions.
-        for (auto s: in_->states())
-            out_state[s] = out_->add_state();
+        for (auto s: in_->states()) {
+	  out_state[s] = s;
+	  out_->add_state(s);
+	  if(in_->has_name(s))
+	    out_->set_state_name(s, in_->get_state_name(s));	     	  
+	}
         out_state[in_->pre()]= out_->pre();
         out_state[in_->post()]= out_->post();
 
@@ -219,8 +231,12 @@ namespace awali { namespace sttc {
       {
         // Copy the states.  We cannot iterate on the transitions
         // only, as we would lose the states without transitions.
-        for (auto s: in_->states())
-            out_state[s] = out_->add_state();
+        for (auto s: in_->states()) {
+	  out_state[s] = s;
+	  out_->add_state(s);
+	  if(in_->has_name(s))
+	    out_->set_state_name(s, in_->get_state_name(s));	     
+	}
         out_state[in_->pre()]= out_->pre();
         out_state[in_->post()]= out_->post();
 

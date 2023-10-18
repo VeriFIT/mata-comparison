@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -74,6 +74,9 @@ public:
   inline operator std::string&() {return str;}
   inline operator std::string() const {return str;}
   inline operator unsigned() const {return i;}
+
+  inline uint_or_string_t& operator=(uint_or_string_t const& uos) 
+  { if (this != &uos) { i = uos.i; str = uos.str;} return *this;}
 
   inline uint_or_string_t& operator=(uint_or_string_t&& uos) 
   { i = uos.i, str = std::move(uos.str); return *this;}
@@ -174,8 +177,7 @@ public:
 
 
 protected:
-  static std::string message_builder(std::string const& caller_method,
-                                     node_kind_t caller_kind,
+  static std::string message_builder(node_kind_t caller_kind,
                                      std::initializer_list<node_kind_t> types);
 
 };
@@ -286,7 +288,7 @@ public:
   //node_t const* at(std::initializer_list<unsigned> const&) const;
   virtual node_t* at(unsigned i);
   virtual node_t const* at(unsigned i) const;
-  inline virtual bool has_child(unsigned i) const
+  inline virtual bool has_child(unsigned) const
   {return false;}
   //inline virtual bool has_child(std::initializer_list<unsigned> const& l) const
   //{node_t const* n = this; for (auto x : l) if (n->has_child(x)) n = n->at(x); else return false; return true;}
@@ -362,7 +364,7 @@ protected:
 /* =============================================================================
    OBJECT
 ============================================================================= */
-class object_t : public node_t {
+class object_t final : public node_t {
   linked_map_t<std::string,node_t*> _fields;
 public:
   linked_map_t<std::string,node_t*> const& fields;
@@ -392,7 +394,12 @@ public:
   object_t* insert_before(std::string const& ref_key, 
     std::string key, node_t* node);
 
-  inline void erase(std::string const& key) {_fields.erase(key);}
+  inline void erase(std::string const& key) {
+    auto it = _fields.find(key);
+    if (it != _fields.end())
+      delete it->second;
+    _fields.erase(it);
+  }
 
   inline virtual object_t* object() override {return this;}
   inline virtual object_t const* object() const override {return this;}
@@ -421,7 +428,7 @@ public:
 /* =============================================================================
    ARRAY
 ============================================================================= */
-class array_t : public node_t {
+class array_t final : public node_t {
 protected:
   std::vector<node_t*> _values;
 
@@ -436,8 +443,6 @@ public:
   : node_t(node_kind_t::ARRAY), _values(std::move(v)), values(_values) {}
 
   ~array_t();
-
-//   static array_t* parse(std::istream& i);
 
   inline virtual array_t* array() override {return this;}
   inline virtual array_t const* array() const override {return this;}
@@ -480,7 +485,7 @@ public:
 /* =============================================================================
    INTEGER
 ============================================================================= */
-class int_t : public node_t {
+class int_t final : public node_t {
 public:
   int value;
 
@@ -500,13 +505,11 @@ public:
 /* =============================================================================
    FLOATING
 ============================================================================= */
-class float_t : public node_t {
+class float_t final : public node_t {
 public:
   double value;
 
   float_t(double v) : node_t(node_kind_t::FLOATING), value(v) {}
-
-//   static node_t* parse(std::istream& i);
 
   inline virtual float_t* copy() const override
   {return new float_t(value);}
@@ -523,7 +526,7 @@ public:
 /* =============================================================================
    STRING
 ============================================================================= */
-class string_t : public node_t {
+class string_t final : public node_t {
 public:
   std::string value;
 
@@ -532,9 +535,6 @@ public:
 
   string_t(std::string v)
   : node_t(node_kind_t::STRING), value(std::move(v)) {}
-
-//   static inline string_t* parse(std::istream& i)
-//   {return new string_t(internal::parsestring(i));}
 
   inline virtual string_t* copy() const override
   {return new string_t(value);}
@@ -552,15 +552,11 @@ public:
 /* =============================================================================
    BOOLEAN
 ============================================================================= */
-class bool_t : public node_t {
+class bool_t final : public node_t {
 public:
   bool value;
 
   bool_t(bool v) : node_t(node_kind_t::BOOLEAN), value(v) {}
-
-//   static bool_t* parse(std::istream& i);
-//   static bool_t* parse_true(std::istream& i);
-//   static bool_t* parse_false(std::istream& i);
 
   inline virtual bool_t* copy() const override
   {return new bool_t(value);}
@@ -579,13 +575,11 @@ public:
 /* =============================================================================
    NULL
 ============================================================================= */
-class null_t : public node_t {
+class null_t final : public node_t {
 public:
   null_t() : node_t(node_kind_t::_NULL) {}
 
-//   static null_t* parse(std::istream& i);
-
-  inline virtual null_t* copy() const override { return new null_t();}
+  inline virtual null_t* copy() const override {return new null_t();}
 
   inline virtual null_t* null() override {return this;}
 

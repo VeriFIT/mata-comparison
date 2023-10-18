@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -164,6 +164,27 @@ namespace awali { namespace sttc {
         res_->set_state_name(initial_,"i");
         res_->set_state_name(final_,"s"+std::to_string(counter++));
         history_->add_state(final_,"star");
+      }
+
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        e.sub()->accept(*this);
+        res_->add_transition(initial_, final_, epsilon_);
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        e.sub()->accept(*this);
+        state_t initial = res_->add_state();
+        state_t final = res_->add_state();
+        res_->new_transition(initial, initial_, epsilon_);
+        res_->new_transition(final_,  final,    epsilon_);
+        res_->new_transition(final_,  initial_, epsilon_);
+        initial_ = initial;
+        final_ = final;
+        res_->set_state_name(initial_,"s"+std::to_string(counter));
+        res_->set_state_name(final_,"t"+std::to_string(counter++));
+        history_->add_state(final_,"plus");
       }
 
       AWALI_RAT_VISIT(lweight, e)

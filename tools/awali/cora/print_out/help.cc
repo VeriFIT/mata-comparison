@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 |                                     lists of commands printed by list     |
 |                       201211    complete rewriting to comply with Victor's|
 |                                 instructions                              |
+|                       211029    suppression of help_tokens                |
+|                                 special case of command eval              |
 ---------------------------------------------------------------------------*/
 
 void help()
@@ -36,14 +38,18 @@ void help(std::string s)
   std::vector<choice>::iterator it_chc;
   std::map<std::string, option>::iterator it_opt;
   std::vector<command>::iterator it_cmd;
+  
+  size_t terminal_width = balanced_term_width(); //to allow variable width print
+
 
 // Look for string s first in 'help_tokens' list, then in 'options' list and
 // finally in 'commands' list. If s is not found, it is assumed that s was 
 // a mispelled command.
-  if ( found_in_list(s, help_tokens, it_chc) ) { // !! returns it_chc !! 
-    // string s has been found in help_tokens
-    width_warning();
-    std::cout << it_chc->longdesc << std::endl;
+  if ( (!true) ) { // deprecated but not suppressed in case of remorse
+//     found_in_list(s, help_tokens, it_chc) ) { // !! returns it_chc !! 
+//     // string s has been found in help_tokens
+//     width_warning();
+//     std::cout << it_chc->longdesc << std::endl;
   } // end processing  s  in help_tokens
 
   else { // search among options
@@ -60,15 +66,34 @@ void help(std::string s)
         error_print(error_msg1, error_msg2);
       }
 	  
-      else { // string s is a command; processing help <cmd>
+      else { // !! the test has returned it_cmd !!
+		// string s is a command; processing help <cmd>
         // It consists in printing first a line for the usage,
         // and then the 'longdesc' field of the command.
         // The usage line is processed differently, according to <cmd>
         width_warning();  //  because it ends in every case with printing 
 
-	    if ( s == "help" ) {
-          // Case 1  s = help directly calls printing of longdesc, no usage line		
-          std::cout << it_cmd->longdesc << std::endl;
+	    if ( (s == "help") || (s == "eval") ) { // special cases
+          if ( s == "help" ) {
+            // Case 1.1  help directly calls printing of longdesc, no usage line		
+            std::cout << it_cmd->longdesc << std::endl;
+          } 
+          else {
+            // Case 1.2  eval is a polysemic command, special usage line		
+            std::string  str, str3, help_str;
+            help_str  = "\nCommand " + usage_clr + it_cmd->name + reset_clr +
+              " accepts as first argument an automaton as well as a transducer."
+			  " 'eval' is then a common name for two distinct functions.";
+            variable_width_print(help_str, terminal_width);
+			
+            str = usage_clr + "cora " + it_cmd->name ;
+            str3="\n   or" + std::string(4,' ') ;
+            help_str = " Usage : " + str + " <aut> <word> " + reset_clr + str3
+                       + str + " <tdc> <aut> " + reset_clr + 
+                       " or  " + str + " <tdc> <exp> " + reset_clr + "\n";  
+            std::cout << help_str <<  std::endl;
+            std::cout << it_cmd->longdesc << std::endl;
+          }
 	    } 
 	    else {
           std::string  str, str3; 

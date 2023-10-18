@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -290,7 +290,7 @@ while(semiring.next()):
         suite = unittest.TestLoader().loadTestsFromTestCase(TransducerEditionTests)
         runner = unittest.TextTestRunner(verbosity=2,failfast=True)
         result = runner.run(suite)
-        if len(result.failures):
+        if not result.wasSuccessful():
             exit(1)
     else:
         sys.stderr.write("Test ignored: weigh-set '"+semiring.name+"' belongs to the exclude list.\n");

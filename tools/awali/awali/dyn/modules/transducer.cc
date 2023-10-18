@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,6 +40,14 @@ namespace awali {
 
 
     namespace internal {
+      
+      dyn::automaton_t make_nullable_under_lat(dyn::automaton_t tdc)
+      {
+        return loading::call1<dyn::automaton_t>("make_nullable_under_lat",
+                                                "transducer", 
+                                                tdc);
+      }
+
       unsigned num_tapes(automaton_t tdc)
       {
         return loading::call1<unsigned>("num_tapes", "transducer", tdc);
@@ -84,7 +92,7 @@ namespace awali {
       transition_t set_tdc_transition(automaton_t tdc, state_t src, state_t dst,
                                       const std::vector<std::string>& labels, weight_t w)
       {
-        return loading::call1<transition_t, automaton_t, state_t, state_t, const std::vector<std::string>&, weight_t>("set_wtdc_transition",
+        return loading::call1<transition_t, automaton_t, state_t, state_t, const std::vector<std::string>&, weight_t>("set_tdc_wtransition",
                "transducer", tdc, src, dst, labels, w);
       }
 
@@ -162,7 +170,7 @@ namespace awali {
                tdc);
       }
 
-      bool has_label(automaton_t tdc, unsigned i, std::string l)
+      bool has_label(automaton_t tdc, unsigned i, std::string const& l)
       {
         auto v=alphabets(tdc);
         auto al=v[i];
@@ -172,12 +180,12 @@ namespace awali {
         return false;
       }
 
-      bool has_input_label(automaton_t tdc, std::string l)
+      bool has_input_label(automaton_t tdc, std::string const& l)
       {
         return has_label(tdc, 0, l);
       }
 
-      bool has_output_label(automaton_t tdc, std::string l)
+      bool has_output_label(automaton_t tdc, std::string const& l)
       {
         return has_label(tdc, 1, l);
       }
@@ -258,6 +266,11 @@ namespace awali {
     {
       return loading::call1<automaton_t>("letterize_tape", "transducer", tdc, i);
     }
+
+    transducer_t subnormalize(transducer_t tdc)
+    {
+      return loading::call1<transducer_t>("subnormalize", "transducer", tdc);
+    }    
   }
 }//end of ns awali::dyn, and awali
 

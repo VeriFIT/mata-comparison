@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 namespace awali { namespace cora {
 
 using aut_or_exp_t = ::awali::dyn::internal::aut_or_exp_t;
-aut_or_exp_t load_aut_or_exp(std::string s);
+aut_or_exp_t load_aut_or_exp(std::string s, bool warn_if_word = true);
 
 
 
@@ -79,6 +79,8 @@ enum coms_t {
   REDUCE, L_REDUCE, R_REDUCE,
 // test-determinisation
   IS_DET, IS_SEQ, IS_AMB,
+  // exploration
+  EXPLORE_LENGTH, EXPLORE_BOUND,
 // =======
 //   W_DET,
 // // is
@@ -118,7 +120,7 @@ enum coms_t {
   IS_FUNC, IS_OF_FINITE_IM,
   INVERSE,
   IS_SYNCHRONIZABLE, SYNCHRONIZE,
-  COMPOSE,
+  COMPOSE, SUBNORMALIZE,
 
 //  Factories
   LADYBIRD, N_ULTIMATE, DOUBLERING, DIVKBASEB,  CERNY, WITNESS,
@@ -197,7 +199,9 @@ std::ostream& operator<<(std::ostream& os, const arg_kind_t& kind)
     os << "choice";
     break;
   case AUT_OR_EXP:
-    os << "automaton_or_expresionn";
+    os << "aut_or_exp";  // automaton_or_expresionn  211029 correction
+                         // not really useful: this case is never met
+                         // as it is preempted in the treatment by help.cc
     break;
   };
   return os;
@@ -231,7 +235,7 @@ struct command {               // new format for command
   std::vector<argument_t> args;   // list of types of arguments
   std::string desc;               // short description of command
   std::string optiondesc;         // option description
-  std::string longdesc;           // long description
+  std::string longdesc;      // long description
 };
 
 std::vector<command> commands;
@@ -264,15 +268,15 @@ void init_cmds()
 // help
   commands_basic.emplace_back(
   command{"help", HELP, 1, {{CMD}},
-    "Prints first help, various lists of commands, or a command help",
+    "Prints first help to cora, or a command (or option) help",
     "",
     awali::cora::doc::help
   });
 // list
   commands_basic.emplace_back(
   command{"list", LIST, 1, {{CHC}},
-    "Lists various objects: automata, ratexps, weightsets, factories,"
-    "that can be used in cora command lines.",
+    "Lists cora commands, all or by kind, or various objects: automata, "
+    "ratexps, weightsets, factories, that can be used in cora command lines.",
     "",
     awali::cora::doc::list
   });
@@ -294,6 +298,24 @@ void init_cmds()
     "[-I<input-fmt>] [-O<output-fmt>] [-N<name>]",
     awali::cora::doc::cat
   });
+
+// edit
+  commands_basic.emplace_back(
+  command{"edit", EDIT, 1, {{AUT}},
+    "Enters an interactive mode to edit the automaton <aut>",
+    "",
+    awali::cora::doc::edit
+  });
+// new
+  commands_basic.emplace_back(
+    command{"new", NEW, 0, {},
+            "Creates and edits an empty automaton",
+            "[-O -W -L -A -B]",
+            awali::cora::doc::new_
+    });
+
+// skipped line in the help list
+  commands_basic.emplace_back(empty_cmd);
 
 // display
   commands_basic.emplace_back(
@@ -318,24 +340,6 @@ void init_cmds()
     "",
     awali::cora::doc::statistics
   });
-
-// skipped line in the help list
-  commands_basic.emplace_back(empty_cmd);
-
-// edit
-  commands_basic.emplace_back(
-  command{"edit", EDIT, 1, {{AUT}},
-    "Enters an interactive mode to edit the automaton <aut>",
-    "",
-    awali::cora::doc::edit
-  });
-// new
-  commands_basic.emplace_back(
-    command{"new", NEW, 0, {},
-            "Creates and edits an empty automaton or transducer",
-            "[-O -W -L -A -B]",
-            awali::cora::doc::new_
-    });
 
 // skipped line in the help list
   commands_basic.emplace_back(empty_cmd);
@@ -371,42 +375,42 @@ void init_cmds()
   // trim
   commands_generic.emplace_back(
   command{"trim", TRIM, 1, {{AUT}},
-    "compute the trim part of the automaton",
+    "computes the trim part of the automaton",
     "",
     awali::cora::doc::trim
   });
   // is-empty
   commands_inv.emplace_back(
   command{"is-empty", IS_EMPTY, 1, {{AUT}},
-    "test whether an automaton is empty",
+    "tests whether an automaton is empty",
     "[-S]",
     awali::cora::doc::is_empty
   });
   // is-accessible
   commands_inv.emplace_back(
   command{"is-accessible", IS_ACC, 1, {{AUT}},
-    "test whether an automaton is accessible",
+    "tests whether an automaton is accessible",
     "[-S]",
     awali::cora::doc::is_accessible
   });
   // is-coaccessible
   commands_inv.emplace_back(
   command{"is-coaccessible", IS_COACC, 1, {{AUT}},
-    "test whether an automaton is coaccessible",
+    "tests whether an automaton is coaccessible",
     "[-S]",
     awali::cora::doc::is_coaccessible
   });
   // is-trim
   commands_inv.emplace_back(
   command{"is-trim", IS_TRIM, 1, {{AUT}},
-    "test whether an automaton is trim",
+    "tests whether an automaton is trim",
     "[-S]",
     awali::cora::doc::is_trim
   });
   // is-useless
   commands_inv.emplace_back(
   command{"is-useless", IS_USELESS, 1, {{AUT}},
-    "test whether an automaton has no useful state",
+    "tests whether an automaton has no useful state",
     "[-S]",
     awali::cora::doc::is_useless
   });
@@ -414,14 +418,14 @@ void init_cmds()
   // standard
   commands_generic.emplace_back(
   command{"standard", STANDARD, 1, {{AUT}},
-    "make an automaton standard",
+    "makes an automaton standard",
     "",
     awali::cora::doc::standard
   });
   // is-standard
   commands_inv.emplace_back(
   command{"is-standard", IS_STANDARD, 1, {{AUT}},
-    "test whether an automaton is standard",
+    "tests whether an automaton is standard",
     "[-S]",
     awali::cora::doc::is_standard
   });
@@ -429,7 +433,7 @@ void init_cmds()
   // are-isomorphic  //// FIX ME   quiet-verbose dilemna
   commands_generic.emplace_back(
   command{"are-isomorphic", ARE_ISOMORPHIC, 2, {{AUT, "1"}, {AUT, "2"}},
-    "test whether two automata are isomorphic",
+    "tests whether two automata are isomorphic",
     "[-S]",
     awali::cora::doc::are_isomorphic
   });
@@ -437,22 +441,51 @@ void init_cmds()
 //// Miscellaneous
   // strip
   commands_generic.emplace_back(
-  command{"strip", STRIP, 1, {{AUT}},
-    "strip the history",
+  command{"strip-history", STRIP, 1, {{AUT}},
+    "strips the history",
     "",
-    awali::cora::doc::strip
+    awali::cora::doc::strip_history
   });
+// skipped line in the command list
+  commands_generic.emplace_back(empty_cmd);
+
+//// Transformation of the automaton
+  // transpose
+  commands_generic.emplace_back(
+  command{"transpose", TRANSPOSE, 1, {{AUT}},
+    "transposes an automaton",
+    "",
+    awali::cora::doc::transpose
+  });
+
+//// quotient
+  // min-quotient  //// FIX ME  check the possible options
+  commands_generic.emplace_back(
+  command{"min-quotient", MINQUOTIENT, 1, {{AUT}},
+    "computes the minimal quotient of an automaton",
+    "[-M<method>]",
+    awali::cora::doc::min_quotient
+  });
+  // min-coquotient  //// FIX ME  check the possible options
+  commands_generic.emplace_back(
+  command{"min-coquotient", MINCOQUOTIENT, 1, {{AUT}},
+    "computes the minimal coquotient of an automaton",
+    "[-M<method>]",
+    awali::cora::doc::min_coquotient
+  });
+
 //// strongly connected components
   // condensation
   commands_generic.emplace_back(
   command{"condensation", CONDENSATION, 1, {{AUT}},
-    "reduce each strongly connected component to a single state",
+    "reduces each strongly connected component to a single state",
+    "",
     awali::cora::doc::condensation
   });
   // is-strongly-connected
   commands_inv.emplace_back(
   command{"is-strongly-connected", IS_SC, 1, {{AUT}},
-    "test whether an automaton is strongly connected",
+    "tests whether an automaton is strongly connected",
     "",
     awali::cora::doc::is_strongly_connected
   });
@@ -463,22 +496,25 @@ void init_cmds()
 //// Dealing with the weightset
   // support
   commands_generic.emplace_back(
-  command{"support", SUPPORT, 1, {{AUT}},
-    "compute the support of a weighted automaton",
+  command{"support", SUPPORT, 1, {{AUT_OR_EXP}},
+    "computes the support of a weighted automaton or ratexp",
     "",
     awali::cora::doc::support
   });
   // characteristic
   commands_generic.emplace_back(
-  command{"characteristic", CHARACTERISTIC, 1, {{AUT}},
-    "computes a characteristic automaton of an NFA",
+  command{"characteristic", CHARACTERISTIC, 1, {{AUT_OR_EXP}},
+    "computes a characteristic automaton of a Boolean automaton, "
+    "or the characteristic ratexp of a Boolean ratexp with the "
+    "given weightset",
     "-W<weightset>",
     awali::cora::doc::characteristic
   });
   // promote
   commands_generic.emplace_back(
-  command{"promote", PROMOTE, 1, {{AUT}},
-    "promotes an automaton into an automaton with the given weight",
+  command{"promote", PROMOTE, 1, {{AUT_OR_EXP}},
+    "promotes an automaton or a ratexp into an automaton or a ratexp "
+    "with the given weightset",
     "-W<weightset>",
     awali::cora::doc::promote
   });
@@ -529,24 +565,17 @@ void init_cmds()
   commands_generic.emplace_back(empty_cmd);
 
 //  Dealing with spontaneous transitions
-  // allow-eps
-  commands_generic.emplace_back(
-  command{"allow-eps", ALLOW_EPS, 1, {{AUT}},
-    "allows epsilon-transition in an automaton",
-    "",
-    awali::cora::doc::allow_eps
-  });
   // is-proper
   commands_inv.emplace_back(
   command{"is-proper", IS_PROPER, 1, {{AUT}},
-    "test whether an automaton has some epsilon-transitions",
+    "tests whether an automaton has some epsilon-transitions",
     "",
     awali::cora::doc::is_proper
   });
   // is-valid
   commands_generic.emplace_back(
   command{"is-valid", IS_VALID, 1, {{AUT_OR_EXP}},
-    "test whether a (weighted) automaton or ratexp is valid",
+    "tests whether a (weighted) automaton or ratexp is valid",
     "",
     awali::cora::doc::is_valid
   });
@@ -557,6 +586,13 @@ void init_cmds()
     "[-M<option>]",
     awali::cora::doc::proper
   });
+  // allow-eps
+  commands_generic.emplace_back(
+  command{"allow-eps", ALLOW_EPS, 1, {{AUT}},
+    "allows epsilon-transition in an automaton",
+    "",
+    awali::cora::doc::allow_eps
+  });
 
 // skipped line in the command list
   commands_generic.emplace_back(empty_cmd);
@@ -564,7 +600,7 @@ void init_cmds()
 //// aut-to-exp
   commands_generic.emplace_back(
   command{"aut-to-exp", AUT_TO_EXP, 1, {{AUT}},
-    "convert an automaton into a ratexp",
+    "converts an automaton into a ratexp",
     "[-M<option>]",
     awali::cora::doc::aut_to_exp
   });
@@ -579,22 +615,22 @@ void init_cmds()
 //// About coefficients of words
   // eval
   commands_aut.emplace_back(
-  command{"eval", EVAL, 2, {{AUT}, {WORD}},
-    "compute the weight of a word",
+  command{"eval", EVAL, 2, {{AUT}, {AUT_OR_EXP}},
+    "computes the weight of a word",
     "",
     awali::cora::doc::eval
   });
   // enumerate
   commands_aut.emplace_back(
   command{"enumerate", ENUMERATE, 2, {{AUT}, {INT, "n"}},
-    "enumerate the first words of the language",
+    "enumerates the first words of the language",
     "",
     awali::cora::doc::enumerate
   });
   // shortest   //// FIX ME   should not have 2 arguments
   commands_aut.emplace_back(
   command{"shortest", SHORTEST, 2, {{AUT}, {INT, "n"}},
-    "enumerate the shortest words of the language",
+    "enumerates the shortest words of the language",
     "",
     awali::cora::doc::shortest
   });
@@ -602,41 +638,25 @@ void init_cmds()
 // skipped line in the command list
   commands_aut.emplace_back(empty_cmd);
 
-//// About quotient of an automaton
-  // min-quotient  //// FIX ME  check the possible options
-  commands_aut.emplace_back(
-  command{"min-quotient", MINQUOTIENT, 1, {{AUT}},
-    "compute the minimal quotient of an automaton",
-    "[-M<method>]",
-    awali::cora::doc::min_quotient
-  });
-
-  // min-coquotient  //// FIX ME  check the possible options
-  commands_aut.emplace_back(
-  command{"min-coquotient", MINCOQUOTIENT, 1, {{AUT}},
-    "compute the minimal coquotient of an automaton",
-    "[-M<method>]",
-    awali::cora::doc::min_coquotient
-  });
-
+//// reduction of an automaton (quotient is generic)
   // reduce
   commands_aut.emplace_back(
   command{"reduce", REDUCE, 1, {{AUT}},
-    "reduce a WFA",
+    "reduces a WFA",
     "",
     awali::cora::doc::reduce
   });
   // left-reduce
   commands_aut.emplace_back(
   command{"left-reduce", L_REDUCE, 1, {{AUT}},
-    "left reduce a WFA",
+    "left reduces a WFA",
     "",
     awali::cora::doc::left_reduce
   });
   // right-reduce
   commands_aut.emplace_back(
   command{"right-reduce", R_REDUCE, 1, {{AUT}},
-    "reduce a WFA",
+    "right reduces a WFA",
     "",
     awali::cora::doc::right_reduce
   });
@@ -655,22 +675,33 @@ void init_cmds()
   // determinize
   commands_aut.emplace_back(
   command{"determinize", DETERMINIZE, 1, {{AUT}},
-    "compute the weighted determinization of a WFA",
+    "computes the weighted determinization of a WFA",
     "",
     awali::cora::doc::determinize
   });
-
+  commands_aut.emplace_back(
+  command{"explore-by-length", EXPLORE_LENGTH, 2, {{AUT}, {INT, "n"}},
+    "computes a partial (weighted) determinization of a WFA",
+    "",
+    awali::cora::doc::explore_by_length
+  });
+  commands_aut.emplace_back(
+  command{"explore-with-bound", EXPLORE_BOUND, 2, {{AUT}, {WEIGHT,"k"}},
+    "computes a partial (weighted) determinization of a WFA",
+    "",
+    awali::cora::doc::explore_with_bound
+  });
   // is-deterministic  ////  FIX ME  quiet-verbose dilemna
   commands_aut.emplace_back(
   command{"is-deterministic", IS_DET, 1, {{AUT}},
-    "test whether an automaton is deterministic",
+    "tests whether an automaton is deterministic",
     "",
     awali::cora::doc::is_deterministic
   });
 // is-sequential  ////  FIX ME  quiet-verbose dilemna
   commands_aut.emplace_back(
   command{"is-sequential", IS_SEQ, 1, {{AUT}},
-    "test whether an automaton is sequential",
+    "tests whether an automaton is sequential",
     "",
     awali::cora::doc::is_sequential
   });
@@ -678,37 +709,33 @@ void init_cmds()
   ////     pb with non integral weighht semiring
   commands_aut.emplace_back(
   command{"is-ambiguous", IS_AMB, 1, {{AUT}},
-    "test whether an automaton is ambiguous",
+    "tests whether an automaton is ambiguous",
     "",
     awali::cora::doc::is_ambiguous
   });
 
+// skipped line in the command list
+  commands_aut.emplace_back(empty_cmd);
+
 //// Managing transitions
-  // transpose
-  commands_aut.emplace_back(
-  command{"transpose", TRANSPOSE, 1, {{AUT}},
-    "transpose an automaton",
-    "",
-    awali::cora::doc::transpose
-  });
   // compact-paths
   commands_aut.emplace_back(
   command{"compact-paths", COMPACT, 1, {{AUT}},
-    "compact nonbranching paths",
+    "compacts nonbranching paths",
     "",
     awali::cora::doc::compact_paths
   });
   // letterize
   commands_aut.emplace_back(
   command{"letterize", LETTERIZE, 1, {{AUT}},
-    "convert an automaton on words into an automaton on letters",
+    "converts an automaton on words into an automaton on letters",
     "",
     awali::cora::doc::letterize
   });
   // change-alphabet
   commands_aut.emplace_back(
   command{"change-alphabet", CHG_ALPHA, 1, {{AUT}},
-    "change the alphabet of the automaton",
+    "changes the alphabet of the automaton",
     "-Axyz",
     awali::cora::doc::change_alphabet
   });
@@ -720,22 +747,22 @@ void init_cmds()
   // product  //// FIX ME definition of 'compatible types'
   commands_aut.emplace_back(
   command{"product", PRODUCT, 2, {{AUT, "1"}, {AUT, "2"}},
-    "compute the product of two automata",
+    "computes the product of two automata",
     "",
     awali::cora::doc::product
   });
   // power
   commands_aut.emplace_back(
   command{"power", POWER, 2, {{AUT}, {INT, "n"}},
-    "compute the n-th power of an automaton",
+    "computes the n-th power of an automaton",
     "",
-    "Compute the n-th power of the automaton <aut>.\n"
+    awali::cora::doc::power
   });
   // shuffle  //// FIX ME definition of 'compatible types'
   ////        explain what shuffle is
   commands_aut.emplace_back(
   command{"shuffle", SHUFFLE, 2, {{AUT, "1"}, {AUT, "2"}},
-    "compute the shuffle of two automata",
+    "computes the shuffle of two automata",
     "",
     awali::cora::doc::shuffle
   });
@@ -743,7 +770,7 @@ void init_cmds()
   ////        explain what infiltration is
   commands_aut.emplace_back(
   command{"infiltration", INFILTRATION, 2, {{AUT, "1"}, {AUT, "2"}},
-    "compute the infiltration of two automata",
+    "computes the infiltration of two automata",
     "",
     awali::cora::doc::infiltration
   });
@@ -754,17 +781,20 @@ void init_cmds()
   // are-equivalent  //// FIX ME   quiet-verbose dilemna
   commands_aut.emplace_back(
   command{"are-equivalent", ARE_EQVT, 2, {{AUT, "1"}, {AUT, "2"}},
-    "test whether two automata are equivalent",
+    "tests whether two automata are equivalent",
     "",
     awali::cora::doc::are_equivalent
   });
 
+// skipped line in the command list
+  commands_aut.emplace_back(empty_cmd);
+
 // partial-identity
   commands_aut.emplace_back(
   command{"partial-identity", PARTIAL_ID, 1, {{AUT}},
-    "partial-identity from automaton",
+    "builds a partial-identity transducer from an automaton",
     "",
-    awali::cora::doc::change_alphabet
+    awali::cora::doc::partial_identity
   });
 
 // end of Commands for (weighted) automata (as opposed to transducers)
@@ -772,18 +802,21 @@ void init_cmds()
 /* ---------------------------------------|
 | Ratexp commands                         |
 |----------------------------------------*/
-  // constant-term
+// constant-term
   commands_exp.emplace_back(
   command{"constant-term", CST_TERM, 1, {{EXP}},
-    "compute the constant term of a ratexp",
+    "computes the constant term of a ratexp",
     "",
     awali::cora::doc::constant_term
   });
 
+// skipped line in the command list
+  commands_exp.emplace_back(empty_cmd);
+
 // expand
   commands_exp.emplace_back(
   command{"expand", EXPAND, 1, {{EXP}},
-    "expand a ratexp",
+    "expands a ratexp",
     "",
     awali::cora::doc::expand
   });
@@ -791,7 +824,7 @@ void init_cmds()
 // star-normal-form
   commands_exp.emplace_back(
   command{"star-normal-form", SNF, 1, {{EXP}},
-    "compute the star normal form of a (Boolean) ratexp",
+    "computes the star normal form of a (Boolean) ratexp",
     "",
     awali::cora::doc::star_normal_form
   });
@@ -813,7 +846,7 @@ void init_cmds()
 // exp-to-aut
   commands_exp.emplace_back(
   command{"exp-to-aut", EXP_TO_AUT, 1, {{EXP}},
-    "build an automaton from a ratexp",
+    "builds an automaton from a ratexp",
     "[-M<method>]",
     awali::cora::doc::exp_to_aut
   });
@@ -826,21 +859,21 @@ void init_cmds()
   // prefix
   commands_nfa.emplace_back(
   command{"prefix", PREFIX, 1, {{AUT}},
-    "build an automaton accepting the language of prefixes",
+    "builds an automaton accepting the language of prefixes",
     "",
     awali::cora::doc::prefix
   });
   // suffix
   commands_nfa.emplace_back(
   command{"suffix", SUFFIX, 1, {{AUT}},
-    "build an automaton accepting the language of suffixes",
+    "builds an automaton accepting the language of suffixes",
     "",
     awali::cora::doc::suffix
   });
   // factor
   commands_nfa.emplace_back(
   command{"factor", FACTOR, 1, {{AUT}},
-    "automaton accepting the language of factors",
+    "builds an automaton accepting the language of factors",
     "",
     awali::cora::doc::factor
   });
@@ -848,36 +881,36 @@ void init_cmds()
 // skipped line in the command list
   commands_nfa.emplace_back(empty_cmd);
 
+// complete
+  commands_nfa.emplace_back(
+  command{"complete", COMPLETE, 1, {{AUT}},
+    "completes an automaton",
+    "",
+    awali::cora::doc::complete
+  });
+  // is-complete  ////  FIX ME  quiet-verbose dilemna
+  ////          pb distinguish between error and failure
+  ////    should it be reserved to Boolean automata
+  commands_inv.emplace_back(
+  command{"is-complete", IS_COMPLETE, 1, {{AUT}},
+    "tests whether an automaton is complete",
+    "",
+    awali::cora::doc::is_complete
+  });
+
   // determinize
   commands_nfa.emplace_back(
   command{"determinize", DETERMINIZE, 1, {{AUT}},
-    "determinize a Boolean automaton",
+    "determinizes a Boolean automaton",
     "",
     awali::cora::doc::determinize
   });
   // complement     //// FIX ME   look at the prerequisite
   commands_nfa.emplace_back(
   command{"complement", COMPLEMENT, 1, {{AUT}},
-    "complement a complete DFA",
+    "complements a complete DFA",
     "",
     awali::cora::doc::complement
-  });
-// complete
-  commands_nfa.emplace_back(
-  command{"complete", COMPLETE, 1, {{AUT}},
-    "complete an automaton",
-    "",
-    awali::cora::doc::complete
-  });
-
-  // is-complete  ////  FIX ME  quiet-verbose dilemna
-  ////          pb distinguish between error and failure
-  ////    should it be reserved to Boolean automata
-  commands_inv.emplace_back(
-  command{"is-complete", IS_COMPLETE, 1, {{AUT}},
-    "test whether an automaton is complete",
-    "",
-    awali::cora::doc::is_complete
   });
 
 // skipped line in the command list
@@ -885,8 +918,8 @@ void init_cmds()
 
   // minimal-automaton
   commands_nfa.emplace_back(
-  command{"minimal-automaton", MINIMAL, 1, {{AUT}},
-    "compute the minimal automaton of a language",
+  command{"minimal-automaton", MINIMAL, 1, {{AUT_OR_EXP}},
+    "computes the minimal automaton of a language",
     "[-M<method>]",
     awali::cora::doc::minimal_automaton
   });
@@ -918,32 +951,50 @@ void init_cmds()
     awali::cora::doc::inverse
   });
 
-  // eval-word
+// skipped line in the command list
+  commands_tdc.emplace_back(empty_cmd);
+
+  // eval
+  // appears in the list of transducer-cmds but the case of the token EVAL
+  // is processed in the list of wfa-cmds
   commands_tdc.emplace_back(
+  command{"eval", EVAL, 2, {{AUT}, {AUT_OR_EXP}},
+    "computes the image of a language (series) (represented by an automaton or "
+	"an expression) by a transducer",
+    "",
+    awali::cora::doc::eval
+  });
+  
+// //   Deprecated commands invisible in the list of transducer-cmds
+  // eval-word
+  commands_inv.emplace_back(
   command{"eval-word", EVAL_TW, 2, {{TDC}, {WORD}},
     "image of a word by a transducer",
     "",
     awali::cora::doc::eval_word
     });
   // eval-aut     //// change of name; beware of the order of arguments
-  commands_tdc.emplace_back(
+  commands_inv.emplace_back(
   command{"eval-aut", EVAL_T, 2, {{AUT}, {TDC}},
     "image of a language (series) by a transducer",
     "",
     awali::cora::doc::eval_aut
   });
 
+// skipped line in the command list
+  commands_tdc.emplace_back(empty_cmd);
+
   // is-functional    //// FIX ME   quiet-verbose dilemna
   commands_tdc.emplace_back(
   command{"is-functional", IS_FUNC, 1, {{TDC}},
-    "test whether a transducer is functional",
+    "tests whether a transducer is functional",
     "",
     awali::cora::doc::is_functional
   });
   // is-of-finite-imagel    //// FIX ME   quiet-verbose dilemna
   commands_tdc.emplace_back(
   command{"is-of-finite-image", IS_OF_FINITE_IM, 1, {{TDC}},
-    "test whether a transducer is of finite image",
+    "tests whether a transducer is of finite image",
     "",
     awali::cora::doc::is_of_finite_image
   });
@@ -951,7 +1002,7 @@ void init_cmds()
   // is-synchronizable    //// FIX ME   quiet-verbose dilemna
   commands_inv.emplace_back(
   command{"is-synchronizable", IS_SYNCHRONIZABLE, 1, {{TDC}},
-    "test whether a transducer is synchronizable",
+    "tests whether a transducer is synchronizable",
     "",
     awali::cora::doc::is_synchronizable
   });
@@ -959,16 +1010,23 @@ void init_cmds()
   ////          pb distinguish between error and failure
   commands_tdc.emplace_back(
   command{"synchronize", SYNCHRONIZE, 1, {{TDC}},
-    "synchronize a (synchronizable) transducer", 
+    "synchronizes a (synchronizable) transducer", 
     "",
     awali::cora::doc::synchronize
+  });
+
+  commands_tdc.emplace_back(
+  command{"subnormalize", SUBNORMALIZE, 1, {{TDC}},
+    "subnormalize a transducer", 
+    "",
+    awali::cora::doc::subnormalize
   });
 
   // compose    //// FIX ME. What happens if the two transducers are not composable?
   ////.        if the composition is not defined?
   commands_tdc.emplace_back(
   command{"compose", COMPOSE, 2, {{TDC, "1"}, {TDC, "2"}},
-    "compose two transducers",
+    "composes two transducers",
     "",
     awali::cora::doc::compose
   });
@@ -980,14 +1038,14 @@ void init_cmds()
   // ladybird
   commands_fact.emplace_back(
   command{"ladybird", LADYBIRD, 1, {{INT, "n"}},
-    "build an automaton whose determinisation is of exponential size",
+    "builds an automaton whose determinisation is of exponential size",
     "[-A<alphabet>]",
     awali::cora::doc::ladybird
   });
   // n-ultimate   // FIX ME  alphabet modification
   commands_fact.emplace_back(
   command{"n-ultimate", N_ULTIMATE, 1, {{INT, "n"}},
-    "build an automaton that recognizes words with an 'a' at the n-th "
+    "builds an automaton that recognizes words with an 'a' at the n-th "
     "position from end",
     "[-A<alphabet>]",
     awali::cora::doc::n_ultimate
@@ -995,7 +1053,7 @@ void init_cmds()
   // double-ring
   commands_fact.emplace_back(
   command{"double-ring", DOUBLERING, 1, {{INT, "n"}},
-    "build an automaton that recognizes words "
+    "builds an automaton that recognizes words "
     "with the same number of 'a's as 'b's modulo n",
     "[-A<alphabet>]",
     awali::cora::doc::double_ring
@@ -1003,28 +1061,28 @@ void init_cmds()
   // divkbaseb
   commands_fact.emplace_back(
   command{"divkbaseb", DIVKBASEB, 2, {{INT, "k"}, {INT, "b"}},
-    "build an automaton that recognizes multiple of k written in base b",
+    "builds an automaton that recognizes multiple of k written in base b",
     "",
     awali::cora::doc::divkbaseb
   });
   // cerny
   commands_fact.emplace_back(
   command{"cerny", CERNY, 1, {{INT, "n"}},
-    "build an automaton with long synchronizing word",
+    "builds an automaton with long synchronizing word",
     "",
     awali::cora::doc::cerny
   });
   // witness
   commands_fact.emplace_back(
   command{"witness", WITNESS, 1, {{INT, "n"}},
-    "build Brzozowski's universal witness",
+    "builds Brzozowski's universal witness",
     "",
     awali::cora::doc::witness
   });
 // random-dfa
   commands_fact.emplace_back(
   command{"random-dfa", RAND_DFA, 1, {{INT, "n"}},
-    "generate a random DFA",
+    "generates a random DFA",
     "[-A<alphabet>]",
     awali::cora::doc::random_dfa
   });

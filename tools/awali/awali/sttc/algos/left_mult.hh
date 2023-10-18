@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ namespace awali { namespace sttc {
           {}
         else if(standard)
           {
-            require(is_standard(res), __func__, ": the automaton must be standard");
+            require(is_standard(res), "left_mult : the automaton must be standard");
             state_t initial = res->dst_of(*(res->initial_transitions().begin()));
             if (ws.is_zero(w)) {
               for(auto s : res->states())

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ namespace awali { namespace sttc
           CASE(conjunction);
           CASE(shuffle);
           CASE(star);
+          CASE(maybe);
+          CASE(plus);
           CASE(transposition);
           CASE(lweight);
           CASE(rweight);
@@ -103,6 +105,8 @@ namespace awali { namespace sttc
           lparen_       = "\\left(";
           rparen_       = "\\right)";
           star_         = "^{*}";
+          maybe_         = "^{?}";
+          plus_         = "^{+}";
           complement_   = "^{c}";
           transposition_ = "^{T}";
           conjunction_  = " \\& ";
@@ -125,6 +129,8 @@ namespace awali { namespace sttc
           lparen_       = "(";
           rparen_       = ")";
           star_         = "*";
+          maybe_         = "?";
+          plus_         = "{+}";
           complement_   = "{c}";
           transposition_ = "{T}";
           conjunction_  = "&";
@@ -163,6 +169,8 @@ namespace awali { namespace sttc
             CASE(rweight);
             CASE(shuffle);
             CASE(star);
+            CASE(maybe);
+            CASE(plus);
             CASE(sum);
             CASE(transposition);
             CASE(zero);

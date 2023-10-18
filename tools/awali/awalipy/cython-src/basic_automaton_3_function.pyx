@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 ## ========================================================================= ##
 ## ================== Functions with no equivalent method ================== ##
 ## ========================================================================= ##
-def load(str filename, str fmt = 'json'):
+def load(str filename, str fmt = 'json', bool internal_examples = False):
     """
     Usage:  load(filename [,fmt='json'] )
 
@@ -27,13 +27,20 @@ def load(str filename, str fmt = 'json'):
         filename (str),
             must be a relative path to a file.
         format (str, optional),
-            admissible values are 'json', 'dot', 'fado' and 'grail',
+            admissible values are 'json', 'fado' and 'grail',
             defaults to 'json'.
 
     Returns:  Automaton or Transducer
     """
-    aut_or_tdc= load_automaton_(filename, fmt)
-    return _BasicAutomaton_(aut_or_tdc)
+    if fmt == 'json':
+        x = load_aut_or_exp(filename, internal_examples)
+        if x.is_aut:
+            return _BasicAutomaton_(basic_automaton_t(x.aut))
+        else:
+            return _RatExp(simple_ratexp_t(x.exp))
+    else:
+        aut_or_tdc= load_automaton_(filename, fmt)
+        return _BasicAutomaton_(aut_or_tdc)
 
 def list_examples():
     """
@@ -1102,4 +1109,15 @@ def scc_of(_BasicAutomaton aut_or_tdc, stt_id):
     _deprecated("sccs_of",since="2.0")
     return aut_or_tdc.scc_of_(stt_id)
 
+## ========================================================================= ##
+def are_isomorphic(_BasicAutomaton aut_or_tdc1, _BasicAutomaton aut_or_tdc2):
+    """
+    Usage:   are_isomorphic(aut_or_tdc1, aut_or_tdc2)
 
+    Description:  tests whether <aut_or_tdc1> and <aut_or_tdc2> are isomorphic as labelled graph.
+
+    Args:  aut1, aut2 (Automaton):
+
+    Returns:  bool, True if <aut_or_tdc1> and <aut_or_tdc2> are isomorphic.
+    """
+    return  are_isomorphic_(aut_or_tdc1._this, aut_or_tdc2._this)

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,37 +65,37 @@ void init_options()
   options.emplace(std::make_pair("L", 
     option{"labels",
            LABELS, 1, {{LBL}},
-           "set the type of labels for a new automaton or ratexp",
+           "sets the type of labels for a new automaton or ratexp",
            awali::cora::doc::labelset}));
   
   options.emplace(std::make_pair("A", 
     option{"alphabet",
            ALPHABET, 1, {{ALPH}},
-           "set the alphabet for a new automaton or ratexp",
+           "sets the alphabet for a new automaton or ratexp",
            awali::cora::doc::alphabet}));
  
   options.emplace(std::make_pair("B", 
     option{"alphabet2",
            ALPHABET_B, 1, {{ALPH}},
-           "for transducers, set the output alphabet. See alphabet",
+           "for transducers, sets the output alphabet. See alphabet",
            awali::cora::doc::alphabet2}));
 
   options.emplace(std::make_pair("W", 
     option{"weightset",
            WEIGHTS, 1, {{SMR}},
-           "set the weightset for a new automaton or ratexp",
+           "sets the weightset for a new automaton or ratexp",
            awali::cora::doc::weightset}));  
 
   options.emplace(std::make_pair("I",
     option{"input-fmt",
            INPUT_FMT, 1, {{FMT}},
-           "set input format for automata and ratexps",
+           "sets input format for automata and ratexps",
            awali::cora::doc::input_format}));
 
   options.emplace(std::make_pair("O",
     option{"output-fmt",
            OUTPUT_FMT, 1, {{FMT}},
-           "set output format for the automaton or ratexp produced by the command.",
+           "sets output format for the automaton or ratexp produced by the command.",
            awali::cora::doc::output_format}));
 
   options.emplace(std::make_pair("S", 
@@ -107,19 +107,19 @@ void init_options()
   options.emplace(std::make_pair("V",
     option{"verbose",
            VERBOSE, 0, {},
-           "print result of test commands (set by default)",
+           "prints result of test commands (set by default)",
            awali::cora::doc::verbose}));
 
   options.emplace(std::make_pair("M",
     option{"method",
            METHOD, 1,{{MTD}},
-           "set the 'method' used by some commands for the computation of their result.",
+           "sets the 'method' used by some commands for the computation of their result.",
            awali::cora::doc::method}));
 
   options.emplace(std::make_pair("H", 
     option{"history",
            HISTORY, 0, {},
-           "print state history in dot format or in display",
+           "prints state history in dot format or in display",
             awali::cora::doc::history}));
 
   options.emplace(std::make_pair("N",

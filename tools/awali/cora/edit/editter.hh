@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -313,7 +313,7 @@ h-6 |   |               |                 |                                  |
     ~editter_t();
 
     /* to implement interface `notifiable_t` */
-    virtual void notify(void* notifier);
+    virtual void notify(void* notifier) override;
 
   }; //end of class editter_t
 

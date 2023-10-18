@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,10 +65,7 @@ namespace awali { namespace sttc {
       using queue_t = std::list<std::pair<state_t, monomial_t>>;
 
       enumerater(const automaton_t& aut)
-        : aut_(aut)
-      {
-        past_[aut_->pre()] = ps_.one();
-      }
+        : aut_(aut) {}
 
       /// The weighted accepted word with length at most \a max.
       polynomial_t enumerate(unsigned max)
@@ -87,7 +84,7 @@ namespace awali { namespace sttc {
         polynomial_t res;
         // Return the past of post(), but remove the initial and final
         // special characters for the words.
-        for (const auto& m: past_[aut_->post()])
+        for (const auto& m: achieved_)
           ps_.add_here(res, ls_.undelimit(m.first), m.second);
         return res;
       }
@@ -101,13 +98,13 @@ namespace awali { namespace sttc {
         queue_t queue;
         queue.emplace_back(aut_->pre(), ps_.monomial_one());
 
-        while (past_[aut_->post()].size() < num && !queue.empty())
+        polynomial_t res;
+        while (achieved_.size() < num && !queue.empty())
           propagate_(queue);
 
         // Return the past of post(), but remove the initial and final
         // special characters for the words.
-        polynomial_t res;
-        for (const auto& m: past_[aut_->post()])
+        for (const auto& m: achieved_)
           {
             ps_.add_here(res, ls_.undelimit(m.first), m.second);
             if (--num == 0)
@@ -133,7 +130,8 @@ namespace awali { namespace sttc {
                 // FIXME: monomial mul.
                 monomial_t n(ls_.concat(m.first, aut_->label_of(t)),
                              ws_.mul(m.second, aut_->weight_of(t)));
-                ps_.add_here(past_[aut_->dst_of(t)], n);
+		if(aut_->dst_of(t) == aut_->post())
+		  ps_.add_here(achieved_, n);
                 q2.emplace_back(aut_->dst_of(t), n);
               }
           }
@@ -145,7 +143,7 @@ namespace awali { namespace sttc {
       const polynomialset_t ps_{get_wordset_context(aut_->context())};
       const labelset_t_of<polynomialset_t>& ls_ = *ps_.labelset();
       /// For each state, the first orders of its past.
-      std::map<state_t, polynomial_t> past_;
+      polynomial_t achieved_;
     };
   }
 

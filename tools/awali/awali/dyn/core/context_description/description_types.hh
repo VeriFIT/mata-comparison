@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace context {
     
     
     enum class CTypes {
-      ONESET, NULLABLE, LETTERSET, INTLETTERSET, WORDSET, TUPLE
+      ONESET, NULLABLE, LETTERSET, INTLETTERSET, INTWORDSET, WORDSET, TUPLE
         };
 
     struct WTypes {
@@ -45,22 +45,92 @@ namespace context {
     
     struct labelset_description_impl {
       CTypes type_;
-      std::vector<std::string> alphabet;
-      std::vector<int> int_alphabet;
-      std::vector<labelset_description> children_;
+      std::vector<std::string> alphabet = {};
+      std::vector<int> int_alphabet = {};
+      std::vector<labelset_description> children_ = {};
+      
+      inline bool operator==(labelset_description_impl const& other) const {
+        bool b =    type_ == other.type_
+                 && alphabet == other.alphabet
+                 && int_alphabet == other.int_alphabet
+                 && (children_.size() == other.children_.size());
+        if (!b)
+          return b;
+        for (size_t i = 0; i < children_.size(); ++i)
+          if ( !(*(children_[i]) == *(other.children_[i])) )
+            return false;
+        return true;
+      }
+      
+      inline bool is_lao() const { return (type_ == CTypes::ONESET); }
+      inline bool is_lan() const { return (type_ == CTypes::NULLABLE); }
+      inline bool is_lat() const { return (type_ == CTypes::TUPLE);}
+      inline bool is_lal() const { 
+        return (type_ == CTypes::LETTERSET || type_ == CTypes::INTLETTERSET );}
+      inline bool is_law() const {  
+        return (type_ == CTypes::WORDSET || type_ == CTypes::INTWORDSET );}
+
+      inline bool letters_are_int() const { 
+        if (type_ == CTypes::INTLETTERSET || type_ == CTypes::INTWORDSET)
+          return true;
+        if(is_lan() || is_lan()) {
+          for (auto child : children_)
+            if (!child->letters_are_int())
+              return false;
+          return true;
+        }
+        return false;
+      }
+      
+      inline bool letters_are_char() const { 
+        if (type_ == CTypes::LETTERSET || type_ == CTypes::WORDSET)
+          return true;
+        if(is_lan() || is_lan()) {
+          for (auto child : children_)
+            if (!child->letters_are_int())
+              return false;
+          return true;
+        }
+        return false;
+      }
+
+      size_t tape_number() const {
+        if (!is_lat())
+          return 1;
+        return children_.size();
+      }
+
     };
     
     struct context_description_impl {
       labelset_description ls_;
       weightset_description ws_;
+      
+      inline labelset_description labelset() const { return ls_; }
+      inline weightset_description weightset() const { return ws_; }
+      
+      inline bool operator==(context_description_impl const& other) const {
+        return ls_ == other.labelset() && ws_ == other.weightset(); }
     };
     
     
     struct weightset_description_impl {
       int type_;
-      context_description ct_;
-      std::vector<weightset_description> children_;
-      int characteristic;
+      context_description ct_ = nullptr;
+      std::vector<weightset_description> children_ = {};
+      int characteristic = -1;
+      inline bool operator==(weightset_description_impl const& other) const {
+        if (!(      type_ == other.type_
+               && (   (ct_ == nullptr && other.ct_ == nullptr) 
+                   || *ct_ == *(other.ct_))
+               && children_.size() == other.children_.size()
+               && characteristic == other.characteristic))
+           return false;
+        for (size_t i = 0; i < children_.size(); ++i)
+          if ( !(*(children_[i]) == *(other.children_[i])) )
+            return false;
+        return true;
+      }
     };
 
     //***********************

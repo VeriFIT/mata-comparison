@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace awali { namespace sttc {
   typename Aut::element_type::automaton_nocv_t
   prefix(const Aut& a, bool keep_history=true)
   {
-    auto r = copy(a, keep_history);
+    auto r = copy(a, keep_history, false, true);
     prefix_here(r);
     return r;
   }
@@ -62,7 +62,7 @@ namespace awali { namespace sttc {
   typename Aut::element_type::automaton_nocv_t
   suffix(const Aut& a, bool keep_history=true)
   {
-    auto r = copy(a, keep_history);
+    auto r = copy(a, keep_history, false, true);
     suffix_here(r);
     return r;
   }
@@ -86,7 +86,7 @@ namespace awali { namespace sttc {
   typename Aut::element_type::automaton_nocv_t
   factor(const Aut& a, bool keep_history=true)
   {
-    auto r = copy(a, keep_history);
+    auto r = copy(a, keep_history, false, true);
     factor_here(r);
     return r;
   }

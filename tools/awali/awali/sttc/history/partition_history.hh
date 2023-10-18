@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace awali {
      * This type of history is filled in {@link determinize}, {@link min_quotient}, and related functions.
      */
   template <typename Autb>
-    class partition_history  : public history_base
+    class partition_history final : public history_base
     {
     public:
       //the subsets of source states are std::set of states
@@ -55,29 +55,29 @@ namespace awali {
       {}
 
       ///@return history_kind_t::PARTITION
-      history_kind_t get_nature() const
+      history_kind_t get_nature() const override
       {
         return history_kind_t::PARTITION;
       }
 
-      bool has_history(state_t s) const {
+      bool has_history(state_t s) const override {
         return (origins_.find(s)!=origins_.end());
       }
 
-      bool remove_history(state_t s) {
+      bool remove_history(state_t s) override {
         return origins_.erase(s);
       }
 
       std::ostream&
       print_state_name(state_t s, std::ostream& o,
-                       const std::string& fmt) const
+                       const std::string& fmt) const override
       {
         const auto& set = origins_.at(s);
         const char* separator = "{";
-        for (auto s : set)
+        for (auto origin_state : set)
           {
             o << separator;
-            from_->print_state_history(s, o, fmt);
+            from_->print_state_history(origin_state , o, fmt);
             separator = ", ";
           }
         return o << "}";
@@ -99,11 +99,11 @@ namespace awali {
       /** @brief unsupported method : use {@link get_state_set}
        * @throw runtime_error
        */
-     state_t get_state(state_t s) {
+     state_t get_state(state_t) override {
         throw std::runtime_error("Origin state not available");
       }
 
-      std::vector<state_t> get_state_set(state_t s) {
+      std::vector<state_t> get_state_set(state_t s) override {
         std::vector<state_t> v(origins_[s].begin(),origins_[s].end());
         return v;
       }

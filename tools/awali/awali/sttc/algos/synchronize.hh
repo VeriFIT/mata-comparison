@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #define AWALI_ALGOS_SYNCHRONIZE_HH
 
 #include <awali/sttc/algos/proper.hh>
+#include <awali/sttc/algos/letterize_tape.hh>
 #include <awali/sttc/labelset/traits.hh>
 #include <awali/sttc/misc/sub_tuple.hh>
 #include <awali/sttc/misc/add_epsilon_trans.hh> // is_epsilon
@@ -131,7 +132,7 @@ namespace awali {
               else
                 return it->second;
             };
-            state_t s;
+            state_t s{};
             for(auto triple : finals) {
               s = get_state(triple);
               auto p = rem_in_tuple<0>::get(triple);
@@ -163,6 +164,7 @@ namespace awali {
             auto final_history = std::make_shared<single_history<Tdc>>(tdc);
             for(auto pp: states)
               final_history->add_state(pp.second,std::get<0>(pp.first));
+	    res->set_history(final_history);
           }
           proper_here(res);
           return res;

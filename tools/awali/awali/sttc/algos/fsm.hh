@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ namespace awali { namespace sttc {
         ls_.template set<1>().print(std::get<1>(l), os_);
       }
 
-      void output_transition_(const transition_t t)
+      void output_transition_(const transition_t t) override
       {
         aut_->print_state(aut_->src_of(t), os_);
         if (aut_->dst_of(t) != aut_->post())

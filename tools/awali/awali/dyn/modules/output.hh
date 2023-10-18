@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #include <awali/dyn/modules/automaton.hh>
 #include <awali/dyn/loading/handler.hh>
 
-namespace awali {
-  namespace dyn {
+namespace awali {  namespace dyn {
 
     namespace internal {
       std::ostream& daut(automaton_t aut, std::ostream& out);
@@ -33,7 +32,7 @@ namespace awali {
       std::ostream& grail(automaton_t aut, std::ostream& out);
       std::ostream& efsm(automaton_t aut, std::ostream& out);
       std::ostream& json(automaton_t aut, std::ostream& out);
-      std::ostream& img(automaton_t aut, std::ostream& o, std::string img,
+      std::ostream& img(automaton_t aut, std::ostream& o, std::string const& img,
                         options_t opts);
       std::ostream& pdf(automaton_t aut, std::ostream& o, options_t opts = {});
       std::ostream& svg(automaton_t aut, std::ostream& o, options_t opts = {});
@@ -46,36 +45,11 @@ namespace awali {
     
     json_ast_t to_json_ast(automaton_t aut, 
       json_ast_t extra_medata = json_ast::empty());
-//   struct io {
-//    private :
-//     io(std::string name,unsigned v);
-//     const std::string name;
-//     const static std::vector<const io*>& instances();
-//    public :
-//     unsigned int v;
-//     static const io dot;
-//     static const io fado;
-//     static const io grail;
-//     static const io json;
-//     static const io pdf;
-//     static const io svg;
-//
-//
-//     static io of_string(const std::string& str);
-//   };
-
-//   const io io::dot;
-//   const io io::fado;
-//   const io io::grail;
-//   const io io::json;
-//   const io io::pdf;
-//   const io io::svg;
 
 
 
 
 
-  }
-}//end of ns awali::dyn
+  }}//end of ns awali::dyn
 
 #endif

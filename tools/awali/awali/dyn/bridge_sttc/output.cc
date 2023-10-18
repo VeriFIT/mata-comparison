@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,15 +31,15 @@ namespace awali {
   template<typename Labelset, typename Weightset>
   struct Filter {
     template<typename Aut, typename OStream>
-    static OStream& fado(const Aut& a, OStream& o) {
+    static OStream& fado(const Aut&, OStream&) {
       throw std::domain_error("Fado output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
-    static OStream& grail(const Aut& a, OStream& o) {
+    static OStream& grail(const Aut&, OStream&) {
       throw std::domain_error("Grail output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
-    static OStream& efsm(const Aut& a, OStream& o) {
+    static OStream& efsm(const Aut&, OStream&) {
       throw std::domain_error("Efsm output not supported for this automaton");
     }
   };
@@ -47,15 +47,15 @@ namespace awali {
   template<typename Labelset>
   struct Filter<Labelset, sttc::b> {
     template<typename Aut, typename OStream>
-    static OStream& fado(const Aut& a, OStream& o) {
+    static OStream& fado(const Aut&, OStream&) {
       throw std::domain_error("Grail output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
-    static OStream& grail(const Aut& a, OStream& o) {
+    static OStream& grail(const Aut&, OStream&) {
       throw std::domain_error("Grail output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
-    static OStream& efsm(const Aut& a, OStream& o) {
+    static OStream& efsm(const Aut&, OStream&) {
       throw std::domain_error("Efsm output not supported for this automaton");
     }
   };
@@ -63,11 +63,11 @@ namespace awali {
   template<typename Weightset>
   struct Filter<sttc::ctx::lal_char, Weightset> {
     template<typename Aut, typename OStream>
-    static OStream& fado(const Aut& a, OStream& o) {
+    static OStream& fado(const Aut&, OStream&) {
       throw std::domain_error("Fado output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
-    static OStream& grail(const Aut& a, OStream& o) {
+    static OStream& grail(const Aut&, OStream&) {
       throw std::domain_error("Grail output not supported for this automaton");
     }
     template<typename Aut, typename OStream>
@@ -118,10 +118,10 @@ namespace awali {
     return sttc::dot(a, out, false, history, horizontal);
   }
 
-  extern "C" std::ostream& daut(dyn::automaton_t aut, std::ostream& out) {
-    auto a = dyn::get_stc_automaton<context_t>(aut);
-    return sttc::daut(a, out);
-  }
+//   extern "C" std::ostream& daut(dyn::automaton_t aut, std::ostream& out) {
+//     auto a = dyn::get_stc_automaton<context_t>(aut);
+//     return sttc::daut(a, out);
+//   }
 
   extern "C" std::ostream& fado(dyn::automaton_t aut, std::ostream& out) {
     auto a = dyn::get_stc_automaton<context_t>(aut);

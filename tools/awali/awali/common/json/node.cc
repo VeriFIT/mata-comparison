@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -112,19 +112,17 @@ exception:: exception(std::string const& message, std::string const& caller,
   what_msg = what_stream.str();
 }
 
-kind_mismatch::kind_mismatch(std::string const& caller,
-                             node_t const* node,
+kind_mismatch::kind_mismatch(std::string const& caller, node_t const* node,
                              std::initializer_list<node_kind_t> types)
   :
-  exception(kind_mismatch::message_builder(caller, node->kind, types),
+  exception(kind_mismatch::message_builder(node->kind, types),
             caller, node),
   expected_types{types}
 {}
 
 
 std::string 
-kind_mismatch::message_builder(std::string const& caller_method,
-                               node_kind_t caller_kind,
+kind_mismatch::message_builder(node_kind_t caller_kind,
                                std::initializer_list<node_kind_t> types) 
 {
   std::stringstream ss;
@@ -185,16 +183,16 @@ path_t node_t::path_to_root() const
 
 
 
-node_t const* node_t::at(std::string const& key) const
+node_t const* node_t::at(std::string const&) const
 {throw kind_mismatch ("node_t::at(string)", this, node_kind_t::OBJECT);}
 
-node_t* node_t::at(std::string const& key)
+node_t* node_t::at(std::string const&)
 {throw kind_mismatch ("node_t::at(string)", this, node_kind_t::OBJECT);}
 
-node_t* node_t::at(unsigned i)
+node_t* node_t::at(unsigned)
 {throw kind_mismatch ("node_t::at(uint)", this, node_kind_t::ARRAY);}
 
-node_t const* node_t::at(unsigned i) const
+node_t const* node_t::at(unsigned) const
 {throw kind_mismatch ("node_t::at(uint)", this, node_kind_t::ARRAY);}
 
 
@@ -500,8 +498,8 @@ node_t const*
 array_t::at(unsigned i) 
 const
 {
-if (i < values.size())
-  return values.at(i);
+  if (i < values.size())
+    return values.at(i);
   std::stringstream ss;
   ss << "This json::array_t has only " << values.size() << " children, "
      << " hence has no child at position " << i << ".";

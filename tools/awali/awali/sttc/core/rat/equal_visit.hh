@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ namespace awali { namespace sttc
 #define VISIT(Type)                                                     \
       using Type ## _t = typename super_type::Type ## _t;               \
       virtual void                                                      \
-      visit(const Type ## _t& lhs)                                      \
+      visit(const Type ## _t& lhs) override                             \
       {                                                                 \
         res_ = equal_visit_(lhs, *down_pointer_cast<const Type ## _t>(rhs_)); \
       }
@@ -91,6 +91,8 @@ namespace awali { namespace sttc
       VISIT(rweight);
       VISIT(shuffle);
       VISIT(star);
+      VISIT(maybe);
+      VISIT(plus);
       VISIT(sum);
       VISIT(transposition);
       VISIT(zero);

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,6 +76,8 @@ namespace awali {
         DEFINE(rweight);
         DEFINE(shuffle);
         DEFINE(star);
+        DEFINE(maybe);
+        DEFINE(plus);
         DEFINE(sum);
         DEFINE(transposition);
         DEFINE(zero);
@@ -252,11 +254,8 @@ namespace awali {
     json::node_t* to_json() 
     const 
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[ratexpset] Unsupported fsm-json version:"
-                                + std::to_string(version));
-        case 1:
         default:
           json::object_t* obj 
             = context().template to_json<version>()->object();
@@ -306,7 +305,7 @@ namespace awali {
                                 + std::to_string(version));
         case 1:
         default:
-          return js_parse_exp_content<self_type>(*this,p);
+          return js_parse_exp_content(*this,p);
       }
     }
 
@@ -343,6 +342,8 @@ namespace awali {
         value_t ldiv(value_t l, value_t r) const;
         value_t rdiv(value_t l, value_t r) const;
         value_t star(value_t e) const;
+        value_t maybe(value_t e) const;
+        value_t plus(value_t e) const;
         /// Add a complement operator.
         value_t complement(value_t e) const;
         /// Add a transposition operator.

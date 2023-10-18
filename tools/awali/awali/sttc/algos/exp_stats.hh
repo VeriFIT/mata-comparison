@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ namespace awali {
 
       constexpr static const char* me() { return "exp_stats"; }
 
-      exp_stats_visitor(const ratexpset_t& rs) {}
+      exp_stats_visitor(const ratexpset_t&) {}
 
       void
       operator()(const ratexp_t& v) {
@@ -130,6 +130,21 @@ namespace awali {
       AWALI_RAT_UNSUPPORTED(complement)
 
       AWALI_RAT_VISIT(star, v)
+      {
+        exp_stats(v.sub());
+        ++sh_;
+        ++size_;
+        ++height_;
+      }
+
+      AWALI_RAT_VISIT(maybe, v)
+      {
+        exp_stats(v.sub());
+        ++size_;
+        ++height_;
+      }
+
+      AWALI_RAT_VISIT(plus, v)
       {
         exp_stats(v.sub());
         ++sh_;

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -170,6 +170,7 @@ namespace dyn {
       aut_or_exp_t(ratexp_t e) : is_aut(false), exp(e) {}
       aut_or_exp_t(automaton_t a) : is_aut(true), aut(a) {}
   
+      aut_or_exp_t& operator= (aut_or_exp_t const& other);
 
       /** Returns field #is_aut and assign either @pname{a} or @pname{e} to the
        * content of this.

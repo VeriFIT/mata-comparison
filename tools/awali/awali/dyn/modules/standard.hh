@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,6 +76,31 @@ namespace awali {
      * @see sum For the general function working on any automaton.
      */
     automaton_t sum_of_standard(automaton_t aut1, automaton_t aut2, options_t opts= {});
+
+    /** \ingroup Standard
+     * Produces an automaton that associates with every word the weight (\p w * x), where x is the weight associated with this word in \p aut.
+     *
+     * The automaton must be standard.
+     * This function multiplies the weight of each outgoing
+     *   transition of the initial state by \p w;
+     *
+     * The following options may be given in \p opts: {@link KEEP_HISTORY},
+     * {@link IN_PLACE}.
+     * (Other options are ignored)
+     *
+     * If {@link IN_PLACE} is `true`, this operation operation is done directly
+     * on \p aut.  In this case, {@link KEEP_HISTORY} is ignored.
+     *
+     * If {@link IN_PLACE} is `false, this operation is done on a copy of \p
+     * aut.
+     *
+     * @param aut a standard automaton
+     * @param w weight by which the initial weights are multiplied
+     * @param opts a set of options
+     * @return a copy of `aut` in which the transition weights have been
+     *         multiplied by `w`
+     */
+    automaton_t left_mult_standard(automaton_t aut1, weight_t w, options_t opts= {});
 
     /**
      * Builds a standard automaton that recognizes the star of the language

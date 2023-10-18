@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <awali/common/enums.hh>
 
+#include <vector>
 #include <string>
 
 namespace awali {
@@ -120,26 +121,49 @@ namespace awali {
   std::string name_of(state_elim_order_t val);
 
   namespace internal {
+    
+    using enum_join_t=long;
 
-
-    int enum_of_string (const std::string& enum_name,
+    enum_join_t enum_of_string (const std::string& enum_name,
                         const std::string& value);
 
-#define GENERATE_MAKE_ENUM(enum_t) \
+    std::vector<enum_join_t> enum_values (std::string const& enum_name);
+
+
+    unsigned short index_of_enum(std::string enum_name);
+
+#define GENERATE_MAKE_ENUM(id,enum_t) \
   template<typename T=enum_t> \
   auto make_enum(std::string const& str) \
   -> typename std::enable_if<std::is_same<T,enum_t>::value,T>::type \
-  { return (enum_t) enum_of_string(#enum_t,str); }
+  { return (enum_t) enum_of_string(#enum_t,str); } \
+  \
+  template<typename T=enum_t> \
+  auto values_of() \
+  -> typename std::enable_if<std::is_same<T,enum_t>::value, \
+                             std::vector<T> const&>::type \
+  { static std::vector<enum_t> values; \
+    if (values.empty()) \
+      for (auto v : enum_values(#enum_t)) \
+        values.push_back((enum_t) v); \
+    return values; } \
+  \
+  template<typename T=enum_t> \
+  constexpr auto index_of() \
+  -> typename std::enable_if<std::is_same<T,enum_t>::value, \
+                             short unsigned>::type \
+  {return id;}
 
+  
 
-    GENERATE_MAKE_ENUM(direction_t)
-    GENERATE_MAKE_ENUM(layout_t)
-    GENERATE_MAKE_ENUM(quotient_algo_t)
-    GENERATE_MAKE_ENUM(minim_algo_t)
-    GENERATE_MAKE_ENUM(exp_to_aut_algo_t)
-    GENERATE_MAKE_ENUM(io_format_t)
-    GENERATE_MAKE_ENUM(state_elim_order_t)
-    GENERATE_MAKE_ENUM(star_status_t)
+    GENERATE_MAKE_ENUM(0,direction_t)
+    GENERATE_MAKE_ENUM(1,layout_t)
+    GENERATE_MAKE_ENUM(2,quotient_algo_t)
+    GENERATE_MAKE_ENUM(3,minim_algo_t)
+    GENERATE_MAKE_ENUM(4,exp_to_aut_algo_t)
+    GENERATE_MAKE_ENUM(5,io_format_t)
+    GENERATE_MAKE_ENUM(6,state_elim_order_t)
+    GENERATE_MAKE_ENUM(7,star_status_t)
 
 
 #undef GENERATE_MAKE_ENUM

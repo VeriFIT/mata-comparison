@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -252,9 +252,9 @@ namespace awali { namespace sttc
     auto rw = possibly_implicit_lweight_(r);
     auto rn = unwrap_possible_lweight_(r);
     auto closure =
-      [this] (value_t l, value_t r)
+      [this] (value_t left, value_t right)
       {
-        return less_than_ignoring_weight_(l, r);
+        return less_than_ignoring_weight_(left, right);
       };
     const auto i = std::lower_bound(copy.begin(), copy.end(), rn, closure);
     if (i != copy.end()
@@ -652,15 +652,42 @@ namespace awali { namespace sttc
       }
   }
 
+  DEFINE::maybe(value_t e) const
+    -> value_t
+  {
+    // Trivial Identity.
+    // 0? = 1.
+    if (e->type() == type_t::zero)
+      return one();
+    value_t res = std::make_shared<maybe_t>(e);
+    return res;
+  }
+
+  DEFINE::plus(value_t e) const
+    -> value_t
+  {
+    if (e->type() == type_t::zero)
+      // Trivial one
+      // (0)+ == 0
+      return zero();
+    else
+      {
+        value_t res = std::make_shared<plus_t>(e);
+        require(!is_series() || is_valid(*this, res),
+                "plus argument ", e, " not starrable");
+        return res;
+      }
+  }
+
   DEFINE::complement(value_t e) const
     -> value_t
   {
     // Trivial identity: (k.E){c} => E{c}, (E.k){c} => E{c}.
     // Without it, derived-term (<2>a)*{c} fails to terminate.
-    if (auto w = std::dynamic_pointer_cast<const lweight_t>(e))
-      return complement(w->sub());
-    else if (auto w = std::dynamic_pointer_cast<const rweight_t>(e))
-      return complement(w->sub());
+    if (auto wl = std::dynamic_pointer_cast<const lweight_t>(e))
+      return complement(wl->sub());
+    else if (auto wr = std::dynamic_pointer_cast<const rweight_t>(e))
+      return complement(wr->sub());
     else
       return std::make_shared<complement_t>(e);
   }
@@ -903,7 +930,7 @@ namespace awali { namespace sttc
   }
 
   DEFINE::print(const value_t v, std::ostream& o,
-                const std::string& format) const
+                const std::string& /*format*/) const
     -> std::ostream&
   {
     return ::awali::sttc::print(*this, v, o);

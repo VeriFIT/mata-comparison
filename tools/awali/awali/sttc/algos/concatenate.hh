@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ namespace awali {
       { 
         //using automaton_t = A;
         const auto& ws = *res->weightset();
-        const auto& wsb = *b->weightset();
+//         const auto& wsb = *b->weightset();
         auto one=res->labelset()->one();
         
         // The set of the final transitions of res;
@@ -118,7 +118,7 @@ namespace awali {
         transs_t ftr{ begin(ftr_), end(ftr_) };
         
         copier<B,A> cp(b,res);
-        cp([](state_t) { return true; });
+        cp([](state_t) { return true; },false,false);
         const auto& iom=cp.in_out_map();
         //The set of initial states of b in res
           std::unordered_set<state_t> ist;

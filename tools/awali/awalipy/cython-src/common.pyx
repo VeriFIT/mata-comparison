@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ cdef extern from "automaton.h" namespace "awali::version":
 
 __version__ = full
 
+cdef extern from "automaton.h" namespace "awali::version":
+    string full
+
+__version__ = full
 
 cpdef dict _from_map_s_s(map[string, string] m):
     pymap = {}
@@ -125,3 +129,5 @@ ctypedef fused RatExp_or_Str_or_Aut:
 
 
 
+def _print_warning(s):
+    print("[Warning]", s, file=sys.stderr, flush=True)

@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,4 +48,3 @@ def _deprecated(caller,since=None,replace="the method with the same name"):
     print(s)
 
 
-print ("[Warning] The python module awalipy relies on compilation executed \"on-the-fly\" depending on the context (type of weights, of labels, etc.). As a result, the very first call to a given function in a given context may take up to 10 seconds. ")

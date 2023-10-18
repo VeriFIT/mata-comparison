@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -161,6 +161,10 @@ namespace awali { namespace sttc {
     /// Whether \a l < \a r.
     static bool less_than(const value_t l, const value_t r)
     {
+      if(l.size()<r.size())
+	return true;
+      if(l.size()>r.size())
+	return false;
       return (l < r);
     }
 
@@ -285,7 +289,7 @@ namespace awali { namespace sttc {
         if(!find_sep)
           break;
         p=q;
-        letter_t l= genset_t::parse_one_letter(s, p);
+        l= genset_t::parse_one_letter(s, p);
         if(genset().has(l)) {
           tmp.push_back(l);
         }
@@ -357,10 +361,8 @@ namespace awali { namespace sttc {
     
     template<unsigned version = version::fsm_json>
     json::node_t* to_json() const {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[wordset] Unsupported fsm-json version:"
-                                + std::to_string(version));
         case 1:
         default:
           GenSet const& gs = this->genset();

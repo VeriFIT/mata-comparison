@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -64,7 +64,24 @@ namespace awali {
      **/
      automaton_t promote_automaton(automaton_t aut, const std::string& ws, options_t opts = {});
 
-  }
-}//end of ns awali::dyn
+   /** Computes a new expression with the specified weightset
+     *
+     * If \p ws is the weightset of \p exp, the function returns a copy of the expression.
+     *
+     * \p ws is the public name of a weightset like "B", "Z/5Z", etc.
+     *
+     *
+     * @param exp a rational expression
+     * @param ws the public name of a weightset
+     *
+     * @return a new rational expression
+     **/
+     ratexp_t promote_ratexp(ratexp_t exp, const std::string& weightset);
+
+    automaton_t promote_automaton(automaton_t aut, context_t ctx, options_t opts = {});
+//     context_t join_context(context_t c1, context_t c2);
+
+  
+}}//end of ns awali::dyn
 
 #endif

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -97,6 +97,15 @@ namespace awali {
         raise(sname(), ": star: invalid value: ", format(*this, v));
     }
 
+    value_t
+    plus(const value_t v) const
+    {
+      if (0 <= v)
+        return v;
+      else
+        raise(sname(), ": star: invalid value: ", format(*this, v));
+    }
+
     static value_t
     one()
     {
@@ -118,7 +127,7 @@ namespace awali {
     /// Whether \a lhs < \a rhs.
     static bool less_than(value_t lhs, value_t rhs)
     {
-      return lhs < rhs;
+      return lhs > rhs;
     }
 
     constexpr static bool is_special(value_t)
@@ -240,8 +249,9 @@ namespace awali {
     value_t
     static value_from_json(json::node_t const* p)
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           try {
@@ -262,10 +272,9 @@ namespace awali {
     json::node_t*
     value_to_json(value_t v) const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[zmin] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           if (v == zero())
@@ -278,10 +287,9 @@ namespace awali {
     json::node_t*
     to_json() const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[zmin] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::object_t("semiring",new json::string_t("Z-min-plus"));

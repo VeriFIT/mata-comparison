@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,10 +86,10 @@ namespace editter {
   }
 
   
-  sentence_t::sentence_t(const sentence_t& token) 
-  : std::list<token_t>(token),
-    sep(token.sep), font_style(token.font_style)
-  {}
+//   sentence_t::sentence_t(const sentence_t& token) 
+//   : std::list<token_t>(token),
+//     sep(token.sep), font_style(token.font_style)
+//   {}
 
   
   size_t 
@@ -135,8 +135,10 @@ namespace editter {
       int left = (width-length)/2;
       int right = width - length - left;
       if (apply) {
-        this->insert(this->begin(),token_t(blank(left-sep.size())));
-        this->push_back(token_t(blank(right-sep.size())));
+        if (left > 0 && ((unsigned) left) > sep.size())
+          this->insert(this->begin(),token_t(blank(left-sep.size())));
+        if (right > 0 && ((unsigned) right) > sep.size())
+          this->push_back(token_t(blank(right-sep.size())));
       }
       return {left,right};
     }

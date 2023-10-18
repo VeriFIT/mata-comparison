@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace awali { namespace dyn {
     */
 
     
-    void* get_handler(const std::string name, const std::string group, 
+    void* get_handler(std::string const& name, std::string const& group, 
         const std::string& static_context) 
     {
       std::string unique_name(name+"@"+group+"@"+static_context);
@@ -63,16 +63,16 @@ namespace awali { namespace dyn {
       auto bridge =  dlsym(handle, name.c_str());
       if (bridge==nullptr)
         throw std::runtime_error(std::string("dlsym failed: ") + dlerror());
-      loaded_handler[unique_name] = bridge;
+      loaded_handler.emplace(std::move(unique_name),bridge);
       return bridge;
     }
 
-    void* get_handler(const std::string name, const std::string group,
+    void* get_handler(const std::string& name, const std::string& group,
                       const std::string& static_context1,
                       const std::string& static_context2) {
       make_awali_dir();
       std::string p(libname(static_context1+"_"+static_context2,group)+".so");
-      std::string unique_name(name+"@"+group+"@"+p);
+      std::string unique_name = name+"@"+group+"@"+p;
       auto handler_it= loaded_handler.find(unique_name);
       if (handler_it != loaded_handler.end())
         return handler_it->second;
@@ -92,11 +92,11 @@ namespace awali { namespace dyn {
       if (bridge==nullptr) {
         throw std::runtime_error(std::string("dlsym failed: ") + dlerror());
       }
-      loaded_handler[unique_name] = bridge;
+      loaded_handler.emplace(std::move(unique_name),bridge);
       return bridge;
     }
 
-    void* get_handler(const std::string name, const std::string& static_context) {
+    void* get_handler(const std::string& name, const std::string& static_context) {
       return get_handler(name, name, static_context);
     }
 

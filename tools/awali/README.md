@@ -2,7 +2,7 @@
 =======================
 
 Awali is a C++ and Python generic library for weighted finite state machines.
-Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 
 Awali is a free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -111,6 +111,9 @@ Html versions of those documents may be found in the Awali website.
   the directory where this `README.md` is located).  
   The page `awalidoc/Doxygen/html/index.html` is a good way to start.
 
+  The doxygen documentation is also available online
+  (http://doxygen.vaucanson-project).
+
 - The Python documentation is given as docstring directly in the code and be 
   accessed as usual from the `help(..)` or `..?` built-in features.
 
@@ -147,7 +150,7 @@ Contacts
   
 * Victor Marsault  
   LIGM / Université Gustave Eiffel and CNRS  
-  Victor.Marsault@u-pem.fr  
+  Victor.Marsault@univ-eiffel.fr  
   https://victor.marsault.xyz  
 
 *  Jacques Sakarovitch  

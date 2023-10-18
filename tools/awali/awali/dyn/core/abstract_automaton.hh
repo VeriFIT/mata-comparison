@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -498,6 +498,9 @@ namespace awali { namespace dyn {
 
     /** Returns `true` if epsilon transitions are allowed. */
     virtual bool is_eps_allowed() const = 0;
+
+    /** Returns `true` if words are allowed as labels. */
+    virtual bool are_words_allowed() const = 0;
 
     /** Gets the context of this {@link abstract_automaton_t} */
     virtual context_t get_context() const = 0;

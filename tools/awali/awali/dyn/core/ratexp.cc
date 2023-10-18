@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace awali { namespace dyn {
   ratexp_t
   ratexp_t::from (std::string str,std::string weightset,std::string alphabet)
   { 
-    return ratexp_t::from_context(
+    return ratexp_t(
       str, 
       context::letterset(alphabet=="auto"?"":alphabet),
       context::weightset(weightset),
@@ -54,64 +54,68 @@ namespace awali { namespace dyn {
     );
   }
 
-  ratexp_t
-  ratexp_t::from_context(std::string str, context::labelset_description ld, context::weightset_description wd, bool fixed_alphabet) 
-  {
-    return internal::make_ratexp_with_context(str,ld,wd,fixed_alphabet);
-  }
+  ratexp_t::ratexp_t(std::string str,
+                     context::labelset_description ld,  
+                     context::weightset_description wd, 
+                     bool fixed_alphabet) 
+  : shared_ptr<abstract_ratexp_t>(
+    internal::make_ratexp_with_context(str,ld,wd,fixed_alphabet))
+  {}
 
   ratexp_t
   ratexp_t::from_context(std::string str, context_t ctx, bool fixed_alphabet) 
   {
     return internal::make_ratexp_with_context(str,ctx,fixed_alphabet);
   }
+  
+
+  ratexp_t ratexp_t::from_context(std::string str,
+                                  context::labelset_description ld,
+                                  context::weightset_description wd,
+                                  bool fixed_alphabet)
+  {
+    return ratexp_t(str, ld, wd, fixed_alphabet);
+  }
 
   ratexp_t
   ratexp_t::with_int_labels::from_range(std::string str, int l, int u,
                                         std::string weightset) 
   {
-    return ratexp_t::from_context(
-      str,
-      context::intletterset(l,u),
-      context::weightset(weightset)
-    );
+    return ratexp_t(str, 
+                    context::intletterset(l,u), 
+                    context::weightset(weightset));
+
   }
 
   ratexp_t
   ratexp_t::with_int_labels::from_size(std::string str, unsigned n,
                                         std::string weightset) 
   {
-    return ratexp_t::from_context(
-      str,
-      context::intletterset(n),
-      context::weightset(weightset)
-    );
+    return ratexp_t(str, 
+                    context::intletterset(n),
+                    context::weightset(weightset));
   }
   
   ratexp_t
   ratexp_t::with_int_labels::from(std::string str, std::string weightset) 
   {
-    return ratexp_t::from_context(
-      str,
-      context::intletterset(0),
-      context::weightset(weightset),
-      false
-    );
+    return ratexp_t(str, 
+                    context::intletterset(0),
+                    context::weightset(weightset),
+                    false);
   }
 
   ratexp_t
   ratexp_t::with_tuple_labels::from(std::string str, unsigned n, 
                                     std::string weightset)
   {
-    return ratexp_t::from_context(
-      str,
-      context::ltupleset({
-        context::nullableset(context::letterset("")),
-        context::nullableset(context::letterset(""))
-      }),
-      context::weightset(weightset),
-      false
-    );
+    std::vector<context::labelset_description> v;
+    for(unsigned i = 0; i<n; ++i)
+      v.emplace_back(context::letterset(""));
+    return ratexp_t(str,
+                    context::ltupleset(std::move(v)),
+                    context::weightset(weightset),
+                    false);
   }
 
   ratexp_t
@@ -122,11 +126,9 @@ namespace awali { namespace dyn {
     std::vector<context::labelset_description> v;
     for (auto s : alphabets)
       v.push_back(context::letterset(s));
-    return ratexp_t::from_context(
-      str,
-      context::ltupleset(v),
-      context::weightset(weightset)
-    );
+    return ratexp_t(str,
+                    context::ltupleset(v),
+                    context::weightset(weightset));
   }
 
 

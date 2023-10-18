@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@ json_ast::from(std::istream& i)
   return std::shared_ptr<json::object_t>(json::parse(i)->object());
 }
 
+json_ast_t internal::metadata_ast(std::istream& i) {
+  return std::shared_ptr<json::object_t>(json::parse(i, true)->object());
+}
 
 /** Helper function to be used with metadata */
 json_ast_t
@@ -81,7 +84,8 @@ json_ast::from_file(std::string const& filename) {
 // }
 
 std::ostream& put(json_ast_t tree, std::ostream& out) 
-{return json::put(&*tree,out);}
+{return json::put(out,&*tree);}
+
 
 }//end of namespace awali
 

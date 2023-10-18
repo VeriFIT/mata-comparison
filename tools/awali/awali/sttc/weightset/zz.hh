@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ namespace awali {
       {
         require(!is_zero(r), sname()+" div: division by zero");
         int calc=0;
-        for (int i=1; i<N; i++) {
+        for (unsigned i=1; i<N; i++) {
           calc = (calc+r)%N; // calc is always equal to (i*r)%N
           if ( calc == 1 )
             return ( (l*i)%N );
@@ -122,6 +122,15 @@ namespace awali {
       {
         if ( v == 0 )
           return 1;
+        else
+          throw std::domain_error("Weightset "+sname()+": given value ("+std::to_string(v)+") is not starrable");
+      }
+
+      static value_t
+      plus(const value_t v)
+      {
+        if ( v == 0 )
+          return 0;
         else
           throw std::domain_error("Weightset "+sname()+": given value ("+std::to_string(v)+") is not starrable");
       }
@@ -209,7 +218,7 @@ namespace awali {
 
       static std::ostream&
       print(const value_t v, std::ostream& o,
-            const std::string& format= "text")
+            const std::string& /*format*/= "text")
       {
         return o << v;
       }
@@ -231,16 +240,15 @@ namespace awali {
       static json::node_t* 
       to_json()
       {
-      switch (version) {
-        case 0:
-          throw parse_exception("[zz] Unsupported fsm-json version:"
-                                + std::to_string(version));
-        case 1:
-        default:
-          json::object_t* obj = new json::object_t();
-          obj->push_back("semiring", new json::string_t("Cyclic"));
-          obj->push_back("characteristic", new json::int_t(N));
-          return (obj);
+        version::check_fsmjson<version>();
+        switch (version) {
+          case 0: /* Never occurs due to above check. */
+          case 1:
+          default:
+            json::object_t* obj = new json::object_t();
+            obj->push_back("semiring", new json::string_t("Cyclic"));
+            obj->push_back("characteristic", new json::int_t(N));
+            return (obj);
         }
       }
 
@@ -249,26 +257,24 @@ namespace awali {
       json::node_t* value_to_json(value_t v) 
       const
       {
+        version::check_fsmjson<version>();
         switch (version) {
-          case 0:
-            throw parse_exception("[zz] Unsupported fsm-json version:"
-                                  + std::to_string(version));
-          case 1:
-          default:
-            return new json::int_t(v);
+          case 0: /* Never occurs due to above check. */
+            case 1:
+            default:
+              return new json::int_t(v);
         }
       }
     
 
       template<unsigned version = version::fsm_json>
       value_t
-      value_from_json(json::node_t* p) 
+      value_from_json(json::node_t const* p) 
       const 
       {
+        version::check_fsmjson<version>();
         switch (version) {
-          case 0:
-            throw parse_exception("[letterset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
+          case 0: /* Never occurs due to above check. */
           case 1:
           default:
             return p->to_int();
@@ -280,6 +286,14 @@ namespace awali {
     template<unsigned N>
     inline
     zz<N> join(const zz<N>&, const zz<N>&) { return {}; }
+    
+//     template<unsigned N>
+//     inline
+//     zz<N> join(const zz<N>&, const b&) { return {}; }
+//     
+//     template<unsigned N>
+//     inline
+//     zz<N> join(const b&, const zz<N>&) { return {}; }
 
   }
 }//end of ns awali::stc

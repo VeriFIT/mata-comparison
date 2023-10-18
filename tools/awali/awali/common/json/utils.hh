@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -180,7 +180,7 @@ namespace awali {
               i >> c3;
               i >> c4;
               if(c1=='0' && c2 =='0' && (c3 == '0' || c3 == '1')) {
-                char c = (c3 == '1')?16:0;
+                c = (c3 == '1')?16:0;
                 if ('0'<= c4 && c4 <= '9')
                   c +=  (c4-'0');
                 else if ('a'<= c4 && c4 <= 'f')

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace awali {
         using ret_automaton_t = Aut;
       
         static ret_automaton_t letterize(const Aut& aut, bool keep_history) {
-          return copy(aut, keep_history);
+          return copy(aut, keep_history, false, true);
         }
       };
      
@@ -56,7 +56,10 @@ namespace awali {
           auto ret= make_mutable_automaton(ret_context_t{nletset,*aut->context().weightset()});
           std::unordered_map<state_t,state_t> state_map;
           for(auto s : aut->states()) {
-            state_map[s]=ret->add_state();
+            state_map[s]= s;
+	    ret->add_state(s);
+	    if(aut->has_name(s))
+	      ret->set_state_name(s, aut->get_state_name(s));	     
           }
           state_map[ret->pre()]=aut->pre();
           state_map[ret->post()]=aut->post();
@@ -78,8 +81,12 @@ namespace awali {
           }
           if(keep_history) {
             auto history = std::make_shared<single_history<automaton_t>>(aut);
-            for(auto p : state_map)
+            for(auto p : state_map) {
               history->add_state(p.second,p.first);
+	      if(aut->has_name(p.first)) {
+		ret->set_state_name(p.second, aut->get_state_name(p.first));
+	    }
+	    }
             ret->set_history(history);
           }
           return ret;

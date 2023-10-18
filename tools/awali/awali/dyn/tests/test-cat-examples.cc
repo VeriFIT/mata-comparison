@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,8 @@ int main() {
       if (x->has_path({"metadata","timestamp"}))
         x->at("metadata")->object()->erase("timestamp");
     if (!equal(in,out,false)) {
-      save(aut, path);
+      if (awali::version::suffix == "")
+        save(aut, path);
       std::cerr << "Updated." << std::endl;
       put(in,std::cerr) << std::endl;
       put(out,std::cerr) << std::endl;

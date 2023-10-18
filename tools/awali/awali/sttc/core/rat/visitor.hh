@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@ namespace awali { namespace sttc
       template <type_t Type>
       using weight_node_t = rat::weight_node<Type, label_t, weight_t>;
 
+      virtual ~const_visitor() = default;
+
 # define DEFINE(Type)                                   \
       using Type ## _t = Type<label_t, weight_t>;       \
       virtual void visit(const Type ## _t& v)
@@ -55,6 +57,8 @@ namespace awali { namespace sttc
       DEFINE(rweight);
       DEFINE(shuffle);
       DEFINE(star);
+      DEFINE(maybe);
+      DEFINE(plus);
       DEFINE(sum);
       DEFINE(transposition);
       DEFINE(zero);
@@ -66,7 +70,7 @@ namespace awali { namespace sttc
 
 # define AWALI_RAT_VISIT(Type, Val)                      \
   using Type ## _t = typename super_type::Type ## _t;   \
-  virtual void visit(const Type ## _t& Val)
+  virtual void visit(const Type ## _t& Val) override
 
 # define AWALI_RAT_UNSUPPORTED(Type)                     \
   AWALI_RAT_VISIT(Type,)                                 \

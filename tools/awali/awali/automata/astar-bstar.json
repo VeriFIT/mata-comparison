@@ -1,0 +1,20 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"astar-bstar",
+    "caption":"NFA with epsilon transition which recognizes words in 'a*b*'",
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:53Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Letters",  "letterType":"Char",    "allowEpsilon":true,
+       "alphabet":["a","b"]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"p", "initial":true},
+       {"id":1, "name":"q", "final":true}],
+    "transitions":
+      [{"source":0, "destination":0, "label":"a"},
+       {"source":1, "destination":1, "label":"b"},
+       {"source":0, "destination":1, "label":[]}]}}

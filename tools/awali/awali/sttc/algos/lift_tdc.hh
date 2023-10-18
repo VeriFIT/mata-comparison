@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -63,9 +63,12 @@ namespace awali { namespace sttc {
         res = make_mutable_automaton(o_context);
         in_out_map[tdc_->pre()] = res->pre();
         in_out_map[tdc_->post()] = res->post();
-        for (auto s: tdc_->states())
-          in_out_map[s] = res->add_state();
-
+        for (auto s: tdc_->states()) {
+          in_out_map[s] = s;
+	  res->add_state(s);
+	  if(tdc_->has_name(s))
+	    res->set_state_name(s, tdc_->get_state_name(s));	     
+	}
         for (auto t: tdc_->all_transitions())
           if (tdc_->src_of(t) == tdc_->pre())
             res->add_initial(in_out_map[tdc_->dst_of(t)],

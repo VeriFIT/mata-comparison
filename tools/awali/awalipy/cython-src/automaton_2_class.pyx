@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ cdef Automaton _Automaton(basic_automaton_t aut):
         Use with caution.
     """
     a= Automaton("", empty_shell=True)
-    a._this= aut
+    a._set_cpp_class(aut)
     return a
 
 cdef class Automaton(_BasicAutomaton):
@@ -147,6 +147,7 @@ cdef class Automaton(_BasicAutomaton):
                 self.set_final(t[0], t[1])
             else:
                 self.set_final(t)
+        self._recompute_state_names();
 
 
     def __call__(self, str word):
@@ -156,12 +157,25 @@ cdef class Automaton(_BasicAutomaton):
     def __repr__(self):
       return self.__str__()
 
+    def is_eps_allowed(self):
+        """
+        Usage:  aut.is_eps_allowed()
+
+        Description:  returns True if <self/aut> allows epsilon-transitions.
+        """
+        return self._to_cpp_class().is_eps_allowed();
+
     def __str__(self):
-        result=  "Automaton ("
-        result+= self.get_static_context()+"):"
-        result+= "\tWeight Set: "+str(self.get_weightset())
-        result+= "\tAlphabet: "+self.alphabet()+"\n"
-        result+= "States:{"
+        result=  "Automaton (static context: "
+        result+= self.get_static_context()+")\n"
+        result+= "Weightset: "+str(self.get_weightset())
+        result+= "\tAlphabet: "+self.alphabet()
+        result+= "\tEpsilon-transitions: "
+        if self.is_eps_allowed():
+            result += "Allowed\n"
+        else:
+            result +="Disallowed\n"
+        result+= "- States:{"
         weight_one= self.get_weightset().one()
         states = self.states();
         strlist=[]
@@ -176,28 +190,28 @@ cdef class Automaton(_BasicAutomaton):
                 e = ')'
                 weight= self.get_initial_weight(s)
                 if (weight != weight_one):
-                    str_s+= ':'+weight
+                    str_s+= ':'+str(weight)
             if self.is_final(s):
                 str_s+= c+'f'
                 e = ')'
                 weight= self.get_final_weight(s)
                 if (weight != weight_one):
-                    str_s+= ':'+weight
+                    str_s+= ':'+str(weight)
             str_s+= e
             result+= "\t"+str_s
             #result+= strlist[-1]
         result+="\t}\n"
-        result+="Transitions:{"
+        result+="- Transitions:{"
         transitions = self.transitions()
         for t in transitions:
             result+= '\t'
             result+= str(self.src_of(t))
-            result+= '--'
+            result+= '-'
             weight= self.weight_of(t)
             if (weight != weight_one):
                 result+= '<'+weight+'>'
             result+= self.label_of(t)
-            result+='-->'
+            result+='->'
             result+= str(self.dst_of(t))
         result+="\t\t}"
         return result
@@ -243,19 +257,19 @@ cdef class Automaton(_BasicAutomaton):
 
 
 ## ========================================================================= ##
-    def set_transition(self, int src_id, int dst_id, str label, str new_weight=None):
+    def set_transition(self, src, dst, str label, str new_weight=None):
         """
         Usage:
-            aut.set_transition(src_id, dst_id, label [, new_weight=aut.get_weightset().one() ] )
+            aut.set_transition(src, dst, label [, new_weight=aut.get_weightset().one() ] )
 
         Description:  sets as <new_weight> the weight of the transition \
-going from <src_id> to <dst_id> and labelled by <label>; \
+going from <src> to <dstd> and labelled by <label>; \
 overwrites the eventual previous weight; \
 creates the transition if necessary.
 
         Args:
-            src_id (int), representing a state
-            dst_id (int), representing a state
+            src (int or str): state identifier (int) or state name (str) of the source
+            dst (int or str): state identifier (int) or state name (str) of the destination
             label (str)
             new_weight (str, optional),
                 defaults to aut.get_weightset().one().
@@ -263,25 +277,23 @@ creates the transition if necessary.
         Returns: (int), representing a transition
         """
         if new_weight is None:
-            return self._to_cpp_class().set_transition3(src_id, dst_id, label)
+            return self._to_cpp_class().set_transition3(self._id_or_name(src), self._id_or_name(dst), label)
         else:
-            return self._to_cpp_class().set_transition4(src_id, dst_id, label, new_weight)
+            return self._to_cpp_class().set_transition4(self._id_or_name(src), self._id_or_name(dst), label, new_weight)
 
 
 ## ========================================================================= ##
-    cpdef str add_transition(self, int src_id, int dst_id, str label, str weight=None):
+    def add_transition(self, src, dst, str label, str weight=None):
         """
-        Usage:  aut.add_transition(src_id, dst_id, label [, weight=aut.get_weightset().one() ] )
+        Usage:  aut.add_transition(src, dst, label [, weight=aut.get_weightset().one() ] )
 
         Description:  adds in <aut> some weight to the transition \
-going from <src_id> to <dst_id> and labelled by <label>; creates the \
+going from <src> to <dst> and labelled by <label>; creates the \
 transition if necessary.
 
         Args:
-            aut (Automaton)
-            tdc (Transducer)
-            src_id (int), identifier of a state
-            dst_id (int), identifier of a state
+            src (int or str): state identifier (int) or state name (str) of the source
+            dst (int or str): state identifier (int) or state name (str) of the destination
             label (str)
             weight (str, optional)
                 defaults to aut.get_weightset().one()
@@ -289,82 +301,82 @@ transition if necessary.
         Returns:  str, the new weight of the transition
         """
         if weight is None:
-            return self._to_cpp_class().add_transition3(src_id, dst_id, label)
+            return self._to_cpp_class().add_transition3(self._id_or_name(src), self._id_or_name(dst), label)
         else:
-            return self._to_cpp_class().add_transition4(src_id, dst_id, label, weight)
+            return self._to_cpp_class().add_transition4(self._id_or_name(src), self._id_or_name(dst), label, weight)
 
 
 ## ========================================================================= ##
-    def has_transition(self, int source_or_transition, object dst_id=None, str label=None): #3
+    def has_transition(self, source_or_transition, object dst=None, str label=None): #3
         """
         Usage:
             aut.has_transition(tr_id)
-            aut.has_transition(src_id, dst_id, label)
+            aut.has_transition(src, dst, label)
 
         Description:  Returns True if the transition given as argument, or \
 determined by the arguments, exists in <aut/self>.
 
         Arguments:
             tr_id (int), identifier of the transition
-            src_id (int), identifier of the source state
-            dst_id (int), identifier of the destination state
+            src (int or str): state identifier (int) or state name (str) of the source
+            dst (int or str): state identifier (int) or state name (str) of the destination
             label (str), label of the transition
 
         Returns:
             bool, True if the transition exists.
     """
-        if ((dst_id is None) != (label is None)):
+        if ((dst is None) != (label is None)):
             _bad_arg_number_("Automaton", "has_transition", [1,3])
-        if dst_id is None:
+        if dst is None:
             return _BasicAutomaton.has_transition(self,source_or_transition)
         else:
-            return  self._to_cpp_class().has_transition3(source_or_transition, dst_id, label)
+            return  self._to_cpp_class().has_transition3(self._id_or_name(source_or_transition), self._id_or_name(dst), label)
 
 
 ## ========================================================================= ##
-    def del_transition(self, int tr_or_src_id, dest=None, str label=None):
+    def del_transition(self, int tr_or_src, dest=None, str label=None):
         """
         Usage:
             [a]  aut.del_transition(tr_id)
-            [b]  aut.del_transition(src_id, dst_id)
-            [c]  aut.del_transition(src_id, dst_id, label)
+            [b]  aut.del_transition(src, dst)
+            [c]  aut.del_transition(src, dst, label)
 
         Description:
             [a,c]  removes from <aut/self> the unique transition \
-determined either by an identifier <tr_id>, or by a source <src_id>, \
-a destination <dst_id> and and a <label>
+determined either by an identifier <tr_id>, or by a source <src>, \
+a destination <dst> and and a <label>
             [b]  removes from <aut/self> every transition going from \
-<src_id> to <dst_id>
+<src> to <dst>
 
         Args:
             tr_id (int), identifier of a transition
-            src_id (int), identifier of the source state
-            dst_id (int), identifier of the destination state
+            src (int or str): state identifier (int) or state name (str) of the source
+            dst (int or str): state identifier (int) or state name (str) of the destination
             label (str)
         """
         if label is None:
-            _BasicAutomaton.del_transition(self, tr_or_src_id, dest)
+            _BasicAutomaton.del_transition(self, tr_or_src, dest)
         else:
-            self._to_cpp_class().del_transition3(tr_or_src_id, dest, label)
+            self._to_cpp_class().del_transition3(tr_or_src, dest, label)
 
 
 ## ========================================================================= ##
-    def get_transition(self, int src_id, int dst_id, str label):
+    def get_transition(self, src, dst, str label):
         """
         Usage:
-            aut.get_transition(src_id, dst_id, label)
+            aut.get_transition(src, self._id_or_name(dst), label)
 
-        Description:  returns the identifier of the transition of <aut/self> going from <src_id> to <dst_id> and labelled by <label>.
+        Description:  returns the identifier of the transition of <aut/self> going from <src> to <dst> and labelled by <label>.
 
         Args:
-            src_id (int), identifier of the source state
-            dst_id (int), identifier of the destination state
+            src (int or str): state identifier (int) or state name (str) of the source
+            dst (int or str): state identifier (int) or state name (str) of the destination
             label (str)
 
         Returns:
             int, identifier of a transition
         """
-        return self._to_cpp_class().get_transition(src_id, dst_id, label)
+        return self._to_cpp_class().get_transition(self._id_or_name(src), self._id_or_name(dst), label)
 
 
 ## ========================================================================= ##
@@ -382,76 +394,76 @@ a destination <dst_id> and and a <label>
 
 
 ## ========================================================================= ##
-    def incoming(self, int state, str label=None):
+    def incoming(self, stt, str label=None):
         """
-        Usage:  aut.incoming(stt_id [,label])
+        Usage:  aut.incoming(stt [,label])
 
         Description:  Returns the identifiers of all incoming transitions of \
-<stt_id> in <aut/self>; \
+<stt> in <aut/self>; \
 if <label> is provided, returns only the identifiers of the \
 transitions labelled by <label>.
 
         Args:
-            stt_id (int), identifier of a state
+            stt (int or str): state identifier (int) or state name (str)
             label (str, optional)
 
         Returns:  list of int, identifiers of transitions
         """
         if label is None:
-            return _BasicAutomaton.incoming(self, state)
+            return _BasicAutomaton.incoming(self, self._id_or_name(stt))
         else:
-            return self._to_cpp_class().incoming2(state, label)
+            return self._to_cpp_class().incoming2(self._id_or_name(stt), label)
 
 
 ## ========================================================================= ##
-    def outgoing(self, int state, str label=None):
+    def outgoing(self, stt, str label=None):
         """
         Usage:
-            outgoing(aut, stt_id [,label])
-            outgoing(tdc, stt_id [,labels])
+            outgoing(aut, stt [,label])
+            outgoing(tdc, stt [,labels])
 
         Description:  Returns the identifiers of all outgoing transitions of \
-<stt_id> within <aut/self>; \
+<stt> within <aut/self>; \
 if <label> is provided, returns only the identifiers of the \
 transitions labelled by <label>.
 
         Args:
-            stt_id (int), identifier of a state
+            stt (int or str): state identifier (int) or state name (str)
             label (str, optional)
 
         Returns:  list of int, identifiers of transitions
         """
         if label is None:
-            return _BasicAutomaton.outgoing(self, state)
+            return _BasicAutomaton.outgoing(self, self._id_or_name(stt))
         else:
-            return self._to_cpp_class().outgoing2(state, label)
+            return self._to_cpp_class().outgoing2(self._id_or_name(stt), label)
 
 
 ## ========================================================================= ##
-    def predecessors(self, int state, str label=None):
+    def predecessors(self,stt, str label=None):
         """
-        Usage:  aut.predecessors(stt_id [, label])
+        Usage:  aut.predecessors(stt [, label])
 
         Description:  returns the identifiers of all the states that are \
-predecessors of <stt_id> within <tdc/self>; \
+predecessors of <stt> within <tdc/self>; \
 if  <labels> is provided, returns only the identifiers of the \
-states s such that there exists a transition going  from s to <stt_id> and \
+states s such that there exists a transition going  from s to <stt> and \
 labelled by <labels>.
 
         Args:
-            stt_id (int), identifier of a state
+            stt (int or str): state identifier (int) or state name (str)
             label (str, optional)
 
         Returns:  list of int, identifiers of states
         """
         if label is None:
-            return _BasicAutomaton.predecessors(self, state)
+            return _BasicAutomaton.predecessors(self, self._id_or_name(stt))
         else:
-            return self._to_cpp_class().predecessors2(state, label)
+            return self._to_cpp_class().predecessors2(self._id_or_name(stt), label)
 
 
 ## ========================================================================= ##
-    def successors(self, int state, str label=None):
+    def successors(self,stt, str label=None):
         """
         Usage:  aut.successors(stt_id [, label])
 
@@ -462,15 +474,15 @@ states s such that there exists a transition going from <stt_id> to s and \
 labelled by <label>.
 
         Args:
-            stt_id (int), identifier of a state
+            stt (int or str): state identifier (int) or state name (str)
             label (str, optional)
 
         Returns:  list of int, identifiers of states
         """
         if label is None:
-            return _BasicAutomaton.successors(self, state)
+            return _BasicAutomaton.successors(self, self._id_or_name(stt))
         else:
-            return self._to_cpp_class().successors2(state, label)
+            return self._to_cpp_class().successors2(self._id_or_name(stt), label)
 
 
 ## ========================================================================= ##
@@ -546,17 +558,6 @@ labelled by <label>.
         return _Automaton(characteristic_(self._to_cpp_class(), semiring))
 
 
-## ========================================================================= ##
-    def aut_to_exp(self):
-        """
-        Usage:  aut.aut_to_exp()
-
-        Description:  computes the rational expression of the language accepted by <aut/self>.
-
-        Returns:
-            RatExp, (weighted) expression of the language accepted by <aut/self>.
-        """
-        return _RatExp(aut_to_exp_(self._to_cpp_class()))
 
 
 ## ========================================================================= ##
@@ -979,22 +980,6 @@ labelled by <label>.
 
 
 ## ========================================================================= ##
-    def are_isomorphic(self, Automaton other):
-        """
-        Usage:   aut.are_isomorphic(other)
-
-        Description:  tests whether <aut/self> and <other> are isomorphic as labelled graph.
-
-        Args:
-            other (Automaton)
-
-        Returns:
-            bool: True if <aut/self> and <other> are isomorphic.
-        """
-        return are_isomorphic_(self._to_cpp_class(), other._to_cpp_class())
-
-
-## ========================================================================= ##
     def proper(self, bool backward=True, bool prune=True):
         """
         Usage:  aut.proper([ backward=True [, prune=True ] ])
@@ -1272,7 +1257,7 @@ then the algorithm will not fail but the resulting automaton will not be a coquo
 
         Args:  method(str, optional), algorithm to use; admissible values are "moore" or "hopcroft"; default value is "moore".
 
-Returns (Automaton)
+        Returns (Automaton)
         """
         return _Automaton(min_coquotient_(self._to_cpp_class(), method))
 
@@ -1305,6 +1290,42 @@ of <aut/self>.
           self._set_cpp_class(min_coquotient_(self._to_cpp_class()))
         else:
           self._set_cpp_class(coquotient_(self._to_cpp_class(), equiv))
+
+## ========================================================================= ##
+    def explore_with_bound(self, str weight):
+        """
+        Usage: aut.explore_with_bound(weight)
+        
+        Args: <weight> (str), the string representation of a weight
+
+        Returns: Automaton
+
+        Description:  Computes part of the weighted determinization of <aut>.  Recall that in general, the weighted determinization of <aut> may be infinite; let us call it <det_aut>.  Every state of <det_aut> is associated with a vector (x_1,...,x_q), where the x_i's are weights in <weightset> and q is the number of states in <aut>. 
+Aside from sink states, the returned automaton is the subautomaton of <det_aut>
+containing the states that satisfy (x_i)² <= (<k>)' for every i.  If a word is such that it would reach a state of <det_aut> that is not in the returned automaton, then that word reaches a non-accepting sink state instead.
+
+        Precondition: 
+            - The automaton <aut> must be labelled with letters with no epsilon-transitions allowed.
+            - This command requires the weightset to be N, Z, N-oo or N<int>.
+        """
+        return _Automaton(explore_with_bound(self._to_cpp_class(), weight))
+
+
+## ========================================================================= ##
+    def explore_by_length(self, int i):
+        """
+        Usage: aut.explore_by_length(length)
+        
+        Args: <length> (int >=0), the length
+
+        Returns: Automaton
+
+        Description:  Computes part of the weighted determinization of <aut>. Precisely, it computes the part that is reached by words of length less than or equal to <length>. (Recall that in general, the weighted determinization of <aut> may be infinite.)
+        Words longer than <length> may reach a non-accepting sink state.
+
+        Precondition: The automaton <aut> must be labelled with letters with no epsilon-transitions allowed.
+        """
+        return _Automaton(explore_by_length_(self._to_cpp_class(), i))
 
 ## ========================================================================= ##
     def matrix_repr(self):

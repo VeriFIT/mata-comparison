@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,8 +72,6 @@ cdef class RatExp:
 ## ========================================================================= ##
     cdef simple_ratexp_t _this
 
-
-
 ## ========================================================================= ##
     cdef void _set_cpp_class(self, simple_ratexp_t other):
         """
@@ -114,12 +112,51 @@ cdef class RatExp:
                     self._this = make_simple_ratexp3(expression, weightset, alphabet)
 
 ## ========================================================================= ##
+    def size(self):
+        """
+        Usage: exp.size()
+
+        Returns (int): the number of nodes in <exp/self>, as a tree
+        """
+        return self._this.to_dyn_ratexp().size()
+
+
+## ========================================================================= ##
+    def height(self):
+        """
+        Usage: exp.height()
+
+        Returns (int, nonnegative): the height of <exp/self>, as a tree
+        """
+        return self._this.to_dyn_ratexp().height()
+
+## ========================================================================= ##
+    def length(self):
+        """
+        Usage: exp.length()
+
+        Returns (int, nonnegative): the number of leaves different from ZERO or ONE
+        """
+        return self._this.to_dyn_ratexp().length()
+
+
+## ========================================================================= ##
     def copy(self):
-      return _RatExp(self._this.copy())
+        """
+        Usage: exp.copy()
+
+        Returns (RatExp): a copy of <exp/self>
+        """
+        return _RatExp(self._this.copy())
 
 ## ========================================================================= ##
     def alphabet(self):
-      return self._this.alphabet()
+        """
+        Usage: exp.alphabet()
+
+        Returns (str): the alphabet of <exp/self>
+        """
+        return self._this.alphabet()
 
 ## ========================================================================= ##
     def __add__(self, RatExp other):
@@ -146,68 +183,68 @@ cdef class RatExp:
 
 
 ## ========================================================================= ##
-    def add(self, re):
+    def add(self, other_exp):
         """
-        Usage. re.add(other_re)
+        Usage. exp.add(other_exp)
 
-        Description:  returns the sum (ie union) of <re/self> and <other_re>
+        Description:  returns the sum (ie union) of <exp/self> and <other_exp>
 
-        Args:  other_re (RatExp)
+        Args:  other_exp (RatExp)
 
         Returns: RatExp
         """
-        return _RatExp(self._this.add(RatExp(re,self.get_weightset())._this))
+        return _RatExp(self._this.add(RatExp(other_exp,self.get_weightset())._this))
 
 
 ## ========================================================================= ##
-    def add_here(self, RatExp re):
+    def add_here(self, RatExp other_exp):
         """
-        Usage:  re.add_here(other_re)
+        Usage:  exp.add_here(other_exp)
 
-        Description:  computes the sum  (ie union) of <re/self> and <other_re> and reassign the result to <re/self>
+        Description:  computes the sum  (ie union) of <exp/self> and <other_exp> and reassign the result to <exp/self>
 
-        Args:  other_re (RatExp)
+        Args:  other_exp (RatExp)
 
         Note:  convenience function written at the python layer
         """
-        self._set_cpp_class(self._this.add(re._this))
+        self._set_cpp_class(self._this.add(other_exp._this))
 
 
 ## ========================================================================= ##
-    def mult(self, re):
+    def mult(self, other_exp):
         """
-        Usage:  re.mult(other_re)
+        Usage:  exp.mult(other_re)
 
-        Description:  returns the multiplication (or concatenation) of <re/self> and <other_re>
+        Description:  returns the multiplication (or concatenation) of <exp/self> and <other_exp>
 
-        Args:  other_re (RatExp)
+        Args:  other_exp (RatExp)
 
         Returns: RatExp
         """
-        return _RatExp(self._this.mult(RatExp(re,self.get_weightset())._this))
+        return _RatExp(self._this.mult(RatExp(other_exp,self.get_weightset())._this))
 
 
 
 ## ========================================================================= ##
-    def mult_here(self, RatExp re):
+    def mult_here(self, RatExp other_exp):
         """
-        Usage:  re.mult(other_re)
+        Usage:  exp.mult(other_exp)
 
-        Description:  computes the multiplication (or concatenation) of <re/self> and <other_re> and reassign the result to <re/self>
+        Description:  computes the multiplication (or concatenation) of <exp/self> and <other_exp> and reassign the result to <exp/self>
 
-        Args:  other_re (RatExp)
+        Args:  other_exp (RatExp)
 
         Note:  convenience function written at the python layer
         """
-        self._set_cpp_class(self._this.mult(re._this))
+        self._set_cpp_class(self._this.mult(other_exp._this))
 
 
 ## ========================================================================= ##
     def star(self):
         """
-        Usage:  re.star()
+        Usage:  exp.star()
 
-        Description:  returns the star of <re/self>
+        Description:  returns the star of <exp/self>
 
         Returns:  RatExp
         """
@@ -217,9 +254,9 @@ cdef class RatExp:
 ## ========================================================================= ##
     def star_here(self):
         """
-        Usage:  re.star_here()
+        Usage:  exp.star_here()
 
-        Description:  computes the star of <re/self> and reassign the result to <re/self>
+        Description:  computes the star of <exp/self> and reassign the result to <exp/self>
 
         Note:  convenience function written at the python layer
         """
@@ -235,14 +272,14 @@ cdef class RatExp:
 ## ========================================================================= ##
     def exp_to_aut(self, str method=None):
         """
-        Usage:  re.exp_to_aut( [method="glushkov"] )
+        Usage:  exp.exp_to_aut( [method="standard_and_quotient"] )
 
-        Description:  computes an automaton accepting <re/self>.
+        Description:  computes an automaton accepting <exp/self>.
 
         Args:
             method (str, optional), algorithm to use 
-                admissible values are "glushkov", "derived_term", "breaking_derived_term", "thompson", "weighted_thompson"
-                defaults to "glushkov"
+                admissible values are "standard_and_quotient" (default), "compact_thompson", "thompson", "breaking_derived_term", "derived_term", "weighted_thompson", and "glushkov"
+                defaults to "standard_and_quotient"
 
         Returns:  Automaton or Transducer
         """
@@ -257,11 +294,11 @@ cdef class RatExp:
 ## ========================================================================= ##
     def star_normal_form(self):
         """
-        Usage:  re.star_normal_form()
+        Usage:  exp.star_normal_form()
 
         Description:  builds a new equivalent expression in star normal form
 
-        Precondition:  weighset of <re/self> must be B
+        Precondition:  weighset of <exp/self> must be B
 
         Returns:  RatExp
         """
@@ -271,7 +308,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     def star_height(self):
         """
-        Usage:  re.star_height()
+        Usage:  exp.star_height()
 
         Description:  computes the star-height of the expression
 
@@ -283,9 +320,9 @@ cdef class RatExp:
 ## ========================================================================= ##
     def get_weightset(self):
         """
-        Usage:  re.get_weightset()
+        Usage:  exp.get_weightset()
 
-        Description:  returns the weightset of <re/self>
+        Description:  returns the weightset of <exp/self>
 
         Returns:  WeightSet
         """
@@ -295,7 +332,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     def display(self):
         """
-        Usage:  re.display
+        Usage:  exp.display
         """
         a = _BasicAutomaton_(display_rat_(self._this))
         a.display(history=True)
@@ -304,7 +341,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     def is_valid(self):
         """
-        Usage:  ratexp.is_valid()
+        Usage:  exp.is_valid()
 
         Description:  Tests whether epsilon is properly weighted in every sub-expression.
 
@@ -316,7 +353,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     cpdef str constant_term(self):
         """
-        Usage:  ratexp.constant_term()
+        Usage:  exp.constant_term()
 
         Description:  Returns the weight of epsilon.
 
@@ -327,7 +364,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     def expand(self):
         """
-        Usage:  ratexp.expand()
+        Usage:  exp.expand()
 
         Description:  Distributes union and concatenation as much as possible.
 
@@ -338,7 +375,7 @@ cdef class RatExp:
 ## ========================================================================= ##
     def get_kind(self):
         """
-        Usage:  ratexp.get_kind()
+        Usage:  exp.get_kind()
 
         Description:  Returns the kind of this RatExp
         
@@ -348,12 +385,32 @@ cdef class RatExp:
         """
         return RatExpKind.of[self._this.get_kind()]
 
+## ========================================================================= ##
+    def minimal_automaton(self, str exp_to_aut_method = "default", str minim_method = "default", str quotient_method = "default"):
+        """
+        Usage:  exp.minimal_automaton([quotient_method="determinize_quotient"] [quotient_method="moore"] [exp_to_aut_method ="standard_and_quotient"])
+
+        Description:  computes the minimal automaton accepting the language matched by this RatExp.
+
+      
+        Arg:
+            exp_to_aut_method(str, optional): which algorithm to use to transform the ratexp to an automaton. Valid value are "glushkov", "derived_term", "breaking_derived_term", "thompson", "compact_thompson", "weighted_thompson" and "standard_and_quotient". Defaults to "standard_and_quotient".
+            minim_method (str, optional): how is computed the minimal automaton. Valid values are "brzozowski" and "determinize_quotient". Defaults to "determinize_quotient".
+            quotient_method (str, optional): which algorithm to use to compute the quotient.  Valid values are "moore" and "hopcroft".  Defaults to "moore".  Only meaningful if <minim_method> is "determinize_quotient".
+
+        Returns: an Automaton
+    
+
+
+        Precondition: <exp/self> should be a Boolean ratexp
+        """
+        return _Automaton(minimal_automaton_exp_(self._this, exp_to_aut_method, minim_method, quotient_method))
 
 
 ## ========================================================================= ##
     def content(self):
         """
-        Usage: ratexp.content()
+        Usage: exp.content()
         
         Description: Computes list representing this RatExp as a node.
         - In all case, the first element is the kind of this RatExp.
@@ -378,11 +435,11 @@ cdef class RatExp:
 ## ========================================================================= ##
     def children(self):
         """
-        Usage ratexp.content()
+        Usage: exp.children()
 
-        Description returns a tuple subexpressions of this RatExp.
+        Description: returns deep copies of direct subexpressions of <exp/self>.
 
-        Returns: a tuple of RatExp, or a string if <ratexp> is a RatExp.ATOM.
+        Returns: a tuple of RatExp, or a string if <exp/self> is a RatExp.ATOM.
         """
         if (self.get_kind() == RatExp.ATOM):
             return [self._this.value()]
@@ -395,10 +452,29 @@ cdef class RatExp:
 ## ========================================================================= ##
     def weight(self):
         """
-        Usage ratexp.weight()
+        Usage: exp.weight()
 
-        Description: returns the left and right weight of this RatExp.
+        Description: returns the left and right weight of <exp/self>
 
         Returns: a pair of string.
         """
         return [self._this.lweight(), self._this.rweight()]
+
+
+## ========================================================================= ##
+    def promote(self, weightset):
+        """
+        Usage:  exp.promote(weightset)
+
+        Description:  returns a copy of <exp/self>, except its weightset is <weightset>
+
+        Args: 
+            weightset (str or WeightSet), the weightset to promote 
+
+        Precondition:  <weightset> must be a supersemiring of the weightset of <exp/self>. (Use method `characteristic` to pass from B to any other weightset.)
+
+        Returns:  RatExp 
+        """
+        if isinstance(weightset, WeightSet):
+            weightset = str(weightset)
+        return _RatExp(promote_ratexp_(self._this,weightset))

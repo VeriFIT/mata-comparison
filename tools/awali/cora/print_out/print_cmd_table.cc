@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -149,9 +149,9 @@ void print_table()
   std::string s1, s2, s3, u;
   std::vector<std::string> v1, v2, v3;
 
-  s1 = "Basic commands";
-  s2 = "Generic commands";
-  s3 = "Wfa commands";
+  s1 = "basic-cmds"; //Basic commands
+  s2 = "generic-cmds"; //Generic commands
+  s3 = "wfa-cmds"; //Wfa commands
   v1 = tagged_cmd_name_list(commands_basic);
   v2 = tagged_cmd_name_list(commands_generic);
   v3 = tagged_cmd_name_list(commands_aut);
@@ -163,9 +163,9 @@ void print_table()
   block_print( v1, v2, v3, col_width);
   bot_line_print( col_width);
 
-  s1="Ratexp commands";
-  s2="Nfa commands";
-  s3="Transducer commands";
+  s1="ratexp-cmds"; //Ratexp commands
+  s2="nfa-cmds"; //Nfa commands
+  s3="transducer-cmds"; //Transducer commands
   v1 = tagged_cmd_name_list(commands_exp);
   v2 = tagged_cmd_name_list(commands_nfa);
   v3 = tagged_cmd_name_list(commands_tdc);

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,16 +45,23 @@ namespace awali { namespace sttc {
       {}
 
       template <typename Pred>
-      void operator()(Pred keep_state, bool transpose=false)
+      void operator()(Pred keep_state, bool transpose, bool same_index)
       {
         // Copy the states.  We cannot iterate on the transitions
         // only, as we would lose the states without transitions.
         out_state[in_->pre()] = out_->pre();
         out_state[in_->post()] = out_->post();
         for (auto s: in_->states())
-          if (keep_state(s))
-            out_state[s] = out_->add_state();
-
+          if (keep_state(s)) {
+	    if(same_index) {
+	      out_->add_state(s);
+	      out_state[s] = s;
+	      if(in_->has_name(s))
+		out_->set_state_name(s, in_->get_state_name(s));	     
+	    }
+	    else
+	      out_state[s] = out_->add_state();
+	  }
         for (auto t : in_->all_transitions())
           {
             auto src = out_state.find(in_->src_of(t));
@@ -66,16 +73,23 @@ namespace awali { namespace sttc {
       }
 
       template <typename Pred>
-      void no_weight(Pred keep_state)
+      void no_weight(Pred keep_state, bool same_index)
       {
         // Copy the states.  We cannot iterate on the transitions
         // only, as we would lose the states without transitions.
         out_state[in_->pre()] = out_->pre();
         out_state[in_->post()] = out_->post();
         for (auto s: in_->states())
-          if (keep_state(s))
-            out_state[s] = out_->add_state();
-
+          if (keep_state(s)) {
+	    if(same_index) {
+	      out_->add_state(s);
+	      out_state[s] = s;
+	      if(in_->has_name(s))
+		out_->set_state_name(s, in_->get_state_name(s));	     
+	    }
+	    else
+	      out_state[s] = out_->add_state();
+	  }
         for (auto t : in_->all_transitions())
           {
             auto src = out_state.find(in_->src_of(t));
@@ -115,8 +129,12 @@ namespace awali { namespace sttc {
       void set_history() {
         auto history = std::make_shared<single_history<AutIn>>(in_);
         out_->set_history(history);
-        for (auto p: in_->all_states())
+        for (auto p: in_->all_states()) {
             history->add_state(out_state[p], p);
+	    if(in_->has_name(p)) {
+	      out_->set_state_name(out_state[p], in_->get_state_name(p));
+	    }
+	}
       }
 
       const InOutMap& in_out_map() const {
@@ -137,10 +155,10 @@ namespace awali { namespace sttc {
   template <typename AutIn, typename AutOut, typename Pred>
   inline
   void
-  copy_into(const AutIn& in, AutOut& out, Pred keep_state, bool keep_history=true, bool transpose=false)
+  copy_into(const AutIn& in, AutOut& out, Pred keep_state, bool keep_history=true, bool transpose=false, bool same_index=false)
   {
     internal::copier<AutIn, AutOut> copy(in, out);
-    copy(keep_state, transpose);
+    copy(keep_state, transpose, same_index);
     if(keep_history)
       copy.set_history();
   }
@@ -148,18 +166,18 @@ namespace awali { namespace sttc {
   template <typename AutIn, typename AutOut>
   inline
   void
-  copy_into(const AutIn& in, AutOut& out, bool keep_history=true, bool transpose=false)
+  copy_into(const AutIn& in, AutOut& out, bool keep_history=true, bool transpose=false, bool same_index=false)
   {
-    copy_into(in, out, [](state_t) { return true; }, keep_history, transpose);
+    copy_into(in, out, [](state_t) { return true; }, keep_history, transpose, same_index);
   }
 
   template <typename AutIn, typename AutOut, typename Pred>
   inline
   void
-  copy_support(const AutIn& in, AutOut& out, Pred keep_state, bool keep_history=true)
+  copy_support(const AutIn& in, AutOut& out, Pred keep_state, bool keep_history=true, bool same_index=false)
   {
     internal::copier<AutIn, AutOut> copy(in, out);
-    copy.no_weight(keep_state);
+    copy.no_weight(keep_state, same_index);
     if(keep_history)
       copy.set_history();
   }
@@ -167,10 +185,10 @@ namespace awali { namespace sttc {
   template <typename AutIn, typename AutOut>
   inline
   void
-  copy_support(const AutIn& in, AutOut& out, bool keep_history=true)
+  copy_support(const AutIn& in, AutOut& out, bool keep_history=true, bool same_index=false)
   {
     internal::copier<AutIn, AutOut> copy(in, out);
-    copy.no_weight([](state_t) { return true; });
+    copy.no_weight([](state_t) { return true; }, same_index);
     if(keep_history)
       copy.set_history();
   }
@@ -182,13 +200,13 @@ namespace awali { namespace sttc {
             typename Pred>
   inline
   AutOut
-  copy(const AutIn& input, Pred keep_state, bool keep_history=true, bool transpose=false)
+  copy(const AutIn& input, Pred keep_state, bool keep_history=true, bool transpose=false, bool same_index=false)
   {
     // FIXME: here, we need a means to convert the given input context
     // (e.g. letter -> B) into the destination one (e.g., letter ->
     // Q).  The automaton constructor wants the exact context type.
     auto res = make_mutable_automaton(input->context());
-    sttc::copy_into(input, res, keep_state, keep_history, transpose);
+    sttc::copy_into(input, res, keep_state, keep_history, transpose, same_index);
     res->set_name(input->get_name());
     res->set_desc(input->get_desc());
     return res;
@@ -199,10 +217,10 @@ namespace awali { namespace sttc {
             typename AutOut = typename AutIn::element_type::automaton_nocv_t>
   inline
   AutOut
-  copy(const AutIn& input, bool keep_history=true, bool transpose=false)
+  copy(const AutIn& input, bool keep_history=true, bool transpose=false, bool same_index=false)
   {
     return sttc::copy<AutIn, AutOut>(input,
-                                        [](state_t) { return true; }, keep_history, transpose);
+				     [](state_t) { return true; }, keep_history, transpose, same_index);
   }
 
   /// A copy of \a input keeping only its states that are members of
@@ -211,11 +229,11 @@ namespace awali { namespace sttc {
             typename AutOut = typename AutIn::element_type::automaton_nocv_t>
   inline
   AutOut
-  copy(const AutIn& input, const std::set<state_t>& keep, bool keep_history=true, bool transpose=false)
+  copy(const AutIn& input, const std::set<state_t>& keep, bool keep_history=true, bool transpose=false, bool same_index=false)
   {
     return sttc::copy<AutIn, AutOut>
       (input,
-       [&keep](state_t s) { return keep.find(s)!=keep.end(); }, keep_history, transpose);
+       [&keep](state_t s) { return keep.find(s)!=keep.end(); }, keep_history, transpose, same_index);
   }
 
 }}//end of ns awali::stc

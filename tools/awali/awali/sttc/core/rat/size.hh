@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ namespace awali { namespace sttc
 
 # define DEFINE(Type)                                           \
       using Type ## _t = typename super_type::Type ## _t;       \
-      virtual void visit(const Type ## _t& v)
+      virtual void visit(const Type ## _t& v) override
 
       DEFINE(atom);
       DEFINE(complement)   { visit_unary(v); }
@@ -74,6 +74,8 @@ namespace awali { namespace sttc
       DEFINE(rweight);
       DEFINE(shuffle)      { visit_variadic(v); };
       DEFINE(star)         { visit_unary(v); }
+      DEFINE(maybe)        { visit_unary(v); }
+      DEFINE(plus)         { visit_unary(v); }
       DEFINE(sum)          { visit_variadic(v); };
       DEFINE(transposition){ visit_unary(v); }
       DEFINE(zero);

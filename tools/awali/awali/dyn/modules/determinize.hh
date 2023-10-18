@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,8 +38,9 @@ namespace awali {
      * The option {@link KEEP_HISTORY} is meaningful only for the Boolean determinization.
      * If `true`, every state of the determinization is linked to a subset of states of \p aut.
      *
-     *
+     * @param aut Automaton to determinize (possibly weighted)
      * @param opts A set of option.  Only {@link KEEP_HISTORY} and {@link SAFE} are meaningful.
+     *
      * @pre \p aut should be over a locally finite weighset, except if {@link SAFE} is `false`.
      * @return The derminization of \p aut
      */
@@ -99,6 +100,32 @@ namespace awali {
      * That is, whether `aut` features two accepting runs for the same word.
      */
     bool is_ambiguous(automaton_t aut);
+
+    /** Computes the exploration of \p aut by length.
+     * @param aut the automaton to explore
+     * @param depth the depth of the exploration
+     * @return a weighted deterministic automaton
+     *
+     * This function builds every state of the weighted determinization with distance at most \p depth from the initial state.
+     * The result is a deterministic automaton which    
+     * -- has the same behaviour as \p aut on words of length at most \p depth;       
+     * -- does not accept any word which is not accepted by \p aut;      
+     * -- either rejects or accepts words of length larger than \p depth that are accepted by \p aut; in the latter case, the weight of the word is equal to the weight of the word in \p aut.
+     */
+    automaton_t explore_by_length(automaton_t aut, unsigned depth);
+
+    /** Computes the exploration of \p aut with respect to a bound.
+     * @param aut the automaton to explore
+     * @param bound the bound of the exploration
+     * @return a weighted deterministic automaton
+     *
+     * This function builds every state of the weighted determinization
+     * such that the square of the bound is not smaller than the square of every component of the multiset corresponding to the state;
+     * The ordering is managed by the weightset.
+     *
+     * \pre Weightset of \pname{aut} needs to be `N`, `Z`, `Noo` or `N<int>` .
+     */
+    automaton_t explore_with_bound(automaton_t aut, weight_t bound);
 
   }
 }//end of ns awali::dyn

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -90,9 +90,9 @@ namespace awali { namespace sttc {
   template <typename Aut>
   Aut
   standard(Aut& aut, bool keep_history=true) {
-    auto out = copy(aut, keep_history);
-        standard_here(out);
-        return out;
+    auto out = copy(aut, keep_history, false, true);
+    standard_here(out);
+    return out;
   }
 
   /*-------------------.
@@ -117,19 +117,25 @@ namespace awali { namespace sttc {
       using weight_t = weight_t_of<context_t>;
 
       using super_type = typename Context::const_visitor;
+      using history_t = std::shared_ptr<string_history>;
 
       constexpr static const char* me() { return "standard"; }
 
-      standard_visitor(const context_t& ctx)
+      standard_visitor(const context_t& ctx, bool keep_history)
         : ws_(*ctx.weightset())
+        , history_(std::make_shared<string_history>())
         , res_(make_shared_ptr<automaton_t>(ctx))
+	, keep_history_(keep_history)
       {}
 
       automaton_t
       operator()(const typename context_t::ratexp_t& v)
       {
+        if(keep_history_)
+          res_->set_history(history_);
         v->accept(*this);
         res_->set_initial(initial_);
+	history_->add_state(initial_,"i");
         return std::move(res_);
       }
 
@@ -158,6 +164,7 @@ namespace awali { namespace sttc {
         initial_ = i;
         res_->new_transition(i, f, e.value());
         res_->set_final(f);
+	history_->add_state(f,std::to_string(++count));
       }
 
       /// The current set of final states.
@@ -213,7 +220,6 @@ namespace awali { namespace sttc {
 
             // Visit the next member of the product.
             c->accept(*this);
-
             // Branch all the previously added final transitions to
             // the successors of the new initial state.
             for (auto t1: ftr)
@@ -272,8 +278,47 @@ namespace awali { namespace sttc {
                    ws_.mul(res_->weight_of(tf), res_->weight_of(ti)));
           }
         for (auto tf: res_->final_transitions())
-          res_->rmul_weight(tf, w);
+	  if (!sttc::internal::has(other_finals, res_->src_of(tf)))
+	    res_->rmul_weight(tf, w);
         res_->set_final(initial_, w);
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        states_t other_finals = finals();
+        e.sub()->accept(*this);
+        // The "final weight of the initial state", starred.
+        weight_t we = res_->get_final_weight(initial_);
+        weight_t w = ws_.star(we);
+        // Branch all the final states (but initial) to the successors
+        // of initial.
+        for (auto ti: res_->out(initial_))
+          {
+            res_->lmul_weight(ti, w);
+            for (auto tf: res_->final_transitions())
+              if (res_->src_of(tf) != initial_
+                  && !sttc::internal::has(other_finals, res_->src_of(tf)))
+                // Note that the weight of ti has already been
+                // multiplied, on the left, by w.
+                //
+                // Not set_transition, as for instance with "a**", the
+                // second star modifies many existing transitions.
+                res_->add_transition
+                  (res_->src_of(tf),
+                   res_->dst_of(ti),
+                   res_->label_of(ti),
+                   ws_.mul(res_->weight_of(tf), res_->weight_of(ti)));
+          }
+        for (auto tf: res_->final_transitions())
+	  if (!sttc::internal::has(other_finals, res_->src_of(tf)))
+	    res_->rmul_weight(tf, w);
+        res_->set_final(initial_, ws_.plus(we));
+      }
+
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        e.sub()->accept(*this);
+        res_->add_final(initial_, ws_.one());
       }
 
       AWALI_RAT_VISIT(lweight, e)
@@ -296,6 +341,9 @@ namespace awali { namespace sttc {
       const weightset_t& ws_;
       automaton_t res_;
       state_t initial_ = automaton_t::element_type::null_state();
+      history_t history_;
+      bool keep_history_;
+      unsigned count = 0;
     };
 
   } // rat::
@@ -306,14 +354,15 @@ namespace awali { namespace sttc {
      * @tparam Context static type of the context of the generated automaton
      * @param ctx      the context of the generated automaton
      * @param exp      the rational expression
+    * @param keep_history (optional) if `true` (default value), the states are stamped with the position
      * @return the standard automaton
      */
   template <typename Aut,
             typename Context = context_t_of<Aut>>
   Aut
-  standard(const Context& ctx, const typename Context::ratexp_t& e)
+  standard(const Context& ctx, const typename Context::ratexp_t& e, bool keep_history=true)
   {
-    rat::standard_visitor<Aut, Context> standard{ctx};
+    rat::standard_visitor<Aut, Context> standard{ctx, keep_history};
     return standard(e);
   }
 
@@ -322,14 +371,15 @@ namespace awali { namespace sttc {
      * @tparam RatExpSet type of the context of the rational expression
      * @param rs         the context of the rational expression
      * @param exp        the rational expression
+     * @param keep_history (optional) if `true` (default value), the states are stamped with the position
      * @return the standard automaton
      */
   template <typename RatExpSet>
   inline
   mutable_automaton<typename RatExpSet::context_t>
-  standard(const RatExpSet& rs, const typename RatExpSet::ratexp_t& e)
+  standard(const RatExpSet& rs, const typename RatExpSet::ratexp_t& e, bool keep_history=true)
   {
-    rat::standard_visitor<mutable_automaton<typename RatExpSet::context_t>, typename RatExpSet::context_t> standard{rs.context()};
+    rat::standard_visitor<mutable_automaton<typename RatExpSet::context_t>, typename RatExpSet::context_t> standard{rs.context(), keep_history};
     return standard(e);
   }
 

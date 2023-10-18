@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace awali {
     {
     public:
       ///@return history_kind_t::SINGLE
-      history_kind_t get_nature() const
+      history_kind_t get_nature() const override
       {
         return history_kind_t::SINGLE;
       }
@@ -64,9 +64,9 @@ namespace awali {
       
       std::ostream&
       print_state_name(state_t s, std::ostream& o,
-                       const std::string& fmt) const
+                       const std::string& fmt) const override
       {
-        o << '>';
+        //o << '>';
         from_->print_state_history(origins_[s],o,fmt);
         return o;
       }
@@ -78,11 +78,11 @@ namespace awali {
         return origins_;
       }
 
-      bool has_history(state_t s) const {
+      bool has_history(state_t s) const override {
         return (origins_.find(s)!=origins_.end());
       }
 
-      bool remove_history(state_t s) {
+      bool remove_history(state_t s) override {
         return origins_.erase(s);
       };
 
@@ -94,14 +94,14 @@ namespace awali {
       }
 
 
-      state_t get_state(state_t s) {
+      state_t get_state(state_t s) override {
         return origins_[s];
       }
 
       /** @brief unsupported method : use {@link get_state}
        * @throw runtime_error
        */
-      std::vector<state_t> get_state_set(state_t s) {
+      std::vector<state_t> get_state_set(state_t) override {
         throw std::runtime_error("Origin state set not available");
       }
 

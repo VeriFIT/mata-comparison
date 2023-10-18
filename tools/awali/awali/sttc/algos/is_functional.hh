@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,10 +45,10 @@ namespace awali { namespace sttc {
 
     for(auto ti : tdc->initial_transitions()) {
       //if the initial state has already been met
-      auto it = valuations.find(tdc->dst_of(ti));
-      if(it != valuations.end()) {
+      auto it1 = valuations.find(tdc->dst_of(ti));
+      if(it1 != valuations.end()) {
         //it should have a trivial valuation
-        if(it->second != base)
+        if(it1->second != base)
           return false;
       }
       else {
@@ -91,9 +91,9 @@ namespace awali { namespace sttc {
             if(t_val.first.length() >0 && t_val.second.length()>0)
               return false;
             //if t has already been met, it should have the same valuation
-            auto it = valuations.find(t);
-            if(it != valuations.end()) {
-              if(it->second != t_val)
+            auto it2 = valuations.find(t);
+            if(it2 != valuations.end()) {
+              if(it2->second != t_val)
                 return false;
             }
             else {

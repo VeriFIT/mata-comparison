@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 #include <cora/cora.hh>
 #include <cora/edit/editter.hh>
-#include <cora/color.hh>
+#include <cora/print_out/color.hh>
 #include <awali/common/ato.hh>
 
 #include<dirent.h>
@@ -30,7 +30,7 @@ namespace cora {
 
 class null_buffer_t : public std::streambuf {
  public:
-  int overflow(int c) {
+  int overflow(int c) override {
     return c;
   }
 };
@@ -53,6 +53,8 @@ int count;
 bool boolean;
 bool history;
 dyn::context_t ctx;
+coms_t current_command;
+
 
 bool no_user_file;
 bool first_cmd = true; //to know whether - is the real standard input
@@ -216,7 +218,7 @@ void output()
 |----------------------------------------*/
 
 // load_exp    load expression
-dyn::ratexp_t load_exp(std::string s)
+dyn::ratexp_t load_exp(std::string s, bool warn_if_word = true)
 {
   static const std::vector<std::string> formats
     = {"json", "default", "text", "exp"};
@@ -301,39 +303,126 @@ dyn::ratexp_t load_exp(std::string s)
     }
 
 
-    // We look for sums, stars or weights in s to possibly display
-    // a warning if the expression is too simple.
-    std::list<dyn::ratexp_t> list;
-    list.push_back(res);
-    while (!proper_exp && !list.empty()) {
-      dyn::ratexp_t e = list.back();
-      list.pop_back();
-      if ( e->get_kind() == dyn::ExpKind::ATOM
-           || e->get_kind() == dyn::ExpKind::PROD ) {
-        std::vector<dyn::ratexp_t> const& children = e->children();
-        for (const dyn::ratexp_t& c: children)
-          list.push_back(c);
+    if (warn_if_word) {
+      // We look for sums, stars or weights in s to possibly display
+      // a warning if the expression is too simple.
+      std::list<dyn::ratexp_t> list;
+      list.push_back(res);
+      while (!proper_exp && !list.empty()) {
+        dyn::ratexp_t e = list.back();
+        list.pop_back();
+        if ( e->get_kind() == dyn::ExpKind::ATOM
+             || e->get_kind() == dyn::ExpKind::PROD ) {
+          std::vector<dyn::ratexp_t> const& children = e->children();
+          for (const dyn::ratexp_t& c: children)
+            list.push_back(c);
+        }
+        else
+          proper_exp = true;
       }
-      else
-        proper_exp = true;
-    }
-    if (!proper_exp) {
-      std::string warning_msg = "No file '" + s + "' was found; hence '" + s
-                              + "' was interpreted as a ratexp but "
-                              + "the produced expression seems a bit simple.\n"
-                              + "Use option --input/-I to disambiguate." ;
-      warning_vw_print(warning_msg);
-    }
+      if (!proper_exp) {
+        std::string warning_msg = "No file '" + s + "' was found; hence '" + s
+                                + "' was interpreted as a ratexp but "
+                                + "the produced expression seems a bit simple.\n"
+                                + "Use option --input/-I to disambiguate." ;
+        warning_vw_print(warning_msg);
+      }
 //       *dyn::warning_stream << warning_clr
 //                            << "[Warning] No file \"" << s << "\" was found; hence \""
 //                            << s << "\" was interpreted as a rational \n"
 //                            << "expression but the produced expression seems a bit simple.\n"
 //                            << "Use option --input/-I to disambiguate. "
 //                            << reset_clr << std::endl;
+    }
   }
   return res;
 
 } // end load_exp
+
+
+dyn::automaton_t normalize_automaton_context(dyn::automaton_t a) 
+{
+  static bool law_warning = true;     // These two variables are `static` to
+  static bool lat_law_warning = true; // display the warning only once.
+
+  auto ls_desc = a->get_context()->description()->labelset();
+
+  if (ls_desc->is_lat()) { // vvv lat vvv
+    /* Exit with error if more than one tape. */
+    if (ls_desc->tape_number() != 2) {
+      std::stringstream ss;
+      ss << "Cora only supports transducers with two tapes.  "
+         << "This automaton has " << ls_desc->tape_number() << ".";
+      throw std::runtime_error(ss.str());
+    }
+    /* Display warning if at least one tape is law. */
+    for (auto child_ls_desc : ls_desc->children_) {
+      if (child_ls_desc->is_law()) {
+        if (    lat_law_warning
+             && current_command != CAT
+             && current_command != SUBNORMALIZE
+             && current_command != DISPLAY)
+        {
+          warning_vw_print(
+            "You are manipulating a transducer in which one of the tape uses"
+            " words as labels.  "
+            "In Cora, the support for such transducers is currently limited,"
+            " and might change in the future.  "
+            "Use command subnormalize to convert your transducer into a better"
+            " supported type of transducers."
+          ); 
+          lat_law_warning = false;
+        }
+        return a;
+      }
+    }
+    /* Otherwise, normalize the transducer to lat<lan,lan> */
+    for (auto child_ls_desc : ls_desc->children_) {
+      if (child_ls_desc->is_lal()) // If at least one children is lal
+                                   // we change the context
+        return dyn::internal::make_nullable_under_lat(a);
+    }
+  }                             // ^^^ lat ^^^
+  else if (ls_desc->is_law()) { // vvv law vvv
+    if (    law_warning
+         && current_command != DISPLAY 
+         && current_command != LETTERIZE  
+         && current_command != CAT )
+    {
+      warning_vw_print(
+        "You are manipulating an automaton that uses words as labels.  "
+        "In Cora, the support for such automata is currently limited,"
+        " and might change in the future.  "
+        "Use command letterize to convert your automaton into a better"
+        " supported type of automata."
+      ); 
+      law_warning = false;
+    }
+  }                             // ^^^ law ^^^
+  else if (ls_desc->is_lan()) { // vvv lan vvv
+    bool found_eps_transition = false;
+    for(auto t : a->transitions()) {
+      if (a->label_of(t) == a->get_context()->epsilon()) {
+        found_eps_transition = true;
+        break;
+      }
+    }
+    if (!found_eps_transition)
+      return dyn::proper(a, {dyn::IN_PLACE=false});
+  } // ^^^ lan ^^^
+  return a;
+}
+
+dyn::internal::aut_or_exp_t normalize_aoe_context(
+      dyn::internal::aut_or_exp_t aoe) 
+{
+  if (aoe.is_aut) {
+    return normalize_automaton_context(aoe.aut);
+  }
+  else {
+    return aoe;
+  }
+}
 
 // load    load automaton
 dyn::automaton_t load(std::string s)
@@ -341,19 +430,18 @@ dyn::automaton_t load(std::string s)
   if(s=="-") {
     no_user_file = true;
     if(first_cmd)
-      return dyn::parse_automaton(std::cin,
-    {dyn::IO_FORMAT = input_format});
+      return normalize_automaton_context(dyn::parse_automaton(std::cin,{dyn::IO_FORMAT = input_format}));
     if(final_output!=AUT)
       throw std::runtime_error("Automaton expected on pseudo standard input");
-    return res;
+    return normalize_automaton_context(res);
   }
-  return dyn::internal::load(s,
+  return normalize_automaton_context(dyn::internal::load(s,
                              no_user_file,
-                             dyn::IO_FORMAT.of_string(input_format));
+                             dyn::IO_FORMAT.of_string(input_format)));
 } // end load  (automaton)
 
 // load    load automaton OR expression
-aut_or_exp_t load_aut_or_exp(std::string s)
+aut_or_exp_t load_aut_or_exp(std::string s, bool warn_if_word)
 {
   if (s == "-" && !first_cmd) {
     if (final_output == EXP)
@@ -376,14 +464,14 @@ aut_or_exp_t load_aut_or_exp(std::string s)
     if (s == "-") { // first_cmd is necessarily true
       dyn::internal::aut_or_exp_t result 
         = dyn::internal::parse_aut_or_exp(json_ast::from(std::cin));
-      return result;
+      return normalize_aoe_context(result);
     }
     else
-      return dyn::internal::load_aut_or_exp(s, true);
+      return normalize_aoe_context(dyn::internal::load_aut_or_exp(s, true));
   }
   catch (no_such_file_exception const& e) {
     if (input_format == "default")
-      return load_exp(s);
+      return load_exp(s, warn_if_word);
     throw e;
   }
 } // end load  automaton OR expression
@@ -487,7 +575,6 @@ int main(int argc, const char** argv)
   init_cmds(); // in cora.hh
   init_lists(); // in cora_lists.hh
   init_options(); // in cora_options.hh
-
 // reading the arguments
 // call of cora without argument: error message
   if (argc==1) {
@@ -563,16 +650,25 @@ int main(int argc, const char** argv)
 // Check arg card  +  Hack by VM to allow forgetting the "-"
 //                    seems to introduce a bug for argc=0 (case of list and hilp)
     if(j!=it->argc+1) {
-      arg_kind_t arg_kind = it->args.back().kind;
-      if ((!first_cmd) && (it->argc == 1) && (j == it->argc)
-          && (   arg_kind == AUT_OR_EXP || arg_kind == EXP || arg_kind == AUT 
-              || arg_kind == TDC))
-        args[j++]="-";
-      else { // printing it->args requires detour by stringstream
+      bool print_arg_error = false;
+      if (it->argc > 0) {
+        arg_kind_t arg_kind = it->args.back().kind;
+        if ((!first_cmd) && (it->argc == 1) && (j == it->argc)
+            && (   arg_kind == AUT_OR_EXP || arg_kind == EXP || arg_kind == AUT 
+                || arg_kind == TDC))
+          args[j++]="-";
+        else 
+          print_arg_error = true;
+      }
+      else  
+        print_arg_error = true;
+
+      if (print_arg_error) {
+        // printing it->args requires detour by stringstream
         std::stringstream ss_msg;
         ss_msg << "Usage : " << it->name << ' ' << it->args;
         std::string error_msg1 = ss_msg.str();
-        std::string error_msg2 = "Type 'help " + it->name 
+        std::string error_msg2 = "Type 'cora help " + it->name 
                                + "' for more information.";
         error_print(error_msg1, error_msg2);
         return 1;
@@ -584,7 +680,14 @@ int main(int argc, const char** argv)
 
 ///////////// Main switch according to the command given to cora ////////////
 
+    current_command = it->cst;
       switch(it->cst) {
+		
+/* -----------------------------------------|
+|  Calls to command modules                 |
+|------------------------------------------*/
+
+//// Basic commands          ////
 /* ---------------------------------------|
 |  Basic commands                         |
 |----------------------------------------*/
@@ -593,12 +696,14 @@ int main(int argc, const char** argv)
         list(args[1]);
         break;
 // DOC
-      case DOC :
+      case DOC : {
         doc_(args[1]);
         break;
+      }
+      
 // CAT
       case CAT : {
-        aut_or_exp_t aoe = load_aut_or_exp(args[1]);
+       aut_or_exp_t aoe = load_aut_or_exp(args[1]);
         if (aoe.split_case(arg1, exp1)) {
           res = arg1;
           final_output = AUT;
@@ -750,9 +855,17 @@ int main(int argc, const char** argv)
               throw std::runtime_error("Unknown letter_type: "+letter_type);
           }
         }
-        editter_t editter(res, dyn::IO_FORMAT.of_string(output_format));
-        editter.run();
-        final_output=NONE;
+        if(output_format != "json") {
+          if (name != dflt_name)
+            res->set_name(name);
+          if (caption != dflt_caption)
+            res->set_desc(caption);
+          editter_t editter(res, dyn::IO_FORMAT.of_string(output_format));
+          editter.run();
+          final_output=NONE;
+        } 
+        else
+          final_output=AUT;
         break;
       }
 
@@ -848,6 +961,8 @@ int main(int argc, const char** argv)
         break;
       }
 
+
+//// generic commands        ////
 /* ---------------------------------------|
 |  Generic commands                       |
 |----------------------------------------*/
@@ -952,7 +1067,27 @@ int main(int argc, const char** argv)
         res=arg1;
         final_output=AUT;
         break;
-//// Strongly connected components
+
+//// Transformations of the automaton
+      // transpose
+      case TRANSPOSE:
+        arg1 =load(args[1]);
+        res= dyn::transpose(arg1);
+        final_output=AUT;
+        break;
+      //// Quotient
+      // min-quotient
+      case MINQUOTIENT:
+        arg1 =load(args[1]);
+        res = dyn::min_quotient(arg1, {dyn::QUOTIENT_ALGO=algo});
+        final_output=AUT;
+        break;
+      case MINCOQUOTIENT:
+        arg1 =load(args[1]);
+        res = dyn::min_coquotient(arg1, {dyn::QUOTIENT_ALGO=algo});
+        final_output=AUT;
+        break;			
+      //// Strongly connected components
       // condensation
       case CONDENSATION :
         arg1=load(args[1]);
@@ -969,71 +1104,200 @@ int main(int argc, const char** argv)
 
 //// Dealing with the weightset
       // support
-      case SUPPORT :
-        arg1=load(args[1]);
-
-        if (arg1->get_context()->weightset_name() == "B") {
-          std::string arg_msg = args[1];
-          std::string warning_msg = "'" + arg_msg 
-                      + "'  is already Boolean automaton. Result is '" 
-                      + arg_msg + "' unchanged.";
-          warning_vw_print(warning_msg);
-          res = arg1;
-        }
-        else
-          res = dyn::support(arg1);
-
+      case SUPPORT : {
+        aut_or_exp_t aoe = load_aut_or_exp(args[1]);
+        if (aoe.split_case(arg1, exp1)) {// // case of automata
+          if (arg1->get_context()->weightset_name() == "B") {
+            std::string arg_msg = args[1];
+            std::string warning_msg = "'" + arg_msg + "' is already a Boolean "
+                         + "automaton. Result is '" + arg_msg + "' unchanged.";
+            warning_vw_print(warning_msg);
+            res = arg1;
+          } 
+          else {
+            res = dyn::support(arg1);
+          }
         final_output=AUT;
+        }
+        else {// case of ratexps
+          if (exp1->get_context()->weightset_name() == "B") {
+            std::string arg_msg = args[1];
+            std::string warning_msg = "'" + arg_msg + "'  is already a Boolean "
+                             + "ratexp. Result is '" + arg_msg + "' unchanged.";
+            warning_vw_print(warning_msg);
+            exp_res = exp1;
+          } 
+          else {
+            exp_res = dyn::ratexp_support(exp1);
+          }
+          final_output = EXP;
+        }
+      }
         break;
       // characteristic
-      case CHARACTERISTIC :
-        arg1=load(args[1]);
- //         if (arg1->get_context()->weightset_name() != "B") {
-//           std::string error_msg1 = args[0];
-//           error_msg1 = "'" + error_msg1 
-//                      + "' is a command for Boolean automata or transducers only.";
-//           std::string error_msg2 = "Type 'cora help characteristic' if necessary.";
-//           error_print(error_msg1, error_msg2);
-//           return 1;
-//         }
-// 
-//         else {
-// //           if (semiring == "B") {
-// //             std::string warning_msg = "No weightset specified. "
-// //                                       "Semiring N assumed by default.";
-// //             warning_vw_print(warning_msg);
-// //             semiring = "N";
-// //           }
-
-          res = dyn::characteristic(arg1, semiring);
+      case CHARACTERISTIC : {
+        aut_or_exp_t aoe = load_aut_or_exp(args[1]);
+        if (aoe.split_case(arg1, exp1)) {// case of automata
+          if (semiring == "B" && arg1->get_context()->weightset_name() == "B") {
+            std::string warning_msg = "No weightset specified. "
+                                      "Weightset of argument is B. "
+                                      "Result is equal to the input.";
+            warning_vw_print(warning_msg);
+            res = arg1;
+          }
+          else {
+            res = dyn::characteristic(arg1, semiring);
+          }
           final_output=AUT;
-          break;
-//         }
+        }
+        else {// case of ratexps
+          if (semiring == "B" && exp1->get_context()->weightset_name() == "B") {
+            std::string warning_msg = "No weightset specified. "
+                                      "Weightset of argument is B. "
+                                      "Result is equal to the input.";
+            warning_vw_print(warning_msg);
+            exp_res = exp1;
+          }
+          else {
+            exp_res = dyn::ratexp_characteristic(exp1, semiring);
+          }
+          final_output=EXP;
+        }
+      }
+      break;	  
       // promote
-      case PROMOTE:
+      case PROMOTE: {
+        aut_or_exp_t aoe = load_aut_or_exp(args[1]);
+        if (aoe.split_case(arg1, exp1)) {// case of automata
+          if (semiring == "B" && arg1->get_context()->weightset_name() == "B") {
+            std::string warning_msg = "No weightset specified. Weightset of "
+    	                         "argument is B. Result is equal to the input.";
+            warning_vw_print(warning_msg);
+            res = arg1;
+          }
+          else {
+            res = dyn::promote_automaton(arg1, semiring);
+          }
+          final_output=AUT;
+        }
+        else {// case of ratexps
+          if (semiring == "B" && exp1->get_context()->weightset_name() == "B") {
+            std::string warning_msg = "No weightset specified. Weightset of "
+    	                         "argument is B. Result is equal to the input.";
+            warning_vw_print(warning_msg);
+            exp_res = exp1;
+          }
+          else {
+            exp_res = dyn::promote_ratexp(exp1, semiring);
+          }
+          final_output=EXP;
+        }
+      }
+      break;
+
+////  Rational operations on automata
+      // sum and concatenate
+	  
+      case SUM:
+      case CONCATENATE: {
+        std::string error_msg1, error_msg2;
         arg1 =load(args[1]);
- 
-        if (semiring == "B" && arg1->get_context()->weightset_name() == "B") {
-          std::string warning_msg = "No weightset specified. "
-                                    "Weightset of argument is B. "
-                                    "Result is equal to the input.";
-          warning_vw_print(warning_msg);
-          res = arg1;
+        arg2 =load(args[2]);
+        bool arg1_tdc = arg1->is_transducer();
+        bool arg2_tdc = arg2->is_transducer();
+        bool arg1_law = arg1->are_words_allowed();
+        bool arg2_law = arg2->are_words_allowed();
+		
+        if ( ((arg1_tdc || arg2_tdc) && !(arg1_tdc && arg2_tdc)) ) {
+          error_msg1 = "The two arguments should be both transducers " 
+                       "or both automata.";
+          error_msg2 = "Type 'cora help sum' or 'concatenate' if necessary.";
+          error_print(error_msg1, error_msg2);
+          return 1;
         } 
         else {
-          res = dyn::promote_automaton(arg1, semiring);
+          if ( ((arg1_law || arg2_law) && !(arg1_law && arg2_law)) ) {
+            error_msg1 = "The two arguments should be automata that both allow " 
+                         "words or both not.";
+            error_msg2 = "Type 'cora help sum' or 'concatenate' if necessary.";
+            error_print(error_msg1, error_msg2);
+            return 1;
+          } 
+          else {
+            switch(it->cst) {
+              case SUM: {
+                if (algo == "standard") {
+                  res = dyn::sum_of_standard(arg1, arg2);
+                } 
+                else {
+                  res = dyn::sum(arg1, arg2);
+                }
+                break;
+              }
+              case CONCATENATE: {
+                res = dyn::concatenate(arg1, arg2);
+                break;
+              }
+              default: 
+                {}
+            }
+          }
         }
-        
+        final_output=AUT;
+        break;
+      }
+
+// 		case SUM: {
+//         arg1 =load(args[1]);
+//         arg2 =load(args[2]);
+//         final_output=AUT;
+//         break;
+//       }
+//       // concatenation
+//       case CONCATENATE:
+//         arg1 =load(args[1]);
+//         arg2 =load(args[2]);
+//         final_output=AUT;
+//         break;
+      // star
+      case STAR:
+        arg1 =load(args[1]);
+        dyn::star(arg1, {dyn::IN_PLACE=true});
+        res = arg1;
+        final_output=AUT;
+        break;
+      // left-mult, right-mult
+      case LEFT_MULT:
+        arg1 =load(args[2]);
+        if (algo == "standard") {
+          dyn::left_mult_standard(arg1, arg1->get_context()->get_weight(args[1]),
+                       {dyn::IN_PLACE=true});
+        } 
+        else {
+          dyn::left_mult(arg1, arg1->get_context()->get_weight(args[1]),
+                       {dyn::IN_PLACE=true});
+        }
+        res = arg1;
+        final_output=AUT;
+        break;
+      case RIGHT_MULT:
+        arg1 =load(args[1]);
+        dyn::right_mult(arg1, arg1->get_context()->get_weight(args[2]),
+                        {dyn::IN_PLACE=true});
+        res = arg1;
         final_output=AUT;
         break;
 
-////  Rational operations on automata
-      // sum and concatenation
-      case SUM:
-      case CONCATENATE:
-        arg1 =load(args[1]);
-        arg2 =load(args[2]);
-
+// reminiscence of tests made common for sum and concatenation
+//           switch(it->cst) {
+//           case SUM:
+//           case CONCATENATE:
+//             res = dyn::concatenate(arg1, arg2);
+//             break;
+//           default:
+//           {}
+//           }
+//         }
 //         if (arg1->get_context()->weightset_name() !=
 //             arg2->get_context()->weightset_name() ||
 //             arg1->get_context()->labelset_name() != arg2->get_context()->labelset_name()) 
@@ -1047,9 +1311,6 @@ int main(int argc, const char** argv)
 //           return 1;
 //         }
 //         else {
-          switch(it->cst) {
-          case SUM:
-            if (algo == "standard") {
 //               if (!dyn::is_standard(arg1) || ! dyn::is_standard(arg2)) {
 //                 std::string error_msg1 = args[1];
 //                 std::string error_msg2 = args[2];
@@ -1060,51 +1321,6 @@ int main(int argc, const char** argv)
 //                 return 1;
 //               }
 //               else
-                res = dyn::sum_of_standard(arg1, arg2);
-            }
-            else
-//               if (algo != "default") {
-//                 std::string error_msg1 = "'" + algo +  
-//                            + "'   is not a correct option for 'sum'.";
-//                 std::string error_msg2 = "Type 'cora help sum' if necessary.";
-//                 error_print(error_msg1, error_msg2);
-//                 return 1;
-//               }
-//               else
-                res = dyn::sum(arg1, arg2);
-            break;
-          case CONCATENATE:
-            res = dyn::concatenate(arg1, arg2);
-            break;
-          default:
-          {}
-          }
-          final_output=AUT;
-          break;
-//         }
-
-      // star
-      case STAR:
-        arg1 =load(args[1]);
-        dyn::star(arg1, {dyn::IN_PLACE=true});
-        res = arg1;
-        final_output=AUT;
-        break;
-      // left-mult, right-mult
-      case LEFT_MULT:
-        arg1 =load(args[2]);
-        dyn::left_mult(arg1, arg1->get_context()->get_weight(args[1]),
-        {dyn::IN_PLACE=true});
-        res = arg1;
-        final_output=AUT;
-        break;
-      case RIGHT_MULT:
-        arg1 =load(args[1]);
-        dyn::right_mult(arg1, arg1->get_context()->get_weight(args[2]),
-        {dyn::IN_PLACE=true});
-        res = arg1;
-        final_output=AUT;
-        break;
 
 //// Dealing with spontaneous transitions
       // allow-eps
@@ -1130,7 +1346,6 @@ int main(int argc, const char** argv)
       // is-proper
       case IS_PROPER:
         arg1 =load(args[1]);
-
         if (!arg1->is_eps_allowed()) {
           std::string warning_msg = args[1];
           warning_msg = "'" + warning_msg 
@@ -1173,33 +1388,50 @@ int main(int argc, const char** argv)
       }
 
       // proper
-      case PROPER:
+      case PROPER: {
         arg1 =load(args[1]);
-        std::cerr << std::boolalpha << arg1->is_eps_allowed() << std::endl;
-        if (!arg1->is_eps_allowed()) {
-          std::string warning_msg = args[1];
-          warning_msg = "'" + warning_msg 
-                      + "' is an automaton where epsilon-transitions are " 
-                      + "not allowed, hence is proper. Result equal to input.";
-          warning_vw_print(warning_msg);
-        }
+		std::string lbl_name = arg1->get_context()->labelset_name();
+		
+		if (arg1->is_transducer() || arg1->are_words_allowed()) {
+          if (dyn::is_proper(arg1)) {
+            std::string warning_msg = args[1];
+            warning_msg = "'" + warning_msg + "' is an automaton with no "
+                          + "epsilon-transitions, hence is proper. "
+	                      + "Result is equal to input.";
+            warning_vw_print(warning_msg);
+          } 
+          else {
+            dyn::proper(arg1, {dyn::IN_PLACE=true, dyn::DIRECTION=algo});
+          }
+		}
 
         else {
-          if (dyn::is_proper(arg1)) {
-          std::string warning_msg = args[1];
-          warning_msg = "'" + warning_msg 
-                      + "' is an automaton with no epsilon-transitions, "
-                      + "hence is proper. Context of the input only is changed.";
-          warning_vw_print(warning_msg);
+          if ( !(arg1->is_eps_allowed()) ) {
+            std::string warning_msg = args[1];
+            warning_msg = "'" + warning_msg + "' is an automaton where "
+	                    + "'epsilon-transitions are not allowed, hence is proper." 
+                        + " Result is equal to input.";
+            warning_vw_print(warning_msg);
           }
 
-          arg1 = dyn::proper(arg1, {dyn::IN_PLACE=false, dyn::DIRECTION=algo});
-        }
+		  else {
+            if (dyn::is_proper(arg1)) {
+              std::string warning_msg = args[1];
+              warning_msg = "'" + warning_msg + "' is an automaton with no "
+                            + "epsilon-transitions, hence is proper. "
+	                        + "Context of the input only is changed.";
+              warning_vw_print(warning_msg);
+            }
 
-        res = arg1;
+            arg1 = dyn::proper(arg1, {dyn::IN_PLACE=false, dyn::DIRECTION=algo});
+          }
+        } 
+      
+		res = arg1;
         final_output=AUT;
         break;
-
+      }
+																						 																																								 
       // AUT_TO_EXP   implements the state elimination method
       case AUT_TO_EXP :
         arg1=load(args[1]);
@@ -1207,6 +1439,8 @@ int main(int argc, const char** argv)
         final_output=EXP;
         break;
 
+
+//// wfa commands            ////
 /* ---------------------------------------|
 |  Wfa commands                           |
 |    Commands for (weighted) automata     |
@@ -1216,16 +1450,29 @@ int main(int argc, const char** argv)
       // eval
       case EVAL : {
         arg1=load(args[1]);
-        ctx = arg1->get_context(); 
-        weight = dyn::eval(arg1, args[2]);
-        final_output=WEIGHT;
+        if (arg1->is_transducer()) {
+          aut_or_exp_t aoe = load_aut_or_exp(args[2], false);
+          if (aoe.split_case(arg2,exp1)) {
+            res = dyn::eval_tdc(arg2, arg1);
+            final_output = AUT;
+          }
+          else {
+            exp_res = dyn::eval_exp(exp1, arg1);
+            final_output=EXP;
+          }
+        } 
+        else {
+          ctx = arg1->get_context(); 
+          weight = dyn::eval(arg1, ctx->get_word(std::string(args[2])));
+          final_output=WEIGHT;
+        }
       }
       break;
       // enumerate, shortest
       case ENUMERATE :
       case SHORTEST : {
         arg1 =load(args[1]);
-        unsigned n = atou(args[2]);
+        unsigned n = strict_atou(args[2]);
         std::map<dyn::any_t, dyn::weight_t> map;
         switch(it->cst) {
         case ENUMERATE :
@@ -1237,24 +1484,18 @@ int main(int argc, const char** argv)
         default :
         {}
         }
-        for(auto p: map)
-          std::cout << '<' << p.second << "> " << p.first << std::endl;
+        for(auto p: map) {
+          if (arg1->get_context()->weightset_name() != "B")
+            std::cout << '<' 
+                      << arg1->get_context()->weight_to_string(p.second) 
+                      << "> ";
+          std::cout << p.first << std::endl;
+        }
         final_output=NONE;
       }
       break;
 	  
 //// About quotient of an automaton
-      // minimize
-      case MINQUOTIENT:
-        arg1 =load(args[1]);
-        res = dyn::min_quotient(arg1, {dyn::QUOTIENT_ALGO=algo});
-        final_output=AUT;
-        break;
-      case MINCOQUOTIENT:
-        arg1 =load(args[1]);
-        res = dyn::min_coquotient(arg1, {dyn::QUOTIENT_ALGO=algo});
-        final_output=AUT;
-        break;
       // reduce
       case REDUCE :
         arg1=load(args[1]);
@@ -1279,12 +1520,26 @@ int main(int argc, const char** argv)
       //   res = dyn::weighted_determinize(arg1);
       //   final_output=AUT;
       //   break;
-      // is
-     case DETERMINIZE :
+      case DETERMINIZE :
         arg1=load(args[1]);
         res = dyn::determinize(arg1);
         final_output=AUT;
         break;
+      case EXPLORE_LENGTH :
+        arg1=load(args[1]);
+	    {
+         unsigned n = strict_atou(args[2]);
+         res = dyn::explore_by_length(arg1,n);
+        }
+        final_output=AUT;
+        break;
+      case EXPLORE_BOUND :
+        arg1=load(args[1]);
+        ctx = arg1->get_context();
+        res = dyn::explore_with_bound(arg1,ctx->get_weight(args[2]));
+        final_output=AUT;
+        break;
+      // is
      case IS_DET :
         arg1=load(args[1]);
         boolean = dyn::is_deterministic(arg1);
@@ -1302,12 +1557,6 @@ int main(int argc, const char** argv)
         break;
 
 //// Managing transitions
-      // transpose
-      case TRANSPOSE:
-        arg1 =load(args[1]);
-        res= dyn::transpose(arg1);
-        final_output=AUT;
-        break;
       // compact-paths
       case COMPACT:
         arg1 =load(args[1]);
@@ -1342,7 +1591,7 @@ int main(int argc, const char** argv)
         break;
       case POWER: {
         arg1 =load(args[1]);
-        unsigned n =atou(args[2]);
+        unsigned n =strict_atou(args[2]);
         res = dyn::power(arg1, n);
         final_output=AUT;
         break;
@@ -1371,10 +1620,21 @@ int main(int argc, const char** argv)
       // partial-identity
       case PARTIAL_ID:
         arg1 =load(args[1]);
-        res = dyn::partial_identity(arg1);
+        if ( arg1->is_transducer() ) {
+        std::string msg = " In command " + it->name 
+                          + " , transducers are not allowed.";
+        error_print(msg);
+        return 1;
+        }
+
+        else
+          res = dyn::partial_identity(arg1);
+
         final_output=AUT;
         break;
 
+
+//// ratexp commands         ////
 /* ---------------------------------------|
 | Ratexp commands                         |
 |----------------------------------------*/
@@ -1391,11 +1651,23 @@ int main(int argc, const char** argv)
         final_output=EXP;
         break;
       // star-normal-form
-      case SNF :
+      case SNF : {
         exp1=load_exp(args[1]);
-        exp_res = dyn::star_normal_form(exp1);
+        if (exp1->get_context()->weightset_name() != "B") {
+          std::string str = args[0];
+          std::string error_msg1 = "'" + str 
+                                 + "' is a command for Boolean ratexp only.";
+          std::string error_msg2 = "Type 'cora help" + str + "' if necessary.";
+          error_print(error_msg1, error_msg2);
+          return 1;
+        }
+        else
+          exp_res = dyn::star_normal_form(exp1);
+
         final_output=EXP;
-       break;
+        break;
+      }
+      
       // exp-to-aut
       case EXP_TO_AUT :
         exp1=load_exp(args[1]);
@@ -1409,9 +1681,9 @@ int main(int argc, const char** argv)
         {
           std::map<dyn::ratexp_t, dyn::any_t> map;
           if(algo=="breaking")
-            map = dyn::internal::derivation(exp1, args[2], true);
+            map = dyn::internal::derivation(exp1, ctx->get_label(args[2]), true);
           else
-            map = dyn::internal::derivation(exp1, args[2]);
+            map = dyn::internal::derivation(exp1, ctx->get_label(args[2]));
           for(auto p: map) {
             if(ctx->show_one() || p.second != ctx->weight_one())
               std::cout << "<" << p.second << "> ";
@@ -1424,6 +1696,7 @@ int main(int argc, const char** argv)
         break;
 
 
+//// nfa commands            ////
 /* ---------------------------------------|
 | Nfa commands                            |
 |----------------------------------------*/
@@ -1438,7 +1711,7 @@ int main(int argc, const char** argv)
           std::string str = args[0];
           std::string error_msg1 = "'" + str 
                                  + "' is a command for Boolean automata only.";
-          std::string error_msg2 = "Type 'cora help" + str + "' if necessary.";
+          std::string error_msg2 = "Type 'cora help " + str + "' if necessary.";
           error_print(error_msg1, error_msg2);
           return 1;
         }
@@ -1455,6 +1728,8 @@ int main(int argc, const char** argv)
             break;
           case COMPLEMENT :
             if (!dyn::is_deterministic(arg1)) {
+              // The message sent by dyn/bridge/determinize.cc refers to 
+              // complement_here, which is meaningless for cora users
               std::string error_msg1 = args[0];
               error_msg1 = "'" + error_msg1 
                  + "' is a command for deterministic Boolean automata only.";
@@ -1523,68 +1798,86 @@ int main(int argc, const char** argv)
         break;
       }
 
+//// to be found in wfa_cmds.cc the function may appear at two places in
+//// cora.hh and then in the table, but not in the switch
 //       case DETERMINIZE :
 //         arg1=load(args[1]);
 //         res = dyn::determinize(arg1);
 //         final_output=AUT;
 //         break;
 
+//// transducer commands     ////
 /* ---------------------------------------|
 | Transducer commands                     |
 |----------------------------------------*/
-      // domain, image
+
+///////// First check that the argument is a transducer (to be removed)
       case TDC_DOMAIN:
-        arg1 =load(args[1]);
-        res = dyn::domain(arg1);
-        final_output=AUT;
-        break;
       case TDC_IMAGE:
-        arg1 =load(args[1]);
-        res = dyn::image(arg1);
-        final_output=AUT;
-        break;
-      // inverse
       case INVERSE:
-        arg1 =load(args[1]);
-        res = dyn::inverse(arg1);
-        final_output=AUT;
+      case IS_FUNC:
+      case IS_OF_FINITE_IM:
+      case IS_SYNCHRONIZABLE:
+      case SYNCHRONIZE:
+      case SUBNORMALIZE:
+        arg1=load(args[1]);
+        if ( !arg1->is_transducer() ) {
+          std::string str = args[0];
+          std::string error_msg1 = "'" + str 
+                                 + "' is a command for transducers only.";
+          std::string error_msg2 = "Type 'cora help " + str + "' if necessary.";
+          error_print(error_msg1, error_msg2);
+          return 1;
+        }
+        else {
+          switch(it->cst) { // then deals with each command
+            // domain, image
+            case TDC_DOMAIN:
+              res = dyn::domain(arg1);
+              final_output=AUT;
+              break;
+            case TDC_IMAGE:
+              res = dyn::image(arg1);
+              final_output=AUT;
+              break;
+            // inverse
+            case INVERSE:
+              res = dyn::inverse(arg1);
+              final_output=AUT;
+              break;
+
+            // is
+            case IS_FUNC:
+              boolean = dyn::is_functional(arg1);
+              final_output=BOOL;
+              break;
+            case IS_OF_FINITE_IM:
+              boolean = dyn::is_of_finite_image(arg1);
+              final_output=BOOL;
+              break;
+			  
+            // synchronize
+            case IS_SYNCHRONIZABLE:
+              boolean = dyn::is_synchronizable(arg1);
+              final_output=BOOL;
+              break;
+            case SYNCHRONIZE:
+              res = dyn::synchronize(arg1);
+              final_output=AUT;
+              break;
+            case SUBNORMALIZE:
+              res = dyn::subnormalize(arg1);
+              final_output=AUT;
+              break;
+ 
+            default :
+              {}
+              break;
+          }
+        }
         break;
 
-      // eval
-      case EVAL_TW:
-        arg1 =load(args[1]);
-        exp_res = dyn::eval_word(arg1, args[2]);
-        final_output=EXP;
-        break;
-      case EVAL_T:
-        arg1 =load(args[1]);
-        arg2 =load(args[2]);
-        res = dyn::eval_tdc(arg1, arg2);
-        final_output=AUT;
-        break;
-      // is
-      case IS_FUNC:
-        arg1 =load(args[1]);
-        boolean = dyn::is_functional(arg1);
-        final_output=BOOL;
-        break;
-      case IS_OF_FINITE_IM:
-        arg1 =load(args[1]);
-        boolean = dyn::is_of_finite_image(arg1);
-        final_output=BOOL;
-        break;
-      // synchronize
-      case IS_SYNCHRONIZABLE:
-        arg1 =load(args[1]);
-        boolean = dyn::is_synchronizable(arg1);
-        final_output=BOOL;
-        break;
-      case SYNCHRONIZE:
-        arg1 =load(args[1]);
-        res = dyn::synchronize(arg1);
-        final_output=AUT;
-        break;
-      // compose
+		// compose
       case COMPOSE:
         arg1 =load(args[1]);
         arg2 =load(args[2]);
@@ -1592,6 +1885,25 @@ int main(int argc, const char** argv)
         final_output=AUT;
         break;
 
+// // // deprecated commands  eval command is set up in wfa_cmds
+      // cases processed for retro compatibility
+      // eval
+      case EVAL_TW:
+        deprecated_command("eval-word", "2.1", "command eval");
+        arg1 =load(args[1]);
+        exp_res = dyn::eval_word(arg1, args[2]);
+        final_output=EXP;
+        break;
+      case EVAL_T:
+        deprecated_command("eval-aut", "2.1", "command eval");
+        arg1 =load(args[1]);
+        arg2 =load(args[2]);
+        res = dyn::eval_tdc(arg1, arg2);
+        final_output=AUT;
+        break;
+
+
+//// factories commands      ////
 /* ---------------------------------------|
 | Factories.                              |
 |----------------------------------------*/
@@ -1600,8 +1912,8 @@ int main(int argc, const char** argv)
       case LADYBIRD:
       case CERNY:
       case WITNESS: {
-        unsigned n=atou(args[1]);
         if(letter_type=="char") {
+          unsigned n=strict_atou(args[1]);
           switch(it->cst) {
           case N_ULTIMATE:
             res = dyn::factory::n_ultimate(n, alphabet, semiring);
@@ -1660,8 +1972,8 @@ int main(int argc, const char** argv)
 
 //  divkbaseb
       case DIVKBASEB: {
-        unsigned k=atou(args[1]);
-        unsigned b=atou(args[2]);
+        unsigned k=strict_atou(args[1]);
+        unsigned b=strict_atou(args[2]);
         if(letter_type=="char")
           if (alphabet_was_set)
             res = dyn::factory::divkbaseb(k, b, alphabet, semiring);
@@ -1678,29 +1990,45 @@ int main(int argc, const char** argv)
 
 // random
       case RAND_DFA : {
-        unsigned n=atou(args[1]);
+        unsigned n=strict_atou(args[1]);
         res=dyn::factory::randomDFA(n, alphabet);
         final_output=AUT;
       }
       break;
-//// 
+
+//////////
       default : // Does not happen ! Just here to avoid warnings
         break;
-      } // end of the large switch on all cora commands
+      } // end of the switch on all cora commands
 
 // Ready for the reading of the next chunk of the input line
       first_cmd=false;
     } // end of try
 
-    catch(const std::runtime_error& e) {
-      std::cerr << "command " << it->name <<": error: " << e.what() << std::endl;
+    catch(const std::runtime_error& e) {// call centralised error message print
+//  std::cerr << "command " << it->name <<": error: " << e.what() << std::endl;
+      std::string msg = " In command " + it->name + " : " + e.what();
+      error_print(msg);
       std::exit(EXIT_FAILURE);
     }
-    catch(const std::domain_error& e) {
-      std::cerr << "command " << it->name <<": domain error: " << e.what() <<
-                std::endl;
+    catch(const std::domain_error& e) {// call centralised error message print
+      std::string msg = " In command " + it->name + " : " + e.what();
+      std::string err_typ = "Domain error";
+      x_error_print(msg, err_typ);
       std::exit(EXIT_FAILURE);
     }
+    catch(const std::invalid_argument& e) {// call centralised error message print
+      std::string msg = " In command " + it->name + " : " + e.what();
+      std::string err_typ = "Invalid argument error";
+      x_error_print(msg, err_typ);
+      std::exit(EXIT_FAILURE);
+    }
+//     catch(const parse_exception& e) {// call centralised error message print
+//       std::string msg = " In command " + it->name + " : " + e.what();
+//       std::string err_typ = "Parse exception";
+//       x_error_print(msg, err_typ);
+//       std::exit(EXIT_FAILURE);
+//     }  seems to be useless as taken care of by runtime_error
       
     if ( (final_output == AUT || final_output == TDC) && (name != "tmp") )
       res->set_name(name);
@@ -1721,7 +2049,4 @@ int main(int argc, const char** argv)
   return awali::cora::main(argc, argv);
 }
 
-
 //////   end of cora.cc  //////
-
-

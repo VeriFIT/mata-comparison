@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -236,7 +236,7 @@ namespace awali { namespace sttc {
                     os_ << src << " -> " << dst;
                   }
                 std::string s = format_entry_(src, dst,
-                                              dot2tex_ ? "latex" : "text");
+                                              dot2tex_ ? "latex" : "dot");
                 bool useless = useful.find(src)==useful.end()
                   || useful.find(dst)==useful.end();
                 if (!s.empty() || useless)

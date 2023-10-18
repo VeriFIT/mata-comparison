@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -130,6 +130,14 @@ namespace awali {
       return infinity();
     }
 
+    value_t
+    plus(const value_t v) const
+    {
+      if (is_zero(v))
+        return zero();
+      return infinity();
+    }
+
     constexpr static bool is_special(value_t)
     {
       return false;
@@ -236,11 +244,12 @@ namespace awali {
     print(const value_t v, std::ostream& o,
           const std::string& fmt = "text")
     {
-      if(is_infinity(v))
+      if(is_infinity(v)) {
         if(fmt == "json")
           return o<< "\"oo\"";
         else
           return o << "oo";
+      }
       return o << v;
     }
 
@@ -260,10 +269,9 @@ namespace awali {
     static json::node_t* 
     to_json()
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[zz] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::object_t("semiring",new json::string_t("N-oo"));
@@ -274,10 +282,9 @@ namespace awali {
     json::node_t* value_to_json(value_t v) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[zz] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           if (is_infinity(v))
@@ -288,13 +295,12 @@ namespace awali {
     }
     
     template<unsigned version = version::fsm_json>
-    value_t value_from_json(json::node_t* p) 
+    value_t value_from_json(json::node_t const* p) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[zz] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           try {

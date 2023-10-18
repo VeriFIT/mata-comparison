@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -266,10 +266,9 @@ namespace awali {
 
       template<unsigned version = version::fsm_json>
       json::node_t* to_json() const {
+        version::check_fsmjson<version>();
         switch (version) {
-          case 0:
-            throw parse_exception("[letterset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
+          case 0: /* Never occurs due to above check. */
           case 1:
           default:
             json::object_t* obj 

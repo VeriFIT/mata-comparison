@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,11 +49,13 @@ namespace awali {
         case BRZOZOWSKI:{
           a=sttc::determinize(sttc::transpose_view(a));
           a=determinize(sttc::transpose_view(a));
+	  sttc::complete_here(a);
           break;
         }
         case DET_QUOTIENT: {
           if(!sttc::is_deterministic(a))
             a=determinize(a);
+	  sttc::complete_here(a);
           switch (qalgo) {
             case MOORE:
               a=sttc::min_quotient(a,MOORE);
@@ -67,7 +69,6 @@ namespace awali {
         default:
           throw std::runtime_error("Unreachable statement");
       }
-      sttc::complete_here(a);
       return dyn::make_automaton(a);
     }
   };
@@ -86,11 +87,13 @@ namespace awali {
         case BRZOZOWSKI:{
           a=sttc::determinize(sttc::transpose_view(a));
           a=determinize(sttc::transpose_view(a));
+	  sttc::complete_here(a);
           break;
         }
         case DET_QUOTIENT: {
           if(!sttc::is_deterministic(a))
             a=determinize(a);
+	  sttc::complete_here(a);
           switch (qalgo) {
             case MOORE:
               a=sttc::min_quotient(a,MOORE);
@@ -104,7 +107,6 @@ namespace awali {
         default:
           throw std::runtime_error("Unreachable statement");
       }
-      sttc::complete_here(a);
       return dyn::make_automaton(a);
     }
   };

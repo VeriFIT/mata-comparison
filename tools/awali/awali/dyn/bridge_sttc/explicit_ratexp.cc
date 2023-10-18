@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,14 +49,16 @@ namespace awali { namespace dyn {
        delete global_stats;
    }
 
-    std::vector<dyn::any_t> alphabet() const {
+    std::vector<dyn::any_t> 
+    alphabet() const override 
+    {
       std::vector<dyn::any_t> res;
       for(auto l : expset_->labelset()->genset())
         res.emplace_back(l);
       return res;
     }
 
-    dyn::context_t get_context() const {
+    dyn::context_t get_context() const override {
       return std::make_shared<dyn::explicit_context_t<Context>>(expset_->context());
     }
 //   
@@ -81,7 +83,7 @@ namespace awali { namespace dyn {
 
       
     std::ostream& 
-    print(std::ostream& o) const {
+    print(std::ostream& o) const override {
       return sttc::print(*expset_,exp_,o,std::is_same<typename
         labelset_t::value_t,int>::value);
     }
@@ -98,22 +100,22 @@ namespace awali { namespace dyn {
       return *expset_;
     }
 
-    dyn::ratexp_t lmul(dyn::weight_t w) const {
+    dyn::ratexp_t lmul(dyn::weight_t w) const override {
       typename ratexpset_t::weight_t ws=(typename ratexpset_t::weight_t) w;
       return std::make_shared<explicit_ratexp_t<Context>>(expset_->lmul(ws, exp_), expset_);
     }
 
-    dyn::ratexp_t rmul(dyn::weight_t w) const {
+    dyn::ratexp_t rmul(dyn::weight_t w) const override {
       typename ratexpset_t::weight_t ws= (typename ratexpset_t::weight_t) w;
       return std::make_shared<explicit_ratexp_t<Context>>(expset_->rmul(exp_, ws), expset_);
     }
 
-   dyn::ratexp_t add(dyn::ratexp_t e) const {
+   dyn::ratexp_t add(dyn::ratexp_t e) const override {
       auto ex=dynamic_cast<explicit_ratexp_t<Context>&>(*e).get_ratexp();
       return std::make_shared<explicit_ratexp_t<Context>>(expset_->add(exp_, ex), expset_);
     }
 
-    dyn::ratexp_t mult(dyn::ratexp_t e) const {
+    dyn::ratexp_t mult(dyn::ratexp_t e) const override {
       auto ex=dynamic_cast<explicit_ratexp_t<Context>&>(*e).get_ratexp();
       return std::make_shared<explicit_ratexp_t<Context>>(expset_->mul(exp_, ex), expset_);
     }
@@ -126,35 +128,35 @@ namespace awali { namespace dyn {
    
  public:
    
-   unsigned size() const {
+   unsigned size() const override {
      if(global_stats==nullptr)
        set_global_stats();
      return global_stats->size;
    }
 
-   unsigned length() const {
+   unsigned length() const override {
      if(global_stats==nullptr)
        set_global_stats();
      return global_stats->length;
    }
 
-   unsigned height() const {
+   unsigned height() const override {
      if(global_stats==nullptr)
        set_global_stats();
      return global_stats->height;
    }
    
-   unsigned star_height() const {
+   unsigned star_height() const override {
      if(global_stats==nullptr)
        set_global_stats();
      return global_stats->star_height;
    }
 
-   dyn::ratexp_t star() const {
+   dyn::ratexp_t star() const override {
       return std::make_shared<explicit_ratexp_t<Context>>(expset_->star(exp_), expset_);
     }
 
-   unsigned arity() const {
+   unsigned arity() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -162,7 +164,7 @@ namespace awali { namespace dyn {
      return arity_;
    }
 
-   const std::vector<dyn::ratexp_t>& children() const {
+   const std::vector<dyn::ratexp_t>& children() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -170,7 +172,7 @@ namespace awali { namespace dyn {
      return children_;
    }
 
-   dyn::ExpKind get_kind() const {
+   dyn::ExpKind get_kind() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -178,7 +180,7 @@ namespace awali { namespace dyn {
      return kind_;
    }
 
-   dyn::weight_t lweight() const {
+   dyn::weight_t lweight() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -186,7 +188,7 @@ namespace awali { namespace dyn {
      return lweight_;
    }
 
-   dyn::weight_t rweight() const {
+   dyn::weight_t rweight() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -194,7 +196,7 @@ namespace awali { namespace dyn {
      return rweight_;
    }
 
-   dyn::label_t value() const {
+   dyn::label_t value() const override {
      if(!stats) {
        stats=true;
        exp_->accept(const_cast<explicit_ratexp_t&>(*this));
@@ -270,15 +272,17 @@ namespace awali { namespace dyn {
 }//end of ns dyn
 
   template<typename Context>
-  typename sttc::ratexpset<Context>::ratexp_t
+  typename sttc::ratexpset_of<Context>::ratexp_t
   get_stc_ratexp(dyn::ratexp_t e) {
-    return dynamic_cast<dyn::explicit_ratexp_t<Context>&>(*e).get_ratexp();
+    using context_t = sttc::ratexp_context_of<Context>;
+    return dynamic_cast<dyn::explicit_ratexp_t<context_t>&>(*e).get_ratexp();
   }
 
   template<typename Context>
-  sttc::ratexpset<Context>
+  sttc::ratexpset_of<Context>
   get_stc_ratexpset(dyn::ratexp_t e) {
-    return dynamic_cast<dyn::explicit_ratexp_t<Context>&>(*e).get_ratexpset();
+    using context_t = sttc::ratexp_context_of<Context>;
+    return dynamic_cast<dyn::explicit_ratexp_t<context_t>&>(*e).get_ratexpset();
   }
 
   template<typename Ratexpset, typename Context= typename Ratexpset::context_t>

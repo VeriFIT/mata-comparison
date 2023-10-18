@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -74,12 +74,17 @@ namespace awali {
     }
 
 
-    std::ostream& internal::img(automaton_t aut, std::ostream& o, std::string img,
-                                options_t opts)
+    std::ostream& 
+    internal::img(automaton_t aut, std::ostream& o, std::string const& img,
+                  options_t opts)
     {
       std::string dot_binary = loading::get_dot_binary();
       if (dot_binary == "") {
-        *warning_stream << "PDF output disabled (requires dot binary)." << std::endl;
+        *warning_stream << "Could not convert automaton to image (" 
+                        << img << "):"
+                        << " no \"dot\" binary was found."
+                        << "  (It is usually distributed as part of graphviz.)"
+                        << std::endl;
         return o;
       }
       std::string name;
@@ -91,7 +96,7 @@ namespace awali {
       std::ofstream of(filename);
       dot(aut, of, opts) << std::endl;
       size_t buffersize = 1024;
-      char buffer[buffersize];
+      char* buffer = (char*) malloc(buffersize * sizeof(char));
       std::shared_ptr<FILE> pipe(popen((dot_binary+" -T"+img+" "+filename).c_str(),
                                        "r"), pclose);
       if (!pipe) throw std::runtime_error("popen() failed!");
@@ -101,6 +106,7 @@ namespace awali {
           break;
         o.write(buffer, n);
       }
+      free(buffer);
       return o;
     }
 

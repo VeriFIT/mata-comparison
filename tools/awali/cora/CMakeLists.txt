@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,27 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 2.8.12)
-project(Cora CXX)
-
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-	check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-	if(COMPILER_SUPPORTS_CXX0X)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-	else()
-		message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-	endif()
-endif()
-
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I.")
-# set (CMAKE_SHARED_LINKER_FLAGS "-rdynamic")
-
-SET(CMAKE_BUILD_TYPE DEBUG)
-SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0")
+# cmake_minimum_required(VERSION 2.8.12)
+# project(Cora CXX)
+# 
+# include(CheckCXXCompilerFlag)
+# check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+# if(COMPILER_SUPPORTS_CXX11)
+#         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# else()
+#         check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+#         if(COMPILER_SUPPORTS_CXX0X)
+#                 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+#         else()
+#                 message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+#         endif()
+# endif()
+# 
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I.")
+# # set (CMAKE_SHARED_LINKER_FLAGS "-rdynamic")
+# 
+# SET(CMAKE_BUILD_TYPE DEBUG)
+# SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0")
 
 find_package(Curses)
 

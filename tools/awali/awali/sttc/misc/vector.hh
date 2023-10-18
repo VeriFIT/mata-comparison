@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace awali { namespace sttc {
           std::vector<Ts> const&... ts)
     {
       for (H const& he: h)
-        cross([&](Ts const&... ts) { f(he, ts...); }, ts...);
+        cross([&](Ts const&... ts2) { f(he, ts2...); }, ts...);
     }
 
     template<typename Fun, typename... Ts>

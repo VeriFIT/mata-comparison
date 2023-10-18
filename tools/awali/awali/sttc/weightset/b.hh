@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,6 +86,10 @@ namespace sttc {
         return one();
       }
 
+      static value_t plus(value_t v) {
+        return v;
+      }
+      
       static bool equals(value_t l, value_t r)
       {
         return l == r;
@@ -164,7 +168,7 @@ namespace sttc {
         if (format == "latex")
           o << (v ? "\\top" : "\\bot");
         else
-          o << v;
+          o << (v? "true" : "false");
         return o;
       }
 

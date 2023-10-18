@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,29 +88,29 @@ namespace awali {
           e= rs_.star(parseNode());
         }
         else if(key == "Label") {
-          e= rs_.atom(ls_.value_from_json<0u>(i_));
+          e= rs_.atom(ls_.value_from_json<1>(i_));
         }
         else if(key == "LWeight") {
-          auto w = ws_.value_from_json<0u>(i_);
+          auto w = ws_.value_from_json<1>(i_);
           std::string key2 = ::awali::internal::parsestring(i_);
           ::awali::internal::check(i_,':');
           e=rs_.lmul(w,parseNode(key2));
         }
         else if(key == "RWeight") {
-          auto w = ws_.value_from_json<0u>(i_);
+          auto w = ws_.value_from_json<1>(i_);
           std::string key2 = ::awali::internal::parsestring(i_);
           ::awali::internal::check(i_,':');
           e=rs_.rmul(parseNode(key2),w);
         }
         else if(key == "One") {
-          char c=::awali::internal::parsecst(i_);
-          if(c!='n')
+          char c2 = ::awali::internal::parsecst(i_);
+          if(c2 != 'n')
             throw std::runtime_error("Json parser: ratexp");
           e = rs_.one();
         }
         else if(key == "Zero") {
-          char c=::awali::internal::parsecst(i_);
-          if(c!='n')
+          char c2 = ::awali::internal::parsecst(i_);
+          if(c2 != 'n')
             throw std::runtime_error("Json parser: ratexp");
           e = rs_.zero();
         }
@@ -149,6 +149,7 @@ namespace awali {
   mutable_automaton<Context>
   js_parse_aut_content(const Context& context, std::istream& i) {
     // using aut_t = mutable_automaton<Context>;
+    ::awali::json::node_t* node = nullptr;
     auto ws = context.weightset();
     auto ls = context.labelset();
     mutable_automaton<Context> aut = make_mutable_automaton(context);
@@ -222,12 +223,14 @@ namespace awali {
           s=::awali::internal::parseint(i);
           if(::awali::internal::peek(i)=='"') {
             key=::awali::internal::parsestring(i);
-            typename Context::labelset_t::value_t l;
+            typename Context::labelset_t::value_t l{};
             bool has_label=false;
             if(key == "Label") {
               has_label=true;
               ::awali::internal::check(i, ':');
-              l=ls->template value_from_json<0u>(::awali::json::parse(i));
+              node = ::awali::json::parse(i);
+              l=ls->template value_from_json<1>(node);
+              delete node;
               if(::awali::internal::peek(i)!='"') {
                 aut->new_transition(states[s], aut->post(), l);
                 ::awali::internal::check(i, '}');
@@ -238,8 +241,9 @@ namespace awali {
             if(key != "Weight")
               throw std::runtime_error("json: FWeight");
             ::awali::internal::check(i, ':');
-            auto w
-             = ws->template value_from_json<0u>(::awali::json::parse(i));
+            node = ::awali::json::parse(i);
+            auto w = ws->template value_from_json<1>(node);
+            delete node;
             if(has_label)
               aut->new_transition(states[s], aut->post(), l, w);
             else
@@ -278,12 +282,13 @@ namespace awali {
           s=::awali::internal::parseint(i);
           if(::awali::internal::peek(i)=='"') {
             key=::awali::internal::parsestring(i);
-            typename Context::labelset_t::value_t l;
+            typename Context::labelset_t::value_t l{};
             bool has_label=false;
             if(key == "Label") {
               has_label=true;
               ::awali::internal::check(i, ':');
-              l=ls->template value_from_json<0u>(::awali::json::parse(i));
+              node = ::awali::json::parse(i);
+              l=ls->template value_from_json<1>(node);
               if(::awali::internal::peek(i)!='"') {
                 aut->new_transition(states[s], aut->post(), l);
                 ::awali::internal::check(i, '}');
@@ -294,7 +299,9 @@ namespace awali {
             if(key != "Weight")
               throw std::runtime_error("json: FWeight");
             ::awali::internal::check(i, ':');
-            auto w=ws->template value_from_json<0u>(::awali::json::parse(i));
+            node = ::awali::json::parse(i);
+            auto w=ws->template value_from_json<1>(node);
+            delete node;
             if(has_label)
               aut->new_transition(states[s], aut->post(), l, w);
             else
@@ -349,10 +356,12 @@ namespace awali {
         }
         key=::awali::internal::parsestring(i);
         ::awali::internal::check(i, ':');
-        typename Context::labelset_t::value_t l;
+        typename Context::labelset_t::value_t l{};
         bool has_label=false;
         if(key == "Label") {
-          l = ls->template value_from_json<0u>(::awali::json::parse(i));
+          node = ::awali::json::parse(i);
+          l = ls->template value_from_json<1>(node);
+          delete node;
           has_label=true;
           if(::awali::internal::peek(i)!='"') {
             aut->new_transition(states[s], states[t],l);
@@ -365,7 +374,9 @@ namespace awali {
         }
         if(key != "Weight")
           throw std::runtime_error("json: Weight");
-        auto w  = ws->template value_from_json<0u>(::awali::json::parse(i));
+        node = ::awali::json::parse(i);
+        auto w  = ws->template value_from_json<1>(node);
+        delete node;
         if(has_label)
           aut->new_transition(states[s], states[t],l,w);
         else

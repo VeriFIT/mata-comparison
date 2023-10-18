@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -508,6 +508,12 @@ std::string help {
 "as well as being"
 "accessible from the Doxygen documentation."
 
+}; 
+
+// intro_basic_cmds	
+std::string intro_basic_cmds {
+"\n"
+"In this context, 'automaton' means 'automaton or transducer'.\n" 
 }; 
 
 }}} // end of namespace awali::cora::vw_doc, awali::cora and awali

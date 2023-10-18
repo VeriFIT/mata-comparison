@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ namespace awali {
         template<typename Tuple, typename... Values>
         static
         auto
-        get(const Tuple& t, Values & ... values)
+        get(const Tuple&, Values & ... values)
           -> typename tail_tuple<Tuple>::type
         {
           return std::make_tuple(values...);

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,27 +24,27 @@
 #endif
 
 
-#define INSTANCIATE_call_0_1(r,a1) HANDLER_EXTERN template r call0<r,a1>(std::string,std::string, std::string, a1)
+#define INSTANCIATE_call_0_1(r,a1) HANDLER_EXTERN template r call0<r,a1>(std::string const&, std::string const&, std::string const&, a1)
 
-#define INSTANCIATE_call_0_2(r,a1,a2) HANDLER_EXTERN template r call0<r,a1,a2>(std::string,std::string, std::string, a1, a2)
+#define INSTANCIATE_call_0_2(r,a1,a2) HANDLER_EXTERN template r call0<r,a1,a2>(std::string const&,std::string const&, std::string const&, a1, a2)
 
-#define INSTANCIATE_call_0_3(r,a1,a2,a3) HANDLER_EXTERN template r call0<r,a1,a2,a3>(std::string,std::string, std::string, a1, a2)
-
-
-#define INSTANCIATE_call_1_0(r,a1) HANDLER_EXTERN template r call1<r,a1>(std::string,std::string, a1)
-
-#define INSTANCIATE_call_1_1(r,a1,a2) HANDLER_EXTERN template r call1<r,a1,a2>(std::string,std::string, a1, a2)
-
-#define INSTANCIATE_call_1_2(r,a1,a2,a3) HANDLER_EXTERN template r call1<r,a1,a2,a3>(std::string,std::string, a1, a2, a3)
-
-#define INSTANCIATE_call_1_3(r,a1,a2,a3,a4) HANDLER_EXTERN template r call1<r,a1,a2,a3,a4>(std::string,std::string, a1, a2, a3, a4)
-
-#define INSTANCIATE_call_1_4(r,a1,a2,a3,a4,a5) HANDLER_EXTERN template r call1<r,a1,a2,a3,a4,a5>(std::string,std::string, a1, a2, a3, a4, a5)
+#define INSTANCIATE_call_0_3(r,a1,a2,a3) HANDLER_EXTERN template r call0<r,a1,a2,a3>(std::string const&,std::string const&, std::string const&, a1, a2)
 
 
-#define INSTANCIATE_call_2_0(r,a1,a2) HANDLER_EXTERN template r call2<r,a1,a2>(std::string,std::string, a1, a2)
+#define INSTANCIATE_call_1_0(r,a1) HANDLER_EXTERN template r call1<r,a1>(std::string const&,std::string const&, a1)
 
-#define INSTANCIATE_call_2_1(r,a1,a2,a3) HANDLER_EXTERN template r call2<r,a1,a2,a3>(std::string,std::string, a1, a2, a3)
+#define INSTANCIATE_call_1_1(r,a1,a2) HANDLER_EXTERN template r call1<r,a1,a2>(std::string const&,std::string const&, a1, a2)
+
+#define INSTANCIATE_call_1_2(r,a1,a2,a3) HANDLER_EXTERN template r call1<r,a1,a2,a3>(std::string const&,std::string const&, a1, a2, a3)
+
+#define INSTANCIATE_call_1_3(r,a1,a2,a3,a4) HANDLER_EXTERN template r call1<r,a1,a2,a3,a4>(std::string const&,std::string const&, a1, a2, a3, a4)
+
+#define INSTANCIATE_call_1_4(r,a1,a2,a3,a4,a5) HANDLER_EXTERN template r call1<r,a1,a2,a3,a4,a5>(std::string const&,std::string const&, a1, a2, a3, a4, a5)
+
+
+#define INSTANCIATE_call_2_0(r,a1,a2) HANDLER_EXTERN template r call2<r,a1,a2>(std::string const&,std::string const&, a1, a2)
+
+#define INSTANCIATE_call_2_1(r,a1,a2,a3) HANDLER_EXTERN template r call2<r,a1,a2,a3>(std::string const&,std::string const&, a1, a2, a3)
 
 
 namespace awali { namespace dyn { namespace loading {

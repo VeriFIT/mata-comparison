@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 using namespace awali::dyn;
 
-int main(int argc, char **argv) {
+int main() {
  
   const char* files[]={"a1","fibotdc-lr","morse","b1","gray","oddb","binary","heapmodel","prob-rabin","c1","lamplighter","d1","minab","slowcerny","evena","minblocka","slowgrow","test_q","test_c",NULL};
   //  rotation is not in the list : C values like "i" are not supported

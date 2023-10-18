@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@ namespace awali {
   
   template<typename Bool, typename P>
   dyn::automaton_t product(dyn::automaton_t aut1, dyn::automaton_t aut2, bool keep_history, priority::ONE<P>) {
-    throw std::runtime_error("product only supported for automata over letters"); 
+    throw std::runtime_error("product only supported for automata over letters with no epsilon-transitions allowed."); 
   }
     
   template<typename Bool, typename P>
   dyn::automaton_t shuffle(dyn::automaton_t aut1, dyn::automaton_t aut2, bool keep_history, priority::ONE<P>) {
-    throw std::runtime_error("shuffle only supported for automata over letters"); 
+    throw std::runtime_error("shuffle only supported for automata over letters with no epsilon-transitions allowed."); 
   }
 
   template<typename Bool, typename P>
   dyn::automaton_t infiltration(dyn::automaton_t aut1, dyn::automaton_t aut2, bool keep_history, priority::ONE<P>) {
-    throw std::runtime_error("infiltration only supported for automata over letters"); 
+    throw std::runtime_error("infiltration only supported for automata over letters with no epsilon-transitions allowed."); 
   }
 
   template<typename Bool, typename P>

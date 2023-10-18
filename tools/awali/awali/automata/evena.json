@@ -3,16 +3,16 @@
  "metadata":
    {"name":"evena",
     "caption":"DFA which recognizes words with an even number of 'a'",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:57Z"}},
  "context":
    {"labels":
       {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
     "weights":{"semiring":"B"}},
  "data":
    {"states":
-      [{"id":0, "name":"s0", "initial":true, "final":true},
-       {"id":1, "name":"s1"}],
+      [{"id":0, "name":"p", "initial":true, "final":true},
+       {"id":1, "name":"q"}],
     "transitions":
       [{"source":0, "destination":1, "label":"a"},
        {"source":0, "destination":0, "label":"b"},

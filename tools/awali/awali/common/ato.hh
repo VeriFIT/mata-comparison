@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,26 +17,14 @@
 #ifndef AWALI_ATO_HH
 #define AWALI_ATO_HH
 
-#include<sstream>
+#include<string>
 
 namespace awali {   
 
-  inline
-  int atoi(std::string s) {
-      std::istringstream is(s);
-      int n;
-      is >> n;
-      return n;
-    }
+  int strict_atoi(const std::string& s);
 
-  inline
-  unsigned atou(std::string s) {
-    std::istringstream is(s);
-    unsigned n;
-    is >> n;
-    return n;
-  }
+  unsigned strict_atou(const std::string& s);
 
-}//end of ns awali::stc
+}//end of ns awali
 
 #endif

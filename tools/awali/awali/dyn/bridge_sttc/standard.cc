@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <awali/sttc/algos/sum.hh>
 #include <awali/dyn/bridge_sttc/explicit_automaton.cc>
 #include <awali/dyn/bridge_sttc/explicit_ratexp.cc>
+#include <awali/sttc/algos/left_mult.hh>
 
 #include<set-types.hh>
 
@@ -50,6 +51,11 @@ namespace awali {
     auto a=dyn::get_stc_automaton<context_t>(aut);
     auto a2=dyn::get_stc_automaton<context_t>(aut2);
     sttc::sum_here(a, a2, true);
+  }
+  
+  extern "C" void left_mult_standard_here(dyn::automaton_t aut, dyn::any_t weight) {
+    auto a=dyn::get_stc_automaton<context_t>(aut);
+    sttc::left_mult_here(a, dyn::internal::extract_value(weight, *(a->context().weightset())), true);
   }
   
   extern "C" dyn::automaton_t star(dyn::automaton_t aut) {

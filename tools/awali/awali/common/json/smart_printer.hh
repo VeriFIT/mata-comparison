@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,6 +81,8 @@ protected:
   inline_sizer_t sizer;
   std::ostream& _out;
   int indent_amount ;
+  /* Attribute `columns` is set to >0 if we are in half-inline mode for array nodes. */
+  unsigned columns;
   node_t const* inliner;
   unsigned _max ;
   std::vector<unsigned> max_vect;
@@ -306,7 +308,8 @@ public:
 //  }
 */
 
-std::ostream& put(node_t const* node, std::ostream& out); 
+std::ostream& put_inline(std::ostream& out, node_t const* node); 
+std::ostream& put(std::ostream& out, node_t const* node); 
 
 } //end of namespace json
 } //end of namespace awali

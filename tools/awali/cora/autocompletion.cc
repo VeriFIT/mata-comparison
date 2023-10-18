@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,23 +16,30 @@
 
 #include<awali/common/docstring/doc_entries.hh>
 #include<cora/cora.hh>
+#include<awali/common/ato.cc>
 #include <sstream>
 #include <sys/types.h>
 #include <list>
 
-// #define DEBUG_FLAG    # <-- uncomment for displaying debug on std::cerr
+#define DEBUG_FLAG   // <-- uncomment for displaying debug on std::cerr
 #ifdef DEBUG_FLAG
   #define DEBUG(str) std::cerr << str ;
-  #define DEBUG2(str1,str2) std::cerr << str1 << str2;
-  #define DEBUG3(str1,str2,str3) std::cerr << str1 << str2 << str3;
+  #define DEBUG2(str1,str2) std::cerr << str1 << " " << str2;
+  #define DEBUG3(str1,str2,str3) \
+    std::cerr << str1 << " " << str2 << " " << str3;
+  #define DEBUG4(str1,str2,str3,str4) \
+    std::cerr << str1 << " " << str2 << " " << str3 << " " << str4;
   #define DEBUGL(str) DEBUG2(str, std::endl)
   #define DEBUG2L(str1,str2) DEBUG3(str1,str2,std::endl)
+  #define DEBUG3L(str1,str2,str3) DEBUG4(str1,str2,str3,std::endl)
 #else
   #define DEBUG(str)
   #define DEBUG2(str1,str2)
   #define DEBUG3(str1,str2,str3)
+  #define DEBUG4(str1,str2,str3,str4) 
   #define DEBUGL(str)
   #define DEBUG2L(str,str2)
+  #define DEBUG3L(str1,str2,str3)
 #endif
 
 
@@ -74,7 +81,11 @@ void flush_possibility() {
   } else
     for(const possibility_t& p: possibilities)
     {
-      std::cout << p.real_result << p.addition << " ";
+      std::cout << p.real_result << p.addition;
+      if (p.append_space) {
+        DEBUG2L("Writing an extra space:", p.real_result)
+        std::cout << ' ' ;
+      }
 //       if ( !p.commentary.compare("") )
 //         std::cout << " -- " << p.commentary;
       std::cout << std::endl;
@@ -146,8 +157,7 @@ void print_arg (int argc, std::vector<std::string> argv, bool is_pipe, bool is_o
     switch (arg.kind) {
       case AUT:
       case TDC: 
-      case AUT_OR_EXP: 
-      {
+      case AUT_OR_EXP: {
         print_local_automata(cur_arg);
         if (is_pipe)
           print_if_possible(cur_arg, {"-", "", "", true});
@@ -162,8 +172,11 @@ void print_arg (int argc, std::vector<std::string> argv, bool is_pipe, bool is_o
         if (arg.kind != AUT_OR_EXP)
           break;
       }
+      // fall through
+      // (Comment above removes G++ warning)
       case EXP: {
-        print_local_automata(cur_arg);
+        if (arg.kind == EXP)
+          print_local_automata(cur_arg);
         if (is_pipe)
           print_if_possible(cur_arg, {"-", "", "", true});
         std::map<std::string,dyn::loading::file_loc_t> ex 
@@ -203,8 +216,8 @@ void print_arg (int argc, std::vector<std::string> argv, bool is_pipe, bool is_o
           print_arg (1, new_argv, is_pipe, is_option);
           
           if (cmd.name == "help") {
-            for (auto chc : help_tokens)
-              print_if_possible(cur_arg, {chc.name, "", "", true} );
+//             for (auto chc : help_tokens)
+//               print_if_possible(cur_arg, {chc.name, "", "", true} );
           }
 
 
@@ -224,7 +237,7 @@ void print_arg (int argc, std::vector<std::string> argv, bool is_pipe, bool is_o
   }
 }
 
-void print_opt(int argc, std::vector<std::string> argv, bool is_pipe)
+void print_opt(int argc, std::vector<std::string> argv)
 {
   std::string cur_arg = argv[argc-1];
   for ( auto pair: options ) {
@@ -294,12 +307,21 @@ int main (int argc, const char** argv)
   awali::cora::init_options();
   bool is_pipe = false;
   bool is_option = false;
-  int new_argc = atoi(argv[1]);
-  DEBUGL(new_argc)
-  std::vector<std::string> args = awali::cora::remove_options_and_pipe( &new_argc, &argv[3], &is_pipe);
+  for (int i = 0; i<argc; ++i) {
+    DEBUG3L("arg", i, argv[i])
+  }
+  int new_argc = awali::strict_atoi(argv[1]);
+  DEBUG2L("new_argc:", new_argc)
+  int first_newarg = 3;
+  for (int i = 0; i<new_argc; ++i) {
+    DEBUG3L("new arg", i,argv[i+first_newarg])
+  }
+  int current =  awali::strict_atoi(argv[new_argc+first_newarg]);
+  new_argc = current;
+  std::vector<std::string> args = awali::cora::remove_options_and_pipe( &new_argc, &argv[first_newarg], &is_pipe);
   if (args[new_argc-1][0] == '-') {
     DEBUGL("Last arg may be an option")
-    awali::cora::print_opt (new_argc, args, is_pipe);
+    awali::cora::print_opt (new_argc, args);
     is_option = true;
   }
   awali::cora::print_arg (new_argc, args, is_pipe, is_option);

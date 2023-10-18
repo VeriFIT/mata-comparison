@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,10 +20,18 @@
 |     new function list()         201127                                    |
 ---------------------------------------------------------------------------*/
 
+/*--------- Memento
+vw_doc:: stands for 'variable width documentation'. In that namespace, the
+text files are given in such a way they can be processed by the function
+'adaptative_print' that composes the layout according to the width of the 
+terminal.
+                                                    -------------------*/
 void list(std::string s)
 {
   std::string title, str1;
   std::string output, margin = " ";
+  
+  size_t terminal_width = balanced_term_width(); // redundant with the same call
 
   if ( found_in_list(s, list_choices, it_chc) ) { // !! returns it_chc !! 
 	// string s has been found in list_choices
@@ -53,18 +61,21 @@ void list(std::string s)
     
     case BASIC_LST : {
       title = "Basic commands";
+      variable_width_print(vw_doc::intro_basic_cmds, terminal_width);
       process_name_desc_list(commands_basic, title);
       break;
     }
     
      case GENERIC_LST : {
       title = "Generic commands for automata and transducers";
+      variable_width_print(vw_doc::intro_generic_cmds, terminal_width);
       process_name_desc_list(commands_generic, title);
       break;
     }
     
      case WFA_CMDS_LST : {
       title = "Commands for (weighted) automata";
+      variable_width_print(vw_doc::intro_wfa_cmds, terminal_width);
       process_name_desc_list(commands_aut, title);
       break;
     }
@@ -89,7 +100,7 @@ void list(std::string s)
     
     case AUTOMATA_LST : {
       std::map<std::string, dyn::loading::file_loc_t> 
-	    dcl = dyn::loading::example_automata();
+      dcl = dyn::loading::example_automata();
       std::vector<name_desc_pair_t> v = list_directory_content(dcl);
 
       title = "Automata library";

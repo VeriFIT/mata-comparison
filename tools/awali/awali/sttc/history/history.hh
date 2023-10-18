@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,13 +47,13 @@ namespace awali {
 
       virtual history_kind_t get_nature() const =0;
 
-      virtual bool has_history() {
+      virtual bool has_history() const {
         return true;
       }
 
-      virtual bool has_history(state_t s) const =0;
+      virtual bool has_history(state_t) const =0;
 
-      virtual bool remove_history(state_t s) =0;
+      virtual bool remove_history(state_t) =0;
 
       template<typename H>
       H& as()

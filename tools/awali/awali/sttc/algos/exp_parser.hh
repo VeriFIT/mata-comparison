@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,16 +33,23 @@ namespace awali {
 #include<string>
 #include<list>
 
-   /*
-
+/*
+  
   E -> P | E+P
   P -> S | PS | P.S
   S -> L | S* | S{exp} | S?
   L -> R | <weight>R
-  R -> A | A<weight>
+  R -> A | A<weight> | S*<weight> | S{exp}<weight> | S?<weight>
   A -> label | (E) | [labelinterval]
-
-     */
+  
+  This grammar implements the following priorities:
+  - + has the least priority
+  - then product (either . or catenation)
+  - then exponent
+  - then left weight
+  right weight has a priori the highest priority, but loses it if it is applied to an exponent:
+      <x>a*<y> is interpreted as ((<x>a)*)<y>
+*/
 
 namespace awali { namespace sttc {
 
@@ -114,13 +121,23 @@ namespace awali { namespace sttc {
           if(p_==0)
             throw parse_exception("Parsing ?");
           ratexp_t e=parseS();
-          return ratexp_t(rs_.add(e,rs_.one()));
+          return ratexp_t(rs_.maybe(e));
         }
         if(s_[p_-1]=='}'){
           --p_;
           ignore();
           if(p_==0)
             throw parse_exception("Parsing exponent");
+	  if(s_[p_-1]=='+') {
+	    --p_;
+	    if(p_==0)
+	      throw parse_exception("Parsing {+}");
+	    if(s_[p_-1]!='{')
+	      throw parse_exception("Parsing {+}");
+	    --p_;
+	    ratexp_t e=parseS();
+	    return ratexp_t(rs_.plus(e));
+	  }
           int a,b,h;
           if(s_[p_-1]==',')
             b=-1;
@@ -202,8 +219,14 @@ namespace awali { namespace sttc {
             throw parse_exception(p_-1,"Parsing right weight");
           --p_;
           ignore();
-          ratexp_t e=parseA();
-          return ratexp_t(rs_.rmul(e, w));
+	  if(s_[p_-1]=='*' || s_[p_-1]=='?' || s_[p_-1]=='}') {
+	    ratexp_t e=parseS();
+	    return ratexp_t(rs_.rmul(e, w));
+	  }
+	  else {
+	    ratexp_t e=parseA();
+	    return ratexp_t(rs_.rmul(e, w));
+	  }
         }
         return parseA();
       }
@@ -248,11 +271,11 @@ namespace awali { namespace sttc {
           while (p_>0 && s_[p_-1]!='[') {
             if(strict_ && p_>1 && s_[p_-1]=='^' && s_[p_-2]=='['){
               std::set<typename labelset_t::value_t> tmp;
-              auto& alpha=ls_.genset();
+              auto const& alpha=ls_.genset();
               auto it=alpha.begin();
               auto ite=alpha.end();
               for( auto l : letter_list) {
-                while(*it != l) {
+                while(!(*it == l)) {
                   tmp.emplace(*it);
                   ++it;
                 }
@@ -271,7 +294,7 @@ namespace awali { namespace sttc {
               ignore();
               auto k = ls_.parse(s_,p_, strict_);
               ignore();
-              for(auto i=l; i>=k; i--) {
+              for(auto i=l; i>=k; --i) {
                 std::ostringstream os;
                 ls_.print(i,os);
                 const std::string& s=os.str();

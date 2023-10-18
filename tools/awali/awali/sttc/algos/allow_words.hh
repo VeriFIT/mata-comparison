@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,10 @@ namespace awali {
           auto ret= make_mutable_automaton(ret_context_t{wordset,*aut->context().weightset()});
           std::unordered_map<state_t,state_t> state_map;
           for(auto s : aut->states()) {
-            state_map[s]=ret->add_state();
+	    ret->add_state(s);
+            state_map[s]=s;
+	    if(aut->has_name(s))
+	      ret->set_state_name(s, aut->get_state_name(s));	     
           }
           state_map[ret->pre()]=aut->pre();
           state_map[ret->post()]=aut->post();
@@ -54,14 +57,17 @@ namespace awali {
             const auto& w=aut->label_of(tr);
             if(labelset.is_special(w))
               ret->new_transition(state_map[aut->src_of(tr)], state_map[aut->dst_of(tr)], wordset.special(), aut->weight_of(tr));
+            else if(labelset.is_one(w))
+              ret->new_transition(state_map[aut->src_of(tr)], state_map[aut->dst_of(tr)], wordset.one(), aut->weight_of(tr));
             else
               ret->new_transition(state_map[aut->src_of(tr)], state_map[aut->dst_of(tr)], wordset.word(w), aut->weight_of(tr));
           }
           if(keep_history) {
             auto history = std::make_shared<single_history<Aut>>(aut);
             ret->set_history(history);
-            for (auto p: aut->all_states())
+            for (auto p: aut->all_states()) {
               history->add_state(state_map[p], p);
+	    }
           }
           return ret;
         }

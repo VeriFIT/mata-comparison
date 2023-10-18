@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <awali/dyn/core/automaton.hh>
 #include <awali/dyn/loading/handler.hh>
 
+#include <awali/dyn/modules/join.hh>
 #include <awali/dyn/modules/promotion.hh>
 #include <awali/dyn/modules/product.hh>
 
@@ -34,6 +35,7 @@ namespace awali {
         throw std::runtime_error("both automata should have the same weightset");
     }
 
+    /*
     static void join_automata(automaton_t& aut1, automaton_t& aut2) {
       std::string semiring1 = aut1->get_context()->weightset_name();
       std::string semiring2 = aut2->get_context()->weightset_name();
@@ -47,7 +49,19 @@ namespace awali {
       
       }
     }
-    
+    */    
+    static void join_automata(automaton_t& aut1, automaton_t& aut2) {
+      context_t ctx1 = aut1->get_context();
+      context_t ctx2 = aut2->get_context();
+      if (*ctx1 == *ctx2)
+        return;
+      context_t join_ctx = join_context(ctx1, ctx2);
+      if (*ctx1 != *join_ctx)
+        aut1 = promote_automaton(aut1, join_ctx, {KEEP_HISTORY=true, SAFE=false});
+      if (*ctx2 != *join_ctx)
+        aut2 = promote_automaton(aut2, join_ctx, {KEEP_HISTORY=true, SAFE=false});
+    }
+
     automaton_t product_strict(automaton_t aut1, automaton_t aut2, options_t opts)
     {
       check_weightsets(aut1, aut2);

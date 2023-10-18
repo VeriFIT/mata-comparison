@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+cdef extern from "automaton.h" namespace "awali::dyn":
+    cppclass abstract_ratexp_t:
+        unsigned size() except+
+        unsigned height() except+
+        unsigned length() except+
+
 cdef extern from "automaton.h" namespace "awali::py":
     cppclass simple_ratexp_t:
+        abstract_ratexp_t& to_dyn_ratexp()
+        simple_ratexp_t(ratexp_t)
+        simple_ratexp_t()
         simple_ratexp_t add(const simple_ratexp_t e) except +
         simple_ratexp_t mult(const simple_ratexp_t e) except +
         simple_ratexp_t star() except +
@@ -49,6 +58,7 @@ cdef extern from "automaton.h" namespace "awali::py":
     unsigned star_height_(simple_ratexp_t exp) except +
 #      simple_automaton_t standard_(simple_ratexp_t exp) except +
     basic_automaton_t display_rat_(simple_ratexp_t exp) except +
+    simple_automaton_t minimal_automaton_exp_(simple_ratexp_t exp, string, string, string) except+
 
 cdef dict _from_map_ratexp_s(map[simple_ratexp_t, string] m):
     pymap = {}

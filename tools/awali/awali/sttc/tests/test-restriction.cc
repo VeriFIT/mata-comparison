@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 #include<awali/sttc/automaton.hh>
 #include<awali/sttc/factories/ladybird.hh>
 #include<awali/sttc/algos/restriction.hh>
+#include <awali/sttc/tests/null_stream.hxx>
 
 using namespace awali;
 using namespace awali::sttc;
@@ -27,16 +28,29 @@ void test(Aut aut, unsigned alph_size, unsigned num_trans) {
   require(aut->num_transitions()==num_trans, "Wrong number of transitions");
 }
 
-int main() {
+int main(int argc, char **argv) {
+  std::ostream * osc;
+  if(argc==2)
+    osc = &std::cout;
+  else
+    osc = &null_stream;
+  
+  *osc << "Use ladybird 3 for the test" << std::endl;
   auto aut=make_automaton({'a','b','c'});
   auto lady = ladybird(aut->context(), 3);
   test(lady,3,9);
+  *osc << "It has 3 letters and 9 transitions" << std::endl;
   change_alphabet(lady, {'a','b'});
+  *osc << "Restrict to alphabet {a,b}" << std::endl;
   test(lady,2,5);
+  *osc << "It has 2 letters and 5 transitions" << std::endl;
   //js_print(lady, std::cout) << std::endl;
   lady = ladybird(aut->context(), 3);
   remove_letters(lady, {'c'});
+  *osc << "Restrict to alphabet {c}" << std::endl;
   test(lady,2,5);
-  //js_print(lady, std::cout) << std::endl;
+  *osc << "It has 2 letters and 5 transitions" << std::endl;
+  *osc << "Print the restriction" << std::endl;
+  js_print(lady, *osc) << std::endl;
 }
 

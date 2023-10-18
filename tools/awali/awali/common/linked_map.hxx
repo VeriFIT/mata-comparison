@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -204,13 +204,14 @@ public:
     auto it = map.find(&key);
     if (it != map.end()) {
       if (overwrite_existing) {
-        list.erase(it->second);
+        auto list_it = it->second;
         map.erase(it);
+        list.erase(list_it);
       }
       else
         return it->second;
     }
-    auto res = list.insert(pos, pair_t(std::move(key),std::move(value)));
+    auto res = list.emplace(pos, std::move(key),std::move(value));
     map.emplace(&(res->first),res);
     return res;
   }
@@ -324,7 +325,7 @@ public:
     auto it = map.find(&key);
     if (it != map.end())
       return it->second->second;
-    list.emplace_back(pair_t(std::move(key),value_t()));
+    list.emplace_back(std::move(key),value_t());
     iterator x = --list.end();
     map[&(x->first)] = x;
     return x->second;

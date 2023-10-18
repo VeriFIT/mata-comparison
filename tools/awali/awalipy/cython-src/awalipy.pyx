@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 
 from __future__ import print_function
 include "common.pyx"
+include "printing_callback_setup.pyx"
 include "weightset_1_include.pyx"
 include "weightset_2_class.pyx"
 include "basic_automaton_1_include.pyx"
@@ -31,4 +32,7 @@ include "ratexp_1_include.pyx"
 include "ratexp_2_class.pyx"
 include "ratexp_3_function.pyx"
 include "fused_Automaton_or_Transducer.pyx"
-#include ".touch_to_force_python_layer_recompilation.pyx"
+
+_print_warning("The python module awalipy relies on compilation executed \"on-the-fly\" depending on the context (type of weights, of labels, etc.). As a result, the very first call to a given function in a given context may take up to one minute. ")
+
+_setup_printing_stream()

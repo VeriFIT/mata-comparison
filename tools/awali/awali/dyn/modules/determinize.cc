@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -103,6 +103,25 @@ namespace awali {
     is_ambiguous (automaton_t aut)
     {
       return loading::call1<bool>("is_ambiguous", "determinize", aut);
+    }
+
+    automaton_t explore_by_length(automaton_t aut, unsigned depth) {
+      return loading::call1<automaton_t>("explore_by_length", "determinize", aut, depth);
+    }
+
+
+    
+    automaton_t explore_with_bound(automaton_t aut, weight_t bound) {
+      std::string ws = aut->get_context()->weightset_name();
+      context::weightset_description wd1 = context::weightset(ws);
+      /* Although it is stated "N2", below, the test for type will work for any
+       * bounded semiring */
+      context::weightset_description wd2 = context::weightset("N2"); 
+      if (ws == "N" || ws == "Z" || ws == "Noo" || wd1->type_ == wd2->type_)
+        return loading::call1<automaton_t>("explore_with_bound", "determinize", aut, bound);
+      throw std::runtime_error(
+        "[dyn::explore_with_bound] It is required that the automaton is"
+        " weighted over N, Z, Noo, or N<int>.");
     }
   }
 }//end of ns awali::dyn

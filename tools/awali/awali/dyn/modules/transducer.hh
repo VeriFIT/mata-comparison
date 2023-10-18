@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ namespace awali {
     // "internal" functions takes automaton_t while "public" functions takes
     // transducer_t
     namespace internal {
+      automaton_t make_nullable_under_lat(automaton_t tdc);
       unsigned num_tapes (automaton_t tdc);
       transition_t set_tdc_transition (automaton_t tdc, state_t src, state_t dst,
                                        const std::vector<std::string>& labels);
@@ -80,10 +81,10 @@ namespace awali {
 
       std::vector<std::vector<char>> alphabets(automaton_t tdc);
 
-      bool has_label(automaton_t tdc, unsigned i, std::string l);
-      bool has_input_label(automaton_t tdc, std::string l);
+      bool has_label(automaton_t tdc, unsigned i, std::string const& l);
+      bool has_input_label(automaton_t tdc, std::string const& l);
 
-      bool has_output_label(automaton_t tdc, std::string l);
+      bool has_output_label(automaton_t tdc, std::string const& l);
 
       automaton_t lift_tdc(automaton_t tdc);
     } // end of namespace awali::dyn::internal
@@ -143,6 +144,7 @@ namespace awali {
     /** \ingroup Transducer */
     transducer_t synchronize(transducer_t tdc);
 
+
     /** \ingroup Transducer */
     transducer_t realtime(transducer_t tdc);
 
@@ -155,6 +157,8 @@ namespace awali {
     /** \ingroup Transducer */
     automaton_t letterize_tape(automaton_t tdc, unsigned i=1);
 
+    /** \ingroup Transducer */
+    transducer_t subnormalize(transducer_t tdc);
   }
 }//end of ns awali::dyn
 #endif

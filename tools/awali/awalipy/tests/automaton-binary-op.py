@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ class AutomatonBinaryTests(unittest.TestCase):
         for A in automata:
             B = random_copy(A)
             self.assertEqual (True, awalipy.are_isomorphic(A,B))
-            self.assertEqual (True, B.are_isomorphic(A))
 
     def test_are_equivalent(self):
         automata = []
@@ -70,7 +69,6 @@ class AutomatonBinaryTests(unittest.TestCase):
             C = A.aut_to_exp().exp_to_aut()
             B = random_copy(A)
             self.assertEqual (True, awalipy.are_equivalent(B,C))
-            self.assertEqual (True, C.are_equivalent(B))
 
     def test_sum(self):
         automata = []
@@ -84,7 +82,6 @@ class AutomatonBinaryTests(unittest.TestCase):
                 self.assertEqual(len(A.states())+len(B.states()),len(C.states()))
                 D = B.sum(A)
                 self.assertEqual(len(A.states())+len(B.states()),len(D.states()))
-                self.assertEqual(True, awalipy.are_isomorphic(C,D))
 
 
 
@@ -131,5 +128,4 @@ sys.stderr.write(
 suite = unittest.TestLoader().loadTestsFromTestCase(AutomatonBinaryTests)
 runner = unittest.TextTestRunner(verbosity=2,failfast=True)
 result = runner.run(suite)
-if len(result.failures):
-    exit(1)
+exit(not result.wasSuccessful())

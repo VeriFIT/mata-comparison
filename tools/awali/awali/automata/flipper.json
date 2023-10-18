@@ -3,20 +3,16 @@
  "metadata":
    {"name":"flipper",
     "caption":"Transducer that mimics a flipper game",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:57Z"}},
  "context":
    {"labels":
       {"labelKind":"Multi-tape",
        "tapeLabels":
-         [{"labelKind":"Letters",
-           "letterType":"Char",
-           "allowEpsilon":true,
-           "alphabet":["a","b"]},
-          {"labelKind":"Letters",
-           "letterType":"Char",
-           "allowEpsilon":true,
-           "alphabet":["c","d"]}]},
+         [{"labelKind":"Letters",  "letterType":"Char",
+           "allowEpsilon":true,    "alphabet":["a","b"]},
+          {"labelKind":"Letters",  "letterType":"Char",
+           "allowEpsilon":true,    "alphabet":["c","d"]}]},
     "weights":{"semiring":"B"}},
  "data":
    {"states":

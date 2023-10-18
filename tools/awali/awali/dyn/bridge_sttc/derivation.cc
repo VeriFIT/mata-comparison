@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@ namespace awali {
               typename T = void>
     struct dispatch { //default
     static dyn::automaton_t derived_term(dyn::ratexp_t exp, bool breaking, bool keep_history) {
-      throw std::runtime_error("derived_term only supported for free label-sets.");
+      throw std::runtime_error("derived_term only supported for free label-sets with no epsilon-transitions allowed.");
     }
     static std::map<dyn::ratexp_t, dyn::any_t> derivation_label(dyn::ratexp_t exp, dyn::any_t a, bool breaking = false) {
-      throw std::runtime_error("derived_term only supported for free label-sets.");
+      throw std::runtime_error("derived_term only supported for free label-sets with no epsilon-transitions allowed.");
 
     }
   };

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -180,6 +180,7 @@ namespace awali { namespace sttc {
   json::object_t*
   json_timestamp()
   {
+    version::check_fsmjson<version>();
   /* timestamp */
     json::object_t* timestamp = new json::object_t();
     time_t tt;
@@ -205,6 +206,7 @@ namespace awali { namespace sttc {
   json::object_t*
   json_creator()
   {
+    version::check_fsmjson<version>();
     json::object_t* creator = new json::object_t();
     creator->push_back("programName", new json::string_t("awali"));
     creator->push_back("version", new json::string_t(awali::version::full));
@@ -217,6 +219,7 @@ namespace awali { namespace sttc {
   json::object_t*
   json_format()
   {
+    version::check_fsmjson<version>();
     json::object_t* format = new json::object_t();
     format->push_back("name", new json::string_t("fsm-json"));
     format->push_back("version", new json::string_t(std::to_string(version)));
@@ -231,6 +234,7 @@ namespace awali { namespace sttc {
              json_ast_t extra_metadata = json_ast::empty(),
              bool full = false)
   {
+    version::check_fsmjson<version>();
     auto ctx = aut->context();
     auto ws = ctx.weightset();
     auto ls = ctx.labelset();
@@ -282,6 +286,11 @@ namespace awali { namespace sttc {
             one_state->push_back(
                 "final",
                 ws->template value_to_json<version>(aut->get_final_weight(i)));
+          if (aut->has_history(i)) {
+            std::stringstream ss;
+            aut->print_state_history(i,ss);
+            one_state->push_back("history",new json::string_t(ss.str()));
+          }
           states->push_back(one_state);
         }
         data->push_back("states", states);
@@ -330,6 +339,7 @@ namespace awali { namespace sttc {
                 const typename RatExpSet::ratexp_t& e,
                 json_ast_t extra_metadata = json_ast::empty())
   {
+    version::check_fsmjson<version>();
     json::object_t* root = new json::object_t();
     {
      /* == format == */

@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+cdef extern from "automaton.h" namespace "awali::dyn":
+    cppclass automaton_t:
+        automaton_t()
+
+    cppclass ratexp_t:
+        ratexp_t()
+
+cdef extern from "automaton.h" namespace "awali::dyn::internal":
+    cppclass aut_or_exp_t:
+        bool is_aut
+        automaton_t aut
+        ratexp_t exp
+        aut_or_exp_t()
+    aut_or_exp_t load_aut_or_exp(string, bool) except+
+
+
 cdef extern from "automaton.h" namespace "awali::py":
     cppclass basic_automaton_t:
+        basic_automaton_t(automaton_t) except+
+        basic_automaton_t() except+
         size_t num_states() except + ### <- in test suite (its.)
         size_t num_initials() except + ### <- its.
         size_t num_finals() except + ### <- its.
@@ -74,11 +92,14 @@ cdef extern from "automaton.h" namespace "awali::py":
         bool is_transducer() except +
         string get_static_context() except +
         void strip_history() except +
+        bool has_explicit_name(int s) except +
         string get_state_name(int s) except +
+        void set_state_name(int s, string name) except +
         string weight_one() except + ### <- its.
         string weight_zero() except + ### <- its.
         weightset_t get_weightset() except + 
         string get_weightset_name() except + ### <- its.
+        int get_state_by_name(string) except +
 #          string json() except +
 #          string fado() except +
 #          string grail() except +
@@ -92,7 +113,9 @@ cdef extern from "automaton.h" namespace "awali::py":
     vector[vector[string]] example_automata_() except+
     vector[vector[string]] example_ratexps_() except+
     basic_automaton_t load_automaton_(string s, string fmt) except+
-    void save_automaton_(basic_automaton_t aut, string s, string fmt) except +
+    void save_automaton2_(basic_automaton_t aut, string s) except +
+    void save_automaton3_(basic_automaton_t aut, string s, string fmt) except +
+    void save_automaton4_(basic_automaton_t aut, string s, string fmt, bool keep_history) except +
     basic_automaton_t copy_(basic_automaton_t aut) except +
 
     vector[int] accessible_states_(basic_automaton_t aut) except +  ### <- its.
@@ -125,3 +148,5 @@ cdef extern from "automaton.h" namespace "awali::py":
     vector[string] available_semirings() except +
     vector[state_t] scc_of_ (basic_automaton_t aut, state_t s) except +
 
+    basic_automaton_t promote_automaton_(basic_automaton_t aut, string ws) except+
+    simple_ratexp_t promote_ratexp_(simple_ratexp_t aut, string ws) except+

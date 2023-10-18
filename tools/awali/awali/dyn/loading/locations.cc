@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,21 +47,17 @@ namespace awali { namespace dyn {
     }
     
     std::vector<std::string> get_lib_directory() {
+#define STR_VALUE(arg)      #arg
+#define STR(name) STR_VALUE(name)
+#ifdef AWALICPP_MODULE_COMPILE_DIR
+      std::string local = std::string(STR(AWALICPP_MODULE_COMPILE_DIR));
+#else
       std::string local(std::getenv("HOME"));
       local.append("/.awali/modules");
-
-      #define STR_VALUE(arg)      #arg
-      #define STR(name) STR_VALUE(name)
-      #ifdef AWALICPP_MODULE_INSTALL_DIR
-      std::string global =std::string(STR(AWALICPP_MODULE_INSTALL_DIR));
-      #undef STR
-      #undef STR_VALUE
-      #else
-      throw std::runtime_error("Installed Static-libraries directory not set.");
-      #endif
-      #undef STR
-      #undef STR_VALUE
-
+#endif
+      std::string global = std::string(STR(AWALICPP_MODULE_INSTALL_DIR));
+#undef STR
+#undef STR_VALUE
       return {local,global};
     }
 
@@ -226,7 +222,7 @@ namespace awali { namespace dyn {
       return 0;
     }
 
-    std::vector<std::string> get_compilation_directory(std::string lname)
+    std::vector<std::string> get_compilation_directory(std::string const& lname)
     {
       #ifdef AWALI_TMP_DIR
       #define STR_VALUE(arg)      #arg
@@ -237,7 +233,8 @@ namespace awali { namespace dyn {
       #else
         std::string local(std::getenv("HOME"));
         local.append("/.awali/tmp/");
-        return {local+lname};
+        local.append(lname);
+        return {std::move(local)};
       #endif
     }
 
@@ -292,10 +289,10 @@ namespace awali { namespace dyn {
 //     }
 
      void 
-     add_files_from(std::string dir,
+     add_files_from(std::string const& dir,
       std::map<std::string, file_loc_t>& result,
-      std::string prefix, bool recurse, std::string type) 
-    {
+      std::string const& prefix, bool recurse, std::string const& type) 
+    { 
       DIR* d = opendir(dir.c_str());
       struct dirent * entry;
       while( (d != nullptr) && ((entry=readdir(d))!=nullptr) ) {
@@ -307,8 +304,10 @@ namespace awali { namespace dyn {
         } 
         else if ( (file.substr(u+1)=="json")) {
           std::string name = file.substr(0,u);
+          std::string fullname = prefix+name;
           if (result.find(prefix+name) == result.end())
-            result[prefix+name] = file_loc_t{dir, name, "json", type};
+            result.emplace(std::move(fullname), 
+                           file_loc_t{dir, std::move(name), "json", type});
         }
       }
       if(d != nullptr)

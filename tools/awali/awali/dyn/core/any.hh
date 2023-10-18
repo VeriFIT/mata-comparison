@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include<iostream>
 #include<sstream>
 #include<list>
+#include<type_traits>
 
 namespace awali {
   namespace dyn {
@@ -36,6 +37,12 @@ namespace awali {
       
       template<typename T>
       T any_cast(const any_t& a);
+      
+      template<typename T>
+      T any_move(any_t& a);
+      
+      template<typename T>
+      T const& any_cref(const any_t& a);
     }
 
     std::ostream& operator<<(std::ostream& o, const dyn::any_t& a);
@@ -52,6 +59,10 @@ namespace awali {
     struct any_t {
       template<typename T>
       friend T internal::any_cast(const any_t& a);
+      template<typename T>
+      friend T internal::any_move(any_t& a);
+      template<typename T>
+      friend T const& internal::any_cref(const any_t& a);
 
       template<typename T>
       friend bool internal::any_typeof(const any_t& a);
@@ -153,8 +164,14 @@ namespace awali {
 
       template<typename T>
       explicit
-      operator T() const {
+      operator T() const & {
         return internal::any_cast<T>(*this);
+      }
+
+      template<typename T>
+      explicit
+      operator T() && {
+        return internal::any_move<T>(*this);
       }
 
       std::ostream& real_type_id(std::ostream &o) const {
@@ -177,6 +194,40 @@ namespace awali {
 
 
   namespace internal {
+    template<typename T>
+    T any_move(any_t& a){
+      try {
+        internal::Value<T>& test
+          = dynamic_cast<internal::Value<T>&>(*(a.val));
+        return std::move(test.val);
+      }
+      catch (const std::bad_cast& e) {
+        std::stringstream ss;
+        ss << "Failed to extract content of "<< a << ". "
+           << "Tried to cast it as a " 
+           << awali::internal::demangle(typeid(T).name())  
+           << " but is actually of type ";
+        a.real_type_name(ss) << ".";
+        throw any_cast_exception(ss.str());
+      }
+    }
+    template<typename T>
+    T const& any_cref(const any_t& a){
+      try {
+        const internal::Value<T>& test
+          = dynamic_cast<const internal::Value<T>&>(*(a.val));
+        return test.val;
+      }
+      catch (const std::bad_cast& e) {
+        std::stringstream ss;
+        ss << "Failed to extract content of "<< a << ". "
+           << "Tried to cast it as a " 
+           << awali::internal::demangle(typeid(T).name())  
+           << " but is actually of type ";
+        a.real_type_name(ss) << ".";
+        throw any_cast_exception(ss.str());
+      }
+    }
     template<typename T>
     T any_cast(const any_t& a){
       try {

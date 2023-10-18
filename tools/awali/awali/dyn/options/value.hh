@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,71 +18,71 @@
 #define AWAlI_DYN_OPTIONS_VALUE_HH
 
 
-namespace awali {
-  namespace dyn {
-    namespace internal {
+namespace awali { namespace dyn { namespace internal {
 
-      struct opt_untyped_value {
-        opt_untyped_value() {}
-        virtual opt_untyped_value* clone() const = 0;
-        virtual ~opt_untyped_value() {}
-      };
+  struct opt_untyped_value
+  {
+    opt_untyped_value() {}
+    virtual opt_untyped_value* clone() const = 0;
+    virtual ~opt_untyped_value() {}
+  };
 
-      template<typename T>
-      struct opt_typed_value : opt_untyped_value {
-        T value;
+  template <typename T>
+  struct opt_typed_value : opt_untyped_value
+  {
+    T value;
 
-        opt_typed_value(const T& val) : value(val) {}
+    opt_typed_value(const T& val) : value(val) {}
 
-        opt_typed_value* clone() const override {
-          return new opt_typed_value(value);
-        }
-      };
-
-
-      struct opt_any_t {
-       private:
-        opt_untyped_value* value;
-
-       public:
-
-        template<typename T>
-        opt_any_t(const T& val) : value(new opt_typed_value<T>(val)) {}
-
-        opt_any_t(char const* s) : value(new opt_typed_value<std::string>(s)) {}
-
-        opt_any_t(opt_any_t const& a) : value(a.value->clone()) {}
-
-        opt_any_t& operator= (opt_any_t const& t) {
-          if(&t!=this) {
-            delete value;
-            value=t.value->clone();
-          }
-          return (*this);
-        }
-
-        ~opt_any_t() {
-          delete(value);
-        }
-
-
-        template<typename T>
-        explicit
-        operator T() const {
-          const opt_typed_value<T>& test
-            = dynamic_cast<const opt_typed_value<T>&>(*(this->value));
-          return test.value;
-        }
-
-      };
-
-      struct option_value_pair_t {
-        size_t id;
-        internal::opt_any_t value;
-        option_value_pair_t(size_t i, internal::opt_any_t v) : id(i), value(v) {}
-      };
-
+    opt_typed_value* clone() const override
+    {
+      return new opt_typed_value(value);
     }
-  }
-} //end of namespaces awali::dyn::internal, awali::dyn, and awali.
+  };
+
+
+  struct opt_any_t
+  {
+  private:
+    opt_untyped_value* value;
+
+  public:
+    template <typename T>
+    opt_any_t(const T& val) : value(new opt_typed_value<T>(val))
+    {}
+
+    opt_any_t(char const* s) : value(new opt_typed_value<std::string>(s)) {}
+
+    opt_any_t(opt_any_t const& a) : value(a.value->clone()) {}
+
+    opt_any_t& operator=(opt_any_t const& t)
+    {
+      if (&t != this) {
+        delete value;
+        value = t.value->clone();
+      }
+      return (*this);
+    }
+
+    ~opt_any_t() { delete (value); }
+
+
+    template <typename T>
+    explicit operator T() const
+    {
+      const opt_typed_value<T>& test
+          = dynamic_cast<const opt_typed_value<T>&>(*(this->value));
+      return test.value;
+    }
+  };
+
+  struct option_value_pair_t
+  {
+    size_t id;
+    internal::opt_any_t value;
+    option_value_pair_t(size_t i, internal::opt_any_t v) : id(i), value(v) {}
+    option_value_pair_t(std::string const&, std::string const&);
+  };
+
+}}} // namespace awali::dyn::internal
 #endif

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,38 +25,38 @@ namespace awali { namespace sttc {
      *
      * This type is used to specify that the automaton has no history.
      */
-    class no_history : public history_base {
+    class no_history final : public history_base {
     public:
 
       std::ostream&
-      print_state_name(state_t s, std::ostream& o,
-                       const std::string& fmt) const {
+      print_state_name(state_t, std::ostream& o,
+                       const std::string& /*fmt*/) const override {
         return o;
       }
 
 
-      history_kind_t get_nature() const {
+      history_kind_t get_nature() const override {
         return history_kind_t::NO_HISTORY;
       }
 
-      bool has_history(state_t s) const {
+      bool has_history(state_t) const override {
         return false;
       }
 
-      bool remove_history(state_t s) {
+      bool remove_history(state_t) override {
         return false;
       };
 
 
-      bool has_history() {
+      bool has_history() const override {
         return false;
       }
 
-      state_t get_state(state_t s) {
+      state_t get_state(state_t) override {
         throw std::runtime_error("Origin state not available");
       }
 
-      std::vector<state_t> get_state_set(state_t s) {
+      std::vector<state_t> get_state_set(state_t) override {
         throw std::runtime_error("Origin state set not available");
       }
     };

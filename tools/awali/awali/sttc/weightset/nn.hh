@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -94,10 +94,10 @@ namespace awali {
       }
       
       static value_t
-    rdiv(const value_t l, const value_t r)
+      rdiv(const value_t, const value_t)
       {
-      raise(sname(), "No division");
-    }
+        raise(sname(), "No division");
+      }
       
       static value_t
     ldiv(const value_t l, const value_t r)
@@ -110,6 +110,15 @@ namespace awali {
       {
         if ( v == 0u )
           return 1u;
+        else
+          return K;
+      }
+
+      static value_t
+      plus(const value_t v)
+      {
+        if ( v == 0u )
+          return 0u;
         else
           return K;
       }
@@ -197,7 +206,7 @@ namespace awali {
 
       static std::ostream&
       print(value_t v, std::ostream& o,
-            const std::string& format= "text")
+            const std::string& /*format*/= "text")
       {
         if(v>K)
           v=K;
@@ -221,10 +230,9 @@ namespace awali {
       json::node_t*
       to_json() const
       {
-        switch (version) {
-        case 0:
-          throw parse_exception("[nn] Unsupported fsm-json version:"
-                                + std::to_string(version));
+      version::check_fsmjson<version>();
+      switch (version) {
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           json::object_t* obj = new json::object_t();
@@ -238,10 +246,9 @@ namespace awali {
     json::node_t*
     value_to_json(value_t v) const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[nn] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::int_t(v);
@@ -252,16 +259,15 @@ namespace awali {
     value_t
     static value_from_json(json::node_t const* p)
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[nn] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           int a=p->to_int();
           if(a<0)
             throw parse_exception("[nn] No negative value in bounded semiring");
-          if(a>K)
+          if(a > (int) K)
             a=K;
           return a;
       }

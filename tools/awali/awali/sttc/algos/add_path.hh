@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -93,7 +93,6 @@ namespace awali {
       auto add_path(Aut& aut, state_t p, state_t q, const typename context_t_of<Aut>::ratexp_t& exp)
         -> typename std::enable_if<labelset_t_of<Aut>::has_one(),void>::type
       {
-        const auto& ws = *aut->weightset();
         auto ste = compact_thompson<Aut>(aut->context(), exp);
         std::unordered_map<state_t,state_t> map;
         state_t ste_init = ste->dst_of(*(ste->initial_transitions().begin()));

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <awali/sttc/labelset/wordset.hh>
 #include <awali/sttc/labelset/nullableset.hh>
 #include <awali/sttc/labelset/oneset.hh>
+#include <awali/sttc/labelset/tupleset.hh>
 #include <awali/sttc/ctx/context.hh>
 
 
@@ -155,20 +156,70 @@ namespace awali {
       }
 
     };
+    
+    ///specialisation of labelset_trait for tupleset
+    template<typename... Ts>
+    struct labelset_trait<tupleset<Ts...>> {
+      using self_t = tupleset<Ts...>;
+      using not_nullable_t = self_t;
+      using nullable_t 
+        = tupleset<typename labelset_trait<Ts>::nullable_t...>;
+      using wordset_t
+	= tupleset<typename labelset_trait<Ts>::wordset_t...>;
+      using ratlabelset_t = self_t;
+
+      static nullable_t get_nullableset(const self_t& ls) {
+        return get_nullableset(ls, ls.indices);
+      }
+ 
+     template<std::size_t... I>
+     static nullable_t get_nullableset(const self_t& ls,
+                                       awali::internal::index_sequence<I...>)
+     {
+        return nullable_t{(labelset_trait<typename std::tuple_element<I, std::tuple<Ts...>>::type>::get_nullableset(ls.template set<I>()))...};
+     }
+      
+      static wordset_t get_wordset(const self_t& ls) {
+        return get_wordset(ls, ls.indices);
+      }
+
+      template<std::size_t... I>
+      static wordset_t get_wordset(const self_t& ls,
+                                       awali::internal::index_sequence<I...>)
+     {
+        return nullable_t{(labelset_trait<typename std::tuple_element<I, std::tuple<Ts...>>::type>::get_wordset(ls.template set<I>()))...};
+     }
+
+      static const ratlabelset_t& get_ratlabelset(const self_t& ls) {
+        return ls;
+      }
+
+      static not_nullable_t const& get_not_nullableset(const self_t& ls)
+      {
+        return ls;
+      }
+
+
+    };
 
     ///specialisation of labelset_trait for oneset
     template<>
     struct labelset_trait<oneset> {
-      using nullable_t = oneset;
-      using ratlabelset_t = oneset;
-      /*
+      using self_t = oneset;
+      using nullable_t = self_t;
+      using not_nullable_t = self_t;
+      using ratlabelset_t = self_t;
+      
       static ratlabelset_t get_ratlabelset(const oneset& os) {
         return os;
       }
-      */
+      static not_nullable_t const& get_not_nullableset(const self_t& ls)
+      {
+        return ls;
+      }
+      
     };
-
-
+    
     template<typename L>
     auto
     get_letterset(const L& labelset) -> typename labelset_trait<L>::letterset_t
@@ -218,10 +269,16 @@ namespace awali {
       return {get_wordset(*ctx.labelset()), *ctx.weightset()};
     }
 
+  
+
     template<typename Context>
-    using ratexpset_of = ratexpset<
-      context<typename labelset_trait<typename Context::labelset_t>::ratlabelset_t,
-              typename Context::weightset_t>>;
+    using ratexp_context_of 
+      = context< typename labelset_trait<typename Context::labelset_t>::ratlabelset_t,
+                 typename Context::weightset_t >;
+
+
+    template<typename Context>
+    using ratexpset_of = ratexpset<ratexp_context_of<Context>>;
 
     template<typename Context>
     using nullable_of =
@@ -234,10 +291,8 @@ namespace awali {
               typename Context::weightset_t>;
 
     template<typename Context>
-    auto
-    get_rat_context(const Context& ctx) ->
-      context<typename labelset_trait<typename Context::labelset_t>::ratlabelset_t,
-              typename Context::weightset_t>
+    ratexp_context_of<Context>
+    get_rat_context(const Context& ctx)
     {
       return {get_ratlabelset(*ctx.labelset()), *ctx.weightset()};
     }

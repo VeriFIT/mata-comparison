@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ namespace awali { namespace sttc
       using const_reverse_iterator = typename ratexps_t::const_reverse_iterator;
       using reverse_iterator = const_reverse_iterator;
 
-      virtual type_t type() const { return Type; };
+      virtual type_t type() const override { return Type; };
 
       const_iterator begin() const;
       const_iterator end() const;
@@ -160,7 +160,7 @@ namespace awali { namespace sttc
       /// Return a copy of children.
       ratexps_t subs() const;
 
-      virtual void accept(typename node_t::const_visitor &v) const;
+      virtual void accept(typename node_t::const_visitor &v) const override;
 
     private:
       ratexps_t sub_;
@@ -184,11 +184,11 @@ namespace awali { namespace sttc
       using value_t = typename node_t::value_t;
 
       unary(value_t exp);
-      virtual type_t type() const { return Type; };
+      virtual type_t type() const override { return Type; };
 
       const value_t sub() const;
 
-      virtual void accept(typename node_t::const_visitor &v) const;
+      virtual void accept(typename node_t::const_visitor &v) const override;
 
     private:
       value_t sub_;
@@ -217,7 +217,7 @@ namespace awali { namespace sttc
       using node_t = node<label_t, weight_t>;
       using value_t = typename super_type::value_t;
 
-      virtual type_t type() const { return Type; };
+      virtual type_t type() const override { return Type; };
 
       const value_t sub() const;
       const weight_t& weight() const;
@@ -229,7 +229,7 @@ namespace awali { namespace sttc
         , weight_(that.weight_)
       {}
 
-      virtual void accept(typename node_t::const_visitor &v) const;
+      virtual void accept(typename node_t::const_visitor &v) const override;
 
     private:
       value_t sub_;
@@ -268,9 +268,9 @@ namespace awali { namespace sttc
       using node_t = node<label_t, weight_t>;
       using value_t = typename node_t::value_t;
 
-      virtual type_t type() const { return Type; };
+      virtual type_t type() const override { return Type; };
 
-      virtual void accept(typename node_t::const_visitor &v) const;
+      virtual void accept(typename node_t::const_visitor &v) const override;
     };
 
 
@@ -288,9 +288,9 @@ namespace awali { namespace sttc
 
       atom(const label_t& value);
 
-      virtual type_t type() const { return type_t::atom; };
+      virtual type_t type() const override { return type_t::atom; };
 
-      virtual void accept(typename node_t::const_visitor &v) const;
+      virtual void accept(typename node_t::const_visitor &v) const override;
       const label_t& value() const;
 
     private:

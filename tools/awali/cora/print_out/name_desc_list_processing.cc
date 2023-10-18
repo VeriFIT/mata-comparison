@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -168,7 +168,7 @@ std::vector<name_desc_pair_t>
     std::string caption = "";
     std::string name = p.second.name;
     std::ifstream fic(p.second.full());
-    json_ast_t jo = json_ast::from(fic);
+    json_ast_t jo = internal::metadata_ast(fic);
     if ( jo->has_path({"metadata","caption"}) )
       caption = jo->at("metadata")->at("caption")->to_string();
     fic.close();
@@ -333,7 +333,7 @@ void process_name_desc_list(std::vector<T>& list, std::string& title,
   print_title(title);
   std::cout << std::endl;
 
-  print_name_desc_list(v, col_name, col_desc);
+  print_name_desc_list(v, col_name, col_desc, cut_at_word);
   std::cout << std::endl;
   
   if (is_chc) 
@@ -343,6 +343,40 @@ void process_name_desc_list(std::vector<T>& list, std::string& title,
   
   return;
 }
+
+// /*  process name_desc list  without header printing  (for command lists) 
+//     but with a (descriptive) comment for the kind*/
+// template<typename T>
+// void process_name_desc_list_with_comment(std::vector<T>& list, std::string& title,
+//                             std::string& comment, bool cut_at_word = true) 
+// {
+//   size_t col_name;
+//   size_t col_desc;
+//   bool is_chc = false;
+//   bool dbl_tp = false;
+//   
+//   size_t terminal_width = balanced_term_width();
+// 
+//   std::vector<name_desc_pair_t> v = tagged_cmd_list(list, is_chc, dbl_tp);
+// 
+//   name_desc_list_layout(v, terminal_width, col_name, col_desc);
+//   
+//   std::cout << std::endl;
+//   print_title(title);
+//   std::cout << std::endl;
+// 
+//   print_name_desc_list(v, col_name, col_desc);
+//   std::cout << std::endl;
+//   
+//   if (is_chc) 
+// 	variable_width_print(vw_doc::is_chc_str, terminal_width);
+//   if (dbl_tp) 
+// 	variable_width_print(vw_doc::dbl_tp_str, terminal_width);
+//   
+//   variable_width_print(comment, terminal_width);
+//   
+//   return;
+// }
 
 /*  process name_desc list  with header printing  
    (for options and  examples lists) no need for tagging.               */
@@ -363,7 +397,7 @@ void process_name_desc_list_with_headers(std::vector<T>& list, std::string& titl
   std::cout << std::endl;
   
   print_name_desc_header(col_name, col_desc, header_left, header_right);
-  print_name_desc_list(list, col_name, col_desc);
+  print_name_desc_list(list, col_name, col_desc, cut_at_word);
   std::cout << std::endl;
   
   return;

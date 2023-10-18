@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #include <awali/sttc/misc/attributes.hh>
 #include <awali/common/enums.hh>
 #include <awali/utils/heap.hh>
-#include <awali/common/ato.hh>
+#include <awali/common/ato.cc>
 
 #define STATS
 
@@ -48,7 +48,7 @@ namespace awali { namespace sttc {
     int debug_level()
     {
       if (auto cp = getenv("AWALI_DEBUG")) {
-          return  *cp ? awali::atoi(cp) : 1;
+          return  *cp ? awali::strict_atoi(cp) : 1;
       }
         else
         return 0;
@@ -449,7 +449,7 @@ namespace awali { namespace sttc {
     switch (dir)
     {
     case direction_t::BACKWARD:
-      res = copy(aut,keep_history);
+      res = copy(aut,keep_history, false, true);
       proper_here(res, dir, prune);
       return res;
     case direction_t::FORWARD:

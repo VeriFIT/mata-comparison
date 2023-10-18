@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,10 +25,12 @@
 #include <awali/sttc/algos/synchronize.hh>
 #include <awali/sttc/algos/real_time.hh>
 #include <awali/sttc/algos/letterize_tape.hh>
+#include <awali/sttc/algos/proper.hh>
 #include <awali/sttc/algos/is_of_finite_image.hh>
 #include <awali/sttc/labelset/letterset.hh>
 #include <awali/sttc/labelset/nullableset.hh>
 #include <awali/sttc/labelset/wordset.hh>
+#include <awali/sttc/ctx/lan_char.hh>
 #include <awali/dyn/bridge_sttc/explicit_automaton.cc>
 #include <awali/sttc/misc/add_epsilon_trans.hh> //get_epsilon
 #include<stdexcept> //get_epsilon
@@ -39,7 +41,7 @@ namespace awali {
 
   static const size_t N=std::tuple_size<labelset_t::valuesets_t>::value;
 
-  extern "C" unsigned num_tapes(dyn::automaton_t tdc) {
+  extern "C" unsigned num_tapes(dyn::automaton_t) {
           return N;
   }
 
@@ -226,29 +228,67 @@ namespace awali {
     return dyn::make_automaton(sttc::projections<1,0>(td));
   }
 
-  extern "C" bool is_functional(dyn::automaton_t tdc) {
-    auto td = dyn::get_stc_automaton<context_t>(tdc);
-    return sttc::is_functional(td);
-  }
-
   extern "C" dyn::automaton_t lift_tdc(dyn::automaton_t tdc) {
     auto td = dyn::get_stc_automaton<context_t>(tdc);
     return dyn::make_automaton(sttc::lift_tdc(td));
   }
 
+  template<typename T>
+  struct dispatch_TDC {
+    static bool is_functional(dyn::automaton_t tdc) {
+      throw std::runtime_error("is_functional only supported for transducer with char letters");
+    }
+
+    static bool is_synchronizable(dyn::automaton_t tdc) {
+      throw std::runtime_error("is_synchronizable only supported for transducer with char letters");
+    }
+
+    static dyn::automaton_t synchronize(dyn::automaton_t tdc) {
+      throw std::runtime_error("synchronize only supported for transducer with char letters");
+    }
+
+    static dyn::automaton_t realtime(dyn::automaton_t tdc) {
+      throw std::runtime_error("realtime only supported for transducer with char letters");
+    }
+  };
+
+  template<typename W>
+  struct dispatch_TDC<sttc::context<sttc::ctx::lat<sttc::ctx::lan_char,sttc::ctx::lan_char>,W> > {
+    static bool is_functional(dyn::automaton_t tdc) {
+      auto td = dyn::get_stc_automaton<context_t>(tdc);
+      return sttc::is_functional(td);
+    }
+
+    static bool is_synchronizable(dyn::automaton_t tdc) {
+      auto td = dyn::get_stc_automaton<context_t>(tdc);
+      return sttc::is_synchronizable(td);
+    }
+
+    static dyn::automaton_t synchronize(dyn::automaton_t tdc) {
+      auto td = dyn::get_stc_automaton<context_t>(tdc);
+      return dyn::make_automaton(sttc::synchronize(td));
+    }
+
+    static dyn::automaton_t realtime(dyn::automaton_t tdc) {
+      auto td = dyn::get_stc_automaton<context_t>(tdc);
+      return dyn::make_automaton(sttc::realtime(td));
+    }
+  };
+  
+  extern "C" bool is_functional(dyn::automaton_t tdc) {
+    return dispatch_TDC<context_t>::is_functional(tdc);
+  }
+
   extern "C" bool is_synchronizable(dyn::automaton_t tdc) {
-    auto td = dyn::get_stc_automaton<context_t>(tdc);
-    return sttc::is_synchronizable(td);
+    return dispatch_TDC<context_t>::is_synchronizable(tdc);
   }
 
   extern "C" dyn::automaton_t synchronize(dyn::automaton_t tdc) {
-    auto td = dyn::get_stc_automaton<context_t>(tdc);
-    return dyn::make_automaton(sttc::synchronize(td));
+    return dispatch_TDC<context_t>::synchronize(tdc);
   }
 
   extern "C" dyn::automaton_t realtime(dyn::automaton_t tdc) {
-    auto td = dyn::get_stc_automaton<context_t>(tdc);
-    return dyn::make_automaton(sttc::realtime(td));
+    return dispatch_TDC<context_t>::realtime(tdc);
   }
 
   extern "C" bool is_realtime(dyn::automaton_t tdc) {
@@ -262,6 +302,13 @@ namespace awali {
       return dyn::make_automaton(sttc::letterize_tape<0>(td));
     else
       return dyn::make_automaton(sttc::letterize_tape<1>(td));
+  }
+
+  extern "C" dyn::automaton_t subnormalize(dyn::automaton_t tdc) {
+    auto td = dyn::get_stc_automaton<context_t>(tdc);
+    auto ret=sttc::letterize_tape<0>(sttc::letterize_tape<1>(td));
+    proper_here(ret);
+    return dyn::make_automaton(ret);
   }
 
   extern "C" bool is_of_finite_image(dyn::automaton_t tdc, unsigned i) {
@@ -295,6 +342,22 @@ namespace awali {
         return coverstring<labelset_t::valueset_t<1>>::tostring(std::get<1>(td->label_of(tr)));
     throw std::runtime_error("get_final_output: not final state");
   }
+
+
+  
+  extern "C" dyn::automaton_t
+  make_nullable_under_lat(dyn::automaton_t tdc)
+  {
+    auto sttc_tdc = dyn::get_stc_automaton<context_t>(tdc);
+    context_t const& c = sttc_tdc->context();
+    using nullable_context_t = sttc::nullable_of<context_t>;
+    nullable_context_t new_c = get_nullable_context(c);
+    auto sttc_new_tdc = sttc::make_mutable_automaton(new_c);
+    sttc::copy_into(sttc_tdc, sttc_new_tdc);
+    return dyn::make_automaton(sttc_new_tdc);
+  }
+
+
 
 }
 

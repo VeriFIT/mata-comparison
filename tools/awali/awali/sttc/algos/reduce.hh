@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -511,7 +511,7 @@ namespace awali { namespace sttc {
         // The permutation array corresponds to a permutation of the indices
         // (i.e. the columns of the matrices)
         // such that permtuation[k] is the pivot of the k-th vector of the basis.
-        unsigned permutation[dimension];
+        unsigned* permutation = new unsigned[dimension];
         for (unsigned i = 0; i < dimension; ++i)
           permutation[i] = i;
         // If the initial vector is null, the function immediatly returns
@@ -590,6 +590,7 @@ namespace awali { namespace sttc {
                                        mu.first, vect_new_basis[b]);
               }
         }
+        delete[] permutation;
       }
 
 

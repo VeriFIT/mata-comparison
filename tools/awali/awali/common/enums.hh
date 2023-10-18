@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ namespace awali {
   };
 
 
-  /** The différent algorithms for computing the minimal quotient. */
+  /** The different algorithms for computing the minimal quotient. */
   enum quotient_algo_t {
     MOORE,
     HOPCROFT
@@ -94,6 +94,8 @@ namespace awali {
     COMPACT_THOMPSON,
     /** A variant of the Thompson automaton, with no circuit of epsilon-transitions; in this variant, the initial state may be another final state.*/
     WEIGHTED_THOMPSON,
+    /// Alias to {@link NET}
+    NET=WEIGHTED_THOMPSON,
     /// Standard automaton followed by quotient
     STANDARD_AND_QUOTIENT
   };

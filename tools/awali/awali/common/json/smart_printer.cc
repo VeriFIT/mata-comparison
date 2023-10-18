@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ void heighter_t::enter(node_t const* node)
 
 
 void
-heighter_t::after_child(node_t const* node, uint_or_string_t const& uos,
+heighter_t::after_child(node_t const* node, uint_or_string_t const&,
                         node_t const* child)
 {
   unsigned x  = map[child];
@@ -84,7 +84,7 @@ inline_sizer_t::leave(int_t const* node)
 void
 inline_sizer_t::leave(string_t const* node)
 {
-  map[node]=escape(node->value).size();
+  map[node]=parser_t::escape(node->value).size();
 }
 
 
@@ -123,7 +123,7 @@ inline_sizer_t::enter(array_t const* node)
 
 
 void
-inline_sizer_t::after_child(array_t const* node, unsigned i,
+inline_sizer_t::after_child(array_t const* node, unsigned,
                             node_t const* child)
 {
   map[node] += map[child];
@@ -165,7 +165,7 @@ inline_sizer_t::between_children(array_t const* node)
 unsigned
 inline_sizer_t::operator[] (node_t const* node)
 {
-  return map.find(node)->second;
+  return map.at(node);
 }
 
 
@@ -178,9 +178,9 @@ inline_sizer_t::height_of(node_t const* node)
 
 
 
-/* =============================================================================
- * smart_printer_t
-============================================================================= */
+/*==============================================================================
+   smart_printer_t
+==============================================================================*/
 
 unsigned
 smart_printer_t::max ()
@@ -194,7 +194,7 @@ smart_printer_t::indent(int i)
 {
   _out << '\n' << std::string(indent_amount+i, ' ');
 }
-
+ 
 
 void
 smart_printer_t::smart_printer_t::leaf(double d)
@@ -211,7 +211,7 @@ smart_printer_t::smart_printer_t::leaf(double d)
 void
 smart_printer_t::leaf(std::string const& str)
 {
-  escape_and_print(_out,str);
+  parser_t::escape_and_put(_out,str);
 }
 
 
@@ -288,6 +288,37 @@ smart_printer_t::enter(array_t const* node)
       _out << "[";
     else
       _out << "  [";
+    if (node->arity() > 0) {
+      unsigned max_child_size = 0;
+      for (node_t const* child : *node)
+        if (sizer[child] > max_child_size)
+          max_child_size = sizer[child];
+      unsigned item_width = max_child_size+3;
+      unsigned count = (max()-indent_amount) / item_width;
+      //item_width = (max()-indent_amount) / count;
+      if (count > 1) {
+        unsigned x = 0;
+        unsigned count_down = node->arity();
+//         unsigned remainder = ((node->arity()) % count);
+//         if (remainder > 0)
+//           remainder = count - remainder;
+        for (node_t const* child : *node) {
+          put_inline(_out, child);
+          if (--count_down > 0) {
+            _out << ",";
+            if (++x == count) {
+              indent();
+              x = 0;
+            }
+            else
+              _out << std::string (item_width-sizer[child]-1, ' ');
+          }
+//           else 
+//               _out << std::string ((remainder+1)*item_width-sizer[child]-3, ' ');
+        }
+        stop(visit_t::IGNORE_UNVISITED_CHILDREN);
+      }
+    }
   }
   else
     _out << "[";
@@ -295,7 +326,7 @@ smart_printer_t::enter(array_t const* node)
 
 
 void
-smart_printer_t::leave(array_t const* node)
+smart_printer_t::leave(array_t const*)
 {
   if (inliner == nullptr && _max != 0) {
     _out << "]";
@@ -316,6 +347,41 @@ smart_printer_t::enter(object_t const* node)
       _out << "{";
     else
       _out << "  {";
+    if (node->arity() > 0) {
+      unsigned max_item_size = 0;
+      for (auto const& pair : *node) {
+        unsigned item_size = sizer[pair.second]
+                             + parser_t::escape(pair.first).size();
+        if (item_size > max_item_size)
+          max_item_size = item_size;
+      }
+      max_item_size += 2; // comma and colon
+      max_item_size += 2; // # of spaces between items
+      unsigned count = (max()-indent_amount+2) / max_item_size;
+      if (count > 1) {
+//         Next line makes takes all available horizontal space
+//         max_item_size = (max()-indent_amount) / (count-1);
+        unsigned x = 0;
+        unsigned count_down = node->arity();
+        for (auto const& pair : *node) {
+          parser_t::escape_and_put(_out, pair.first) << ":";
+          put_inline(_out, pair.second);
+          if (--count_down > 0) {
+            _out << ",";
+            if (++x == count) {
+              indent();
+              x = 0;
+            }
+            else {
+              unsigned item_size = sizer[pair.second] 
+                                   + parser_t::escape(pair.first).size()+2;
+              _out << std::string (max_item_size-item_size, ' ');
+            }
+          }
+        }
+        stop(visit_t::IGNORE_UNVISITED_CHILDREN);
+      }
+    }
   }
   else
     _out << "{";
@@ -324,7 +390,7 @@ smart_printer_t::enter(object_t const* node)
 
 
 void
-smart_printer_t::leave(object_t const* node)
+smart_printer_t::leave(object_t const*)
 {
   if (inliner == nullptr && _max != 0)  {
     decr_indent();
@@ -337,7 +403,7 @@ smart_printer_t::leave(object_t const* node)
 
 
 void
-smart_printer_t::between_children(object_t const* node)
+smart_printer_t::between_children(object_t const*)
 {
   _out << ",";
   if ((inliner == nullptr) && (_max != 0))
@@ -361,8 +427,8 @@ smart_printer_t::between_children(array_t const* node)
 
 
 void
-smart_printer_t::after_child(node_t const* node,
-                             uint_or_string_t const& uos,
+smart_printer_t::after_child(node_t const*,
+                             uint_or_string_t const&,
                              node_t const* child)
 {
   if (!is_last(child))
@@ -372,7 +438,7 @@ smart_printer_t::after_child(node_t const* node,
 
 
 void
-smart_printer_t::before_child(node_t const* node, uint_or_string_t const& uos,
+smart_printer_t::before_child(node_t const*, uint_or_string_t const&,
                               node_t const* child)
 {
   if (is_last(child)) {
@@ -386,7 +452,7 @@ smart_printer_t::before_child(node_t const* node, uint_or_string_t const& uos,
 
 
 void
-smart_printer_t::before_child(array_t const* node, unsigned i,
+smart_printer_t::before_child(array_t const*, unsigned,
                               node_t const* child)
 {
   if (inliner == nullptr && !child->is_leaf()) {
@@ -400,7 +466,7 @@ smart_printer_t::before_child(array_t const* node, unsigned i,
 
 
 void
-smart_printer_t::before_child(object_t const* node, std::string const& key,
+smart_printer_t::before_child(object_t const*, std::string const& key,
                               node_t const* child)
 {
   _out << '\"' << key<< "\":";
@@ -435,7 +501,7 @@ smart_printer_t::leave(node_t const* node)
 
 
 smart_printer_t::smart_printer_t(std::ostream& o, unsigned m)
-: _out(o), indent_amount(0), inliner(nullptr), _max(m)
+: _out(o), indent_amount(0), columns(0), inliner(nullptr), _max(m)
 {
   max_vect.push_back(_max-1);
 }
@@ -459,9 +525,16 @@ smart_printer_t::run(node_t const* tree)
 }
 
 
+std::ostream& 
+put_inline(std::ostream& out, node_t const* node)
+{
+  smart_printer_t printer(out,0);
+  printer.run(node);
+  return out;
+}
 
 std::ostream& 
-put(node_t const* node, std::ostream& out)
+put(std::ostream& out, node_t const* node)
 {
   smart_printer_t printer(out);
   printer.run(node);

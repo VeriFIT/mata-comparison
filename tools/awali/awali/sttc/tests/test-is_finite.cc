@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,30 +30,50 @@
 #include<awali/sttc/weightset/maxmin.hh>
 #include<awali/sttc/weightset/is_finite.hh>
 #include<awali/sttc/misc/raise.hh>
+#include <awali/sttc/tests/null_stream.hxx>
 
+using namespace awali;
 using namespace awali::sttc;
 
+std::ostream * osc;
+
 template<typename WS>
-void test(const WS& ws, bool locally_finite=false, bool finite=false) {
+void test(const WS& ws, star_status_t star_status, bool show_one=true, bool locally_finite=false, bool finite=false) {
+  *osc << "------------" << std::endl
+       << "Semiring " << WS::sname() << std::endl
+       << "------------" << std::endl;
   require((is_finite(ws) == finite), "Semiring ",WS::sname(),": wrong finite status");
+  *osc <<  "Finite status \t -> OK" << std::endl;
   require((is_locally_finite(ws) == locally_finite), "Semiring ",WS::sname(),": wrong locally finite status");
+  *osc << "Locally finite status \t -> OK" << std::endl;
+  require((ws.is_commutative_semiring() == true), "Semiring ",WS::sname(),": wrong commutativity status");
+  *osc << "Commutativity status \t -> OK" << std::endl;
+  require((ws.show_one() == show_one), "Semiring ",WS::sname(),": wrong 'show one' status");
+  *osc << "'Show one' status \t -> OK" << std::endl;
+  require((ws.star_status() == star_status), "Semiring ",WS::sname(),": wrong star status");  
+  *osc << "Star status \t -> OK" << std::endl;
 }
 
 
-int main() {
-  test(b(),true,true);
-  test(n());
-  test(z());
-  test(q());
-  test(r());
-  test(c());
-  test(f2(), true, true);
-  test(nn<3>(), true, true);
-  test(noo());
-  test(zz<5>(), true, true);
-  test(pmax());
-  test(zmax());
-  test(zmin());
-  test(maxmin(), true);
+int main(int argc, char **argv) {
+  if(argc==2)
+    osc = &std::cout;
+  else
+    osc = &null_stream;
+  
+  test(b(),star_status_t::STARRABLE,false,true,true);
+  test(n(),star_status_t::NON_STARRABLE,false);
+  test(z(),star_status_t::NON_STARRABLE,false);
+  test(q(),star_status_t::ABSVAL,false);
+  test(r(),star_status_t::ABSVAL,false);
+  test(c(),star_status_t::ABSVAL,false);
+  test(f2(),star_status_t::NON_STARRABLE,false, true, true);
+  test(nn<3>(),star_status_t::STARRABLE,false, true, true);
+  test(noo(),star_status_t::STARRABLE,false);
+  test(zz<5>(),star_status_t::NON_STARRABLE,false, true, true);
+  test(pmax(),star_status_t::TOPS,false);
+  test(zmax(),star_status_t::TOPS);
+  test(zmin(),star_status_t::TOPS);
+  test(maxmin(),star_status_t::STARRABLE,true , true);
   return 0;
 }

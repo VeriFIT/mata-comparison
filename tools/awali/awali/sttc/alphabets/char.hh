@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include <awali/common/json/node.cc>
 #include <awali/sttc/misc/escape.hh>
+#include <awali/common/version.hh>
 
 namespace awali {
   namespace sttc {
@@ -32,6 +33,9 @@ namespace awali {
     public:
       using letter_t = char;
       using word_t = std::string;
+      
+      virtual ~char_letters() = default;
+
 
       static std::string sname()
       {

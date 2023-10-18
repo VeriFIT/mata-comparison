@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <awali/common/enums.hh>
 #include <awali/sttc/misc/stream.hh>
 #include <awali/sttc/weightset/b.hh>
+#include <awali/sttc/weightset/lr_parse_number.hh>
 
 namespace awali {
   namespace sttc {
@@ -108,6 +109,15 @@ namespace awali {
         raise("N: star: invalid value: ", format(*this, v));
     }
 
+    value_t
+    plus(const value_t v) const
+    {
+      if (is_zero(v))
+        return zero();
+      else
+        raise("N: star: invalid value: ", format(*this, v));
+    }
+
     constexpr static bool is_special(value_t)
     {
       return false;
@@ -166,18 +176,9 @@ namespace awali {
       return v;
     }
 
-    value_t
-    parse(const std::string & s, size_t& p) const {
-      size_t i=p;
-      for(; i>0 && s[i-1]>='0' && s[i-1]<='9'; --i)
-        ;
-      if(i==p)
-        throw parse_exception("Wrong N value");
-      std::istringstream st(s.substr(i, p-i));
-      value_t x;
-      st >> x;
-      p=i;
-      return x;
+    static value_t
+    parse(const std::string & s, size_t& p) {
+      return internal::lr_parse_int(s,p);
     }
 
     static value_t
@@ -192,13 +193,13 @@ namespace awali {
 
     static std::ostream&
     print(const value_t v, std::ostream& o,
-          const std::string& fmt = "text")
+          const std::string& /*fmt*/ = "text")
     {
       return o << v;
     }
 
-    std::ostream&
-    print_set(std::ostream& o, const std::string& format = "text") const
+    static std::ostream&
+    print_set(std::ostream& o, const std::string& format = "text")
     {
       if (format == "latex")
         o << "\\mathbb{N}";
@@ -215,10 +216,9 @@ namespace awali {
     value_t
     static value_from_json(json::node_t const* p)
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[N] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           int a=p->to_int();
@@ -233,10 +233,9 @@ namespace awali {
     json::node_t*
     value_to_json(value_t v) const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[N] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::int_t(v);
@@ -247,10 +246,9 @@ namespace awali {
     json::object_t*
     to_json() const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[N] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           json::object_t* obj = new json::object_t();

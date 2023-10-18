@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ show_area(area_t area)
   std::string blank = std::string(area.w, '#');
   attrset(A_NORMAL);
   for (int x = 0; x<area.h; x++)
-    mvprintw(area.r+x, area.c, blank.c_str());
+    mvprintw(area.r+x, area.c, "%s", blank.c_str());
   mvprintw( area.r+(area.h-1)/2,
             area.c+(area.w-1)/2-4,
             "(%d,%d)(%d,%d)", area.r, area.c, area.h, area.w);
@@ -361,7 +361,7 @@ void
 editter_t::refresh_message()
 {
   using action_t = queued_ostream_t::action_t;
-  int x, y;
+  int x=0, y=0;
   action_t action = message_queue.expected_action();
   switch (action) {
     case action_t::NOTHING:
@@ -794,6 +794,7 @@ editter_t::wait_for_string(std::string& result, size_t width)
         case BACKSPACE:
           if (j>0)
             j--;
+        // fall through
         case DELETE:
           if ((i > 0) && (j < i)) {
             query_area.overwrite_ch(' ', STANDOUT);
@@ -848,11 +849,13 @@ editter_t::action_main_meta()
           action_allow_epsilon();
           break;
         }
+      // fall through
       case 'l' :
         if (!is_transducer) {
           action_meta_addletter();
           break;
         }
+      // fall through
       default:
         print_message(sentence_t(message::unknown_action) /= c);
       }
@@ -950,6 +953,8 @@ editter_t::action_main_state()
       }
       if (c != 'd')
         break;
+    // fall through
+    // if key 'd' was pressed
     case BACKSPACE:
     case DELETE:
       action_state_delete();
@@ -1177,7 +1182,7 @@ editter_t::edit_tr_pack(transition_pack_t& tr, int off)
       return false;
     case NORMAL:
       result += c;
-    //FALLTRHOUGH to NEXT
+    // fall through
     case NEXT: {
       bool success = false;
       if (i == 0) {
@@ -1207,19 +1212,19 @@ editter_t::edit_tr_pack(transition_pack_t& tr, int off)
             print_message("Please enter a destination state.");
         else {
           bool b = false;
-          int i = 0;
+          int tape_n = 0;
           for (std::string const& label : tr.labels) {
             b |= (label == transition_pack_t::DEFAULT);
             if (b)
               print_message(
                   sentence_t("Please enter label for tape %s.") /=  i
               );
-            i++;
+            tape_n++;
           }
           if (!b) {
             if (ctx->weight_to_string(ctx->weight_zero()) ==  tr.weight) {
-              bool c = ask_confirmation(b, true, sentence_t("Given weight is the neutral element for addition."));
-              b &= c;
+              bool b2 = ask_confirmation(b, true, sentence_t("Given weight is the neutral element for addition."));
+              b &= b2;
               b = !b;
               i = 1;
             }
@@ -1233,21 +1238,23 @@ editter_t::edit_tr_pack(transition_pack_t& tr, int off)
       }
       else { //label
         int k = i-2;
-        std::string question = 
+        std::string question2 = 
           is_transducer ? "New label for tape "+std::to_string(k)+"?"
                         : "New label?";
         success = ask_label(result,
                             tr.labels[k] == transition_pack_t::DEFAULT
                               ? "" : tr.labels[k],
                             k, 
-                            question);
+                            question2);
         if (success)
           tr.labels[k] = result;
       }
       query_area.erase();
       if (!success)
         break;
-    }//FALLTHROUGH to RIGHT if success
+    }
+    // Fall through
+    // to RIGHT if success
     case RIGHT:
       if (i<maxi-1)
         i++;
@@ -1438,6 +1445,7 @@ editter_t::ask_long_string(std::string& result, std::string const& question)
     case BACKSPACE:
       if (j>0)
         j--;
+    // fall through
     case DELETE:
       if ((i > 0) && (j < i)) {
         result.erase(j, 1);
@@ -1748,7 +1756,7 @@ editter_t::ask_data( std::string& result,
           stop = true;
           break;
         }
-          
+      // fall through
       default: {
         if (validator.validate(result)) {
           stop = true;

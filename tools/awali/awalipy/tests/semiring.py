@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,13 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
-cmd_folder=os.getcwd()
-if cmd_folder not in sys.path:
-    sys.path.insert(0, cmd_folder)
+import importer
 
 
-semirings =   [  'B',                    'Z',         'F2',               \
+semirings =   [  'B',
+                 'Z',                        'F2',               \
                  'Z-min-plus',                      'Z-max-plus', \
                  'R',                             'R-max-prod', \
                  'Q' ,                           'C',\
@@ -29,7 +27,8 @@ semirings =   [  'B',                    'Z',         'F2',               \
                  'N7'
               ]
 #first value is semiring 0's, second is semiring 1's
-values_list = [ ['0','1','1','1','1'],  ['0','1','-10','-1','15'], ['0','1','1','1','1'],  \
+values_list = [ ['false','true','true','true','true'],  
+                ['0','1','-10','-1','15'], ['0','1','1','1','1'],  \
                 ['oo','0','-10','2','15'],  ['-oo','0','-10','2','15']  ,\
                 ['0','1','0.32','-3.1415','10'],  ['0','1','4','2.7646','3.22222'],\
                 ['0','1','3/2','-1/2','4' ] ,     ['0','1','2+i','3+i','1-2i'],\
@@ -39,7 +38,7 @@ values_list = [ ['0','1','1','1','1'],  ['0','1','-10','-1','15'], ['0','1','1',
 
               ]
 # semiring addition of the last two values
-add_list=     [ '1',                     '14',                      '1', \
+add_list=     [ 'true',                     '14',                      '1', \
                                                                     #this addition in F2 is false on purpose
                 '2',                                '15', \
                 '6.8585',                         '3.22222', \

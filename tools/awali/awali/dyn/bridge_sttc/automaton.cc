@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -69,13 +69,13 @@ namespace awali {
   //}
 
   template <typename C, typename T>
-  void change_alphabet_(dyn::automaton_t aut, std::set<char>& v, priority::ONE<T>)
+  void change_alphabet_(dyn::automaton_t, std::set<char>&, priority::ONE<T>)
   {
     throw std::runtime_error("change_alphabet only supported for WFA with char alphabet");
   }
   
   template <typename C, typename T>
-  void change_int_alphabet_(dyn::automaton_t aut, std::set<int>& v, priority::ONE<T>)
+  void change_int_alphabet_(dyn::automaton_t, std::set<int>&, priority::ONE<T>)
   {
     throw std::runtime_error("change_int_alphabet only supported for WFA with int alphabet");
   }

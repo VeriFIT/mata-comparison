@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -230,6 +230,28 @@ namespace awali { namespace sttc {
             {
               value_t res;
               add_here(res, i->first, weightset()->star(i->second));
+              return res;
+            }
+        }
+      raise(sname(), ": star: invalid value: ", format(*this, v));
+    }
+
+    /// The star of polynomial \a v.
+    value_t
+    plus(const value_t& v) const
+    {
+      // The only starrable polynomialsets are scalars (if they are
+      // starrable too).
+      auto s = v.size();
+      if (s == 0)
+        return zero();
+      else if (s == 1)
+        {
+          auto i = v.find(labelset()->one());
+          if (i != v.end())
+            {
+              value_t res;
+              add_here(res, i->first, weightset()->plus(i->second));
               return res;
             }
         }
@@ -678,7 +700,8 @@ namespace awali { namespace sttc {
 
       // No ranges if the weights aren't all the same.
       std::vector<label_t> letters;
-      weight_t first_w = weightset()->zero();
+//       weight_t first_w = weightset()->zero(); 
+//       commented out by VM on 2022-02-14
       for (const auto& m: v)
         {
           if(labelset()->is_one(m.first))
@@ -731,21 +754,23 @@ namespace awali { namespace sttc {
             left = last = l;
           }
         }
-      if(last-left>2) {
-        print_weight_(get_weight(v, left), out, format);
-        out << '[';
-        labelset()->print(left, out, format);
-        out << '-';
-        labelset()->print(last, out, format);
-        out << ']';
-      }
-      else
-        for(auto le = left; le<=last; ++le) {
-          print_weight_(get_weight(v, le), out, format);
-          labelset()->print(le, out, format);
-          if(le!=last)
-            out << sep;
+      if(!start) {
+        if (last-left>2) {
+          print_weight_(get_weight(v, left), out, format);
+          out << '[';
+          labelset()->print(left, out, format);
+          out << '-';
+          labelset()->print(last, out, format);
+          out << ']';
         }
+        else
+          for(auto le = left; le<=last; ++le) {
+            print_weight_(get_weight(v, le), out, format);
+            labelset()->print(le, out, format);
+            if(le!=last)
+              out << sep;
+          }
+      }
       return out;
     }
 

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,13 +52,10 @@ protected:
 
   position_t position_of(int pos);
   
-  void ignore_spaces();
-
-  bool check(char e, std::string oth = "", std::unordered_map<char,std::string> names_override = {});
-  bool inline check(char e, std::unordered_map<char,std::string> names_override)
+  bool check(char e, std::string const& oth = "", std::unordered_map<char,std::string> const& names_override = {});
+  bool inline check(char e, std::unordered_map<char,std::string> const& names_override)
   {return check(e, "", names_override);}
 
-  int peek();
   std::string extract_and_unescape_string(bool quote = true);
 
   /** Whether on error occured. */
@@ -72,6 +69,16 @@ protected:
   std::list<uint_or_string_t> _error_path;
   
   std::istream& _in;
+  
+  bool _only_metadata;
+  static int const none = -3455678;
+  int _current_char = none;
+
+  int peek(bool ignore_spaces = true);
+  int get(bool ignore_spaces = true);
+  void unget(int c);
+  void reset_lookahead();
+
 public:
 
   inline bool error() { return _error; }
@@ -82,7 +89,8 @@ public:
   { return std::move(_error_path); }
 
   node_t* parse_node();
-  parser_t(std::istream& i) : _error(false), _in(i) {}
+  parser_t(std::istream& i, bool only_metadata = false) : _error(false), _in(i), _only_metadata(only_metadata) {}
+  
 
   inline position_t position() { return position_of(_in.tellg()); };
   
@@ -94,7 +102,7 @@ public:
 };
 
 
-node_t* parse(std::istream&);
+node_t* parse(std::istream&, bool stop_after_metadata= false);
 
 }// end of namespace awali::json
 }// end of namespace awali

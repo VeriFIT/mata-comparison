@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ int main() {
     json::path_t* path_ptr = diff(ast1,ast2);
     if (path_ptr)
       std::cerr << std::endl << std::endl << "diffpath:" << *path_ptr << std::endl;
+      delete path_ptr;
   }
   for (auto a : loading::example_automata()) {
     std::cout << std::endl

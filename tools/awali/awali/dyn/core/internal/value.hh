@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,14 +21,15 @@
 #include <awali/common/qfraction.hh>
 #include <awali/dyn/core/internal/untyped_value.hh>
 
-#include<typeinfo>
+#include<typeinfo>  
 
 namespace awali { namespace dyn {
   namespace internal {
 
     template<typename T> T any_cast(const any_t& a);
+
     template<typename T>
-    struct Value : untyped_value {
+    struct Value : public untyped_value {
       Value(const T& val) : val(val) {}
       T val;
 

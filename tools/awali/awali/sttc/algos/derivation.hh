@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -93,13 +93,13 @@ namespace awali { namespace sttc {
       AWALI_RAT_UNSUPPORTED(ldiv)
       AWALI_RAT_UNSUPPORTED(transposition)
 
-      AWALI_RAT_VISIT(zero, e)
+      AWALI_RAT_VISIT(zero, )
       {
         res_ = ps_.zero();
         cst_ = ws_.zero();
       }
 
-      AWALI_RAT_VISIT(one, e)
+      AWALI_RAT_VISIT(one, )
       {
         res_ = ps_.zero();
         cst_ = ws_.one();
@@ -161,6 +161,19 @@ namespace awali { namespace sttc {
                         ps_.rmul_letter(res_, e.shared_from_this()));
       }
 
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        e.sub()->accept(*this);
+        cst_ = ws_.add(cst_, ws_.one());
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        e.sub()->accept(*this);
+        // We need a copy of e, but without its weights.
+        cst_ = ws_.plus(cst_);
+        res_ = ps_.rmul_letter(res_, rs_.star(e.sub()));
+      }
       AWALI_RAT_VISIT(lweight, e)
       {
           e.sub()->accept(*this);

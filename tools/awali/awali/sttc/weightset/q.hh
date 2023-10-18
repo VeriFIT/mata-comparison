@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include <awali/sttc/misc/raise.hh>
 #include <awali/sttc/misc/stream.hh> // eat
 #include <awali/sttc/weightset/z.hh>
+#include <awali/sttc/weightset/lr_parse_number.hh>
 
 namespace awali {
   namespace sttc {
@@ -118,6 +119,16 @@ namespace awali {
           if (abs(v.num) < v.den)
             // No need to reduce: numerator and denominators are primes.
             return {int(v.den), v.den - v.num};
+          else
+            raise(sname(), ": star: invalid value: ", format(*this, v));
+        }
+
+        value_t plus(const value_t v) const
+        {
+          // Bad casting when v.den is too big
+          if (abs(v.num) < v.den)
+            // No need to reduce: numerator and denominators are primes.
+            return {v.num, v.den - v.num};
           else
             raise(sname(), ": star: invalid value: ", format(*this, v));
         }
@@ -235,34 +246,7 @@ namespace awali {
 
         static value_t
         parse(const std::string & s, size_t& p) {
-          size_t i;
-
-    //Compute denominator
-    unsigned int y = 1;
-    for(i=p; i>0 && (s[i-1]>='0' && s[i-1]<='9');--i)
-            ;
-          if(i==p)
-            throw parse_exception("Wrong Q value (right):"+s);
-    
-    if (i>0 && s[i-1] == '/') { //There is a denominator
-            std::istringstream sty(s.substr(i, p-i));
-            sty >> y;
-      p=i-1;
-    }
-
-    //Compute numerator
-    int x;
-    for(i=p; i>0 && (s[i-1]>='0' && s[i-1]<='9');--i)
-            ;
-
-    if (i==p)
-      throw parse_exception("Wrong Q value (left):"+s);
-          if(i>0 && (s[i-1]=='-' || s[i-1]=='+'))
-            --i;
-          std::istringstream stx(s.substr(i, p-i));
-          stx >> x;
-          p=i;
-          return value_t{x,y};
+          return internal::lr_parse_qfraction(s,p);
         }
         
 
@@ -308,10 +292,9 @@ namespace awali {
     json::object_t*
     to_json() const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[q] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::object_t("semiring", new json::string_t("Q"));
@@ -322,10 +305,9 @@ namespace awali {
     json::node_t* value_to_json(value_t v) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[q] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
         if(v.den ==1u)
@@ -341,8 +323,9 @@ namespace awali {
     value_t value_from_json(json::node_t const* p) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           switch(p->kind) {
@@ -364,7 +347,6 @@ namespace awali {
                 "proper qfraction representation.");
             }
             case json::ARRAY :{
-              std::vector<json::node_t*> const& v = p->array()->values;
               if (p->arity()!=2) 
                 throw json::coercion_exception(
                   "[Q] value_from_json: node is of kind ARRAY and needs to "

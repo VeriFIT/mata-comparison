@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -210,6 +210,16 @@ namespace awali { namespace sttc {
       AWALI_RAT_UNSUPPORTED(transposition)
 
       AWALI_RAT_VISIT(star, e)
+      {
+        res_ = polynomial_t{{e.shared_from_this(), ws_.one()}};
+      }
+
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        res_ = polynomial_t{{e.shared_from_this(), ws_.one()}};
+      }
+      
+      AWALI_RAT_VISIT(plus, e)
       {
         res_ = polynomial_t{{e.shared_from_this(), ws_.one()}};
       }

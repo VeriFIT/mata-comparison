@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,6 +53,11 @@ namespace awali { namespace py {
     operator dyn::ratexp_t() const {
       return dyn::ratexp_t(exp_);
     }
+
+    dyn::abstract_ratexp_t& to_dyn_ratexp() {
+      return (*exp_);
+    }
+
 
     std::string weight_to_string(dyn::any_t a) const
     { 
@@ -128,6 +133,14 @@ namespace awali { namespace py {
     std::string value() {
       return label_to_string(exp_->value());
     }
+
+//     unsigned size() {
+//       return exp_->size();
+//     } 
+//     
+//     unsigned height() {
+//       return exp_->size();
+//     } 
 
   };
   simple_ratexp_t make_simple_ratexp1(std::string str) {

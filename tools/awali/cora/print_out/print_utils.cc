@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -234,6 +234,22 @@ void error_print(const std::string& msg1, const std::string& msg2)
                       << "        " << msg2 << std::endl
                       << reset_clr << std::endl;
   return;
+}
+
+void x_error_print(const std::string& msg, const std::string& err_typ) 
+{
+  *dyn::error_stream  << std::endl << error_clr
+                      << "[" << err_typ << "] " << msg << std::endl
+                      << reset_clr << std::endl;
+  return;
+}
+
+void deprecated_command(std::string name, std::string version, std::string new_name = "") {
+  std::stringstream s;
+  s << "Command " << name << " is deprecated since version " << version << ".";
+  if (new_name != "")
+    s << " Use " << new_name << " instead.";
+  warning_vw_print(s.str());
 }
 
 // // End of file print_utils.cc --- return to print_out.cc

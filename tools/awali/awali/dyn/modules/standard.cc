@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <awali/dyn/core/abstract_ratexp.hh>
 #include <awali/dyn/loading/handler.hh>
 
+#include <awali/dyn/modules/automaton.hh>
 #include <awali/dyn/modules/standard.hh>
 
 namespace awali {
@@ -45,6 +46,12 @@ namespace awali {
         return loading::call1<automaton_t>("standard", "standard", aut);
     }
 
+    automaton_t left_mult_standard(automaton_t aut, weight_t w, options_t opts)
+    {
+      automaton_t res = opts[IN_PLACE] ? aut : copy(aut,opts);
+      loading::call1<void>("left_mult_standard_here", "standard", res, w);
+      return res;
+    }
 
 
     automaton_t sum_of_standard(automaton_t aut1, automaton_t aut2, options_t opts)

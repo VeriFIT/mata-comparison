@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ namespace awali {
     /** \ingroup Products
      */
     automaton_t eval_tdc(automaton_t aut, transducer_t tdc);
+    
+    ratexp_t
+    eval_exp (ratexp_t exp, transducer_t tdc);
 
     ratexp_t eval_word(transducer_t tdc, const std::string& word);
   }

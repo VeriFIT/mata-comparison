@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,7 +47,9 @@ namespace awali { namespace dyn {
     else
       name = "tmp";
     if (loading::get_dot_binary() == "") {
-        *warning_stream << "Display is disabled (requires dot binary)" 
+        *warning_stream << "Could not display automaton:"
+                        << " no \"dot\" binary was found."
+                        << "  (It is usually distributed as part of graphviz.)"
                         << std::endl;
       return;
     }
@@ -58,11 +60,16 @@ namespace awali { namespace dyn {
     std::string command;
 // __APPLE__ ,  __linux__ , __unix__ , __WIN32
 #ifdef __APPLE__
-    command = "open ";
+    command = "open "+filename+" 2>/dev/null";
 #else
-    command = "xdg-open ";
+    command = "xdg-open "+filename+" 2>/dev/null";
 #endif
-    system((command+filename).c_str());
+    int res = system(command.c_str());
+    if (res)
+      *error_stream << "Following system command failed " 
+                    << "(while attempting to open temporary pdf file): " 
+                    << command 
+                    << std::endl;
   }
 
 
@@ -77,7 +84,7 @@ namespace awali { namespace dyn {
       case FSM_JSON_V0:
         return internal::deprecated_parse_automaton(i);
       default:
-        throw std::runtime_error("Only FADO, GRAIL, JSON and DEPRECATED are possible input formats.");
+        throw std::runtime_error("Only FADO, GRAIL, JSON and FSM_JSON_V0 are possible input formats.");
     }
   }
 
@@ -130,9 +137,10 @@ namespace awali { namespace dyn {
       case TEXT: 
         throw std::runtime_error("TEXT format is not supported for automata");
       case SVG: return internal::svg(aut,o,opts);
-      default:
-        throw std::runtime_error("put:: Unreachable statement");
+      case FSM_JSON_V0: 
+        std::runtime_error("FSM_JSON_V0 is no longer supported for output");
     }
+    throw std::runtime_error("awali::dyn::put(automaton_t):: Unreachable statement");
   }
   
   std::ostream& put(ratexp_t ratexp, std::ostream& o, options_t opts)
@@ -147,12 +155,12 @@ namespace awali { namespace dyn {
       case FADO:
       case GRAIL:
       case SVG:
+      case FSM_JSON_V0:
       case PDF:
         throw std::runtime_error(
-          "Only JSON and TEXT format are supported for ratexps.");
-      default:
-        throw std::runtime_error("put:: Unreachable statement");
+          "Only JSON and TEXT format are supported for outputing ratexps.");
     }
+    throw std::runtime_error("awali::dyn::put(automaton_t):: Unreachable statement");
   }
 
   void save(const automaton_t aut, const std::string& filename, 
@@ -260,6 +268,17 @@ namespace awali { namespace dyn {
     else
       e = exp;
     return is_aut;
+  }
+  
+  aut_or_exp_t& aut_or_exp_t::operator= (aut_or_exp_t const& other) {
+    if (this != &other) {
+      is_aut = other.is_aut;
+      if (is_aut)
+        aut = other.aut;
+      else
+        exp = other.exp;
+    }
+    return *this;
   }
 
 

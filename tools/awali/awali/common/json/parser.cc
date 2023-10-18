@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,65 +47,61 @@ std::vector<std::string> init_converter () {
        i++)
   {
     char c = (char) i;
-    std::stringstream o;
+    std::string s;
     switch (c) {
-      case '\b':  o << "\\b"; break;
-      case '\f':  o << "\\f"; break;
-      case '\n':  o << "\\n"; break;
-      case '\r':  o << "\\r"; break;
-      case '\t':  o << "\\t"; break;
-      case '"':   o << "\\\""; break;
-      case '\\':  o << "\\\\"; break;
+      case '\b':  s += "\\b"; break;
+      case '\f':  s += "\\f"; break;
+      case '\n':  s += "\\n"; break;
+      case '\r':  s += "\\r"; break;
+      case '\t':  s += "\\t"; break;
+      case '"':   s += "\\\""; break;
+      case '\\':  s += "\\\\"; break;
       default:
         if ('\x00' <= c && c <= '\x1f') {
-            o << "\\u"
-              << std::hex << std::setw(4) << std::setfill('0') << (int)c;
+            s += "\\u00";
+            s += "00";
+            s += (c >= '\x10'?'1':'0');
+            int d = c%16;
+            if (d<10)
+              s += (d+'0');
+            else
+              s += ((d-10)+'A');
         }
         else
-            o << c;
+            s += c;
      }
-     res[(unsigned char) c] = o.str();
+     res[(unsigned char) c] = std::move(s);
   }
   return res;
 }
 
-static std::vector<std::string> const converter = init_converter();
 
-
-void
-parser_t::ignore_spaces() 
-{
-  while (_in.good() && std::isspace(_in.peek()))
-    _in.get(); 
-}
 
 bool 
-parser_t::check(
-  char e, std::string oth, std::unordered_map<char,std::string> names_override) 
+parser_t::check( char e, std::string const& oth, 
+                 std::unordered_map<char,std::string> const& names_override) 
 { 
-  ignore_spaces();
   int c;
-  if ((c = _in.get()) != (int) e) {
+  if ((c = get()) != (int) e) {
     if (_in.eof())
       _error_message << "Reached end of input while looking for ";
     else {
-      if (!_in.eof())
-        _error_message << "Got unexpected character (";
-        if (c >=20 && c <= 126)
-          _error_message << (char) c;
-        else
-          _error_message << "\\" << (int) c ;
-        _error_message << "). Expecting ";
-    }
-
-    for (char c : oth) {
-      _error_message 
-        << (names_override.count(c) ? names_override.at(c) : names.at(c))
-        << " (";
+      _error_message << "Got unexpected character (";
       if (c >=20 && c <= 126)
         _error_message << (char) c;
       else
         _error_message << "\\" << (int) c ;
+      _error_message << ") while looking for ";
+    }
+
+    for (char x : oth) {
+      _error_message 
+        << (names_override.count(x) ? names_override.at(x) : names.at(x))
+        << " (";
+      if (x >=20 && x <= 126)
+        _error_message << (char) x;
+      else
+        _error_message << "\\" << (int) x ;
       _error_message << "), ";
     }
     if (!oth.empty())
@@ -120,7 +116,7 @@ parser_t::check(
     _error_message << ").";
 
     if (!_in.eof())
-      _in.unget();
+      unget(c);
     _error = true;
     return false;
   }
@@ -128,44 +124,72 @@ parser_t::check(
 }
 
 int
-parser_t::peek() 
+parser_t::peek(bool ignore_spaces) 
 {
-  ignore_spaces();
-  return _in.peek();
+  if (_current_char == none) {
+    if (ignore_spaces)
+      while (_in.good() && std::isspace(_current_char = _in.get())) {}
+    else
+      _current_char = _in.get();
+  }
+  return _current_char;
 }
+
+int parser_t::get(bool ignore_spaces) 
+{
+  int i = peek(ignore_spaces);
+  _current_char = none;
+  return i;
+}
+
+void parser_t::unget(int c) 
+{
+  _current_char = c;
+}
+
+void parser_t::reset_lookahead() 
+{
+  if(_current_char != none) {
+    _in.unget();
+    _current_char = none;
+  }
+}
+
 
 std::string 
 parser_t::extract_and_unescape_string(bool quote) 
 {
-  if (quote && !check('"',{{'"',"opening string delimiter"}}))
+  static std::unordered_map<char,std::string> const open_map = {{'"',"opening string delimiter"}};
+  static std::unordered_map<char,std::string> const close_map = {{'"',"closing string delimiter"}};
+  if (quote && !check('"',open_map))
     return "";
   unsigned start_pos = _in.tellg();
   char c;
-  std::ostringstream o;
+  std::string res;
   while(true) {
-    if ( (quote && _in.peek()=='"') ||  _in.eof())
+    if ( (quote && peek(false)=='"') ||  _in.eof())
       break; 
-    _in.get(c);
+    c = get(false);
     if(c=='\\') {
-      _in.get(c);
+      c = get(false);
       switch(c) {
         case '\\':
         case '"':
-          o << c;
+          res += c;
           break;
-        case 'b': o << '\b'; break;
-        case 'n': o << '\n'; break;
-        case 'f': o << '\f'; break;
-        case 'r': o << '\r'; break;
-        case 't': o << '\t'; break;
+        case 'b': res += '\b'; break;
+        case 'n': res += '\n'; break;
+        case 'f': res += '\f'; break;
+        case 'r': res += '\r'; break;
+        case 't': res += '\t'; break;
         case 'u': {
           char c1, c2, c3, c4 = '\0';
-          _in >> c1;
-          _in >> c2;
-          _in >> c3;
-          _in >> c4;
+          c1 = get(false);
+          c2 = get(false);
+          c3 = get(false);
+          c4 = get(false);
           if(c1=='0' && c2 =='0' && (c3 == '0' || c3 == '1')) {
-            char c = (c3 == '1')?16:0;
+            c = (c3 == '1')?16:0;
             if ('0'<= c4 && c4 <= '9')
               c +=  (c4-'0');
             else if ('a'<= c4 && c4 <= 'f')
@@ -177,34 +201,36 @@ parser_t::extract_and_unescape_string(bool quote)
                                "below 1F are supported, i.e., of the form "
                                "\\u00YZ, where Y = 0 or 1.";
               _error = true;
-              return o.str();
+              return res;
             }
-            o << c;
+            res += c;
           }
           else {
             _error_message << "Only unicode escaped character below "
               "1F are supported, i.e., of the form \\u00YZ, where Y = 0 or "
               "1.";
             _error = true;
-            return o.str();
+            return res;
           }
 
         }
         break;
         default:
-          o << '\\' << c;
+          res +=  '\\';
+          res += c;
       }
     }
     else
-      o << c;
+      res += c;
   }
-  if (quote && !check('"', {{'"',"closing string delimiter"}})) {
+  if (quote && !check('"', close_map)) {
+    reset_lookahead();
     _in.clear();
     _in.seekg(start_pos); /* We return to starting position for error message
                             * purposes. */
     return "";
   }
-  return o.str();
+  return res;
 }
 
 
@@ -244,7 +270,7 @@ parser_t::parse_array()
   if (!check('['))
     return a;
   if(peek()==']') {
-    _in.get();
+    get();
     return a;
   }
 
@@ -259,7 +285,7 @@ parser_t::parse_array()
     }
     if(peek() != ',')
       break;
-    _in.get();
+    get();
     i++;
   }
   check(']');
@@ -275,24 +301,31 @@ parser_t::parse_object()
   if (!check('{'))
     return o;
   if(peek()=='}') {
-    _in.get();
+    get();
     return o;
   }
 
   while(true) {
     std::string k = extract_and_unescape_string();
+    bool found = _only_metadata && k == "metadata";
+    
     if (_error || !check(':'))
       return o;
     node_t* child = parse_node();
-    if (child != nullptr)
-      o->push_back(k,child);
-    if (_error) {
+    if (_error)
       _error_path.push_front(k);
+    if (child != nullptr)
+      o->push_back(std::move(k),child);
+    if (_error)
+      return o;
+    if (found) {
+      _error = true;
+      _error_message << "metadata found";
       return o;
     }
     if(peek() != ',')
       break;
-    _in.get();
+    get();
   }
   check('}',",");
   return o;
@@ -302,6 +335,7 @@ parser_t::parse_object()
 node_t* 
 parser_t::parse_number() 
 {
+  reset_lookahead();
   std::streampos pos = _in.tellg();
   
   int z;
@@ -328,12 +362,15 @@ parser_t::parse_string()
 }
 
 
+
+
 node_t* 
 parser_t::parse_constant(std::string const& target) 
 {
+  reset_lookahead();
   char c[6];
   unsigned p = _in.tellg();
-  for (int x=0; x<target.size(); x++) {
+  for (unsigned x=0; x<target.size(); x++) {
     _in >> c[x];
     if (c[x] != target[x]) {
       parser_t::position_t pos = position_of(p);
@@ -359,11 +396,11 @@ parser_t::parse_constant(std::string const& target)
 
 
 node_t* 
-parse(std::istream& in) 
+parse(std::istream& in, bool stop_after_metadata) 
 {
-  parser_t parser(in);
+  parser_t parser(in, stop_after_metadata);
   node_t* node = parser.parse_node();
-  if (parser.error()) {
+  if (parser.error() && !stop_after_metadata) {
     std::list<uint_or_string_t> list = parser.move_error_path();
     path_t path { std::make_move_iterator(std::begin(list)), 
                   std::make_move_iterator(std::end(list))   };
@@ -391,7 +428,8 @@ parser_t::position_of(int pos) {
   if (start_line_count < 0) /* tellg() is not supported by internal steam. */
     return position_t::tellg_unsupported();
   char c;
-  while ((_in.tellg() < pos) && _in.get(c)) {
+  while (_in.tellg() < pos) {
+    c = get();
     if (c == '\n') {
       ++line_count;
       start_line_count = _in.tellg();
@@ -404,7 +442,17 @@ parser_t::position_of(int pos) {
 
 std::string const& 
 parser_t::escape(char c) { 
+  static std::vector<std::string> const converter = init_converter();
   return converter[(unsigned char) c];
+}
+
+bool
+static need_escape(std::string const& str) {
+  for (auto const& c : str)
+    if (parser_t::escape(c).size() != 1)
+      return true;
+  return false;
+
 }
 
 std::ostream& 
@@ -412,16 +460,20 @@ parser_t::escape_and_put(std::ostream& o, std::string const & str)
 {
   o << '"';
   for (char c : str)
-    o << escape(c);
+    o << parser_t::escape(c);
   return (o << '"'); 
 }
 
 
 std::string 
 parser_t::escape(std::string const& str) {
-  std::stringstream ss;
-  parser_t::escape_and_put(ss,str);
-  return ss.str();
+  if (need_escape(str)) {
+    std::stringstream ss;
+    parser_t::escape_and_put(ss,str);
+    return ss.str();
+  }
+  else
+    return '"'+str+'"';
 }
 
 

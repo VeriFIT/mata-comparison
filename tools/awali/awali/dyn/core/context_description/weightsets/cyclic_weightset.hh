@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,17 +24,12 @@ namespace dyn {
 namespace context {
 
     struct cyclic_weightset : abstract_weightset {
-      
-      static std::string static_pub_name;
 
-          static std::string static_pub_description;
+      cyclic_weightset(const std::string& public_name,
+		       const std::string& desc);
 
       weightset_description fromstring(const std::string &k) const override;
      
-      const std::string& static_public_name() const override;
-
-      const std::string& static_desc() const override;
-
       const std::string& tostring(weightset_description ws, bool dynamic) const override;
 
       weightset_description parse_weightset(json::object_t const* p) const override;

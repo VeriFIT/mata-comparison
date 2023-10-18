@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,29 +35,29 @@ namespace awali { namespace cora { namespace doc {
 |--------------------------------------------------------------------*/
 
 std::string domain {
-R"---(Build the automaton which is the projection of the transducer <tdc> with respect
+R"---(Builds the automaton which is the projection of the transducer <tdc> with respect
 to the first tape.
 )---"
 };
 
 std::string image {
-R"---(Build the automaton which is the projection of the transducer <tdc> with respect
+R"---(Builds the automaton which is the projection of the transducer <tdc> with respect
 to the second tape.
 )---"
 };
 
 std::string inverse {
-R"---(Swap the first and the second tape of the transducer <tdc>.
+R"---(Swaps the first and the second tape of the transducer <tdc>.
 )---"
 };
 
 std::string eval_word {
-R"---(Compute the image of the word <word> by the transducer <tdc>.
+R"---(Computes the image of the word <word> by the transducer <tdc>.
 )---"
 };
 
 std::string eval_aut {
-R"---(Compute the image of the language (series) accepted by the automaton <aut>
+R"---(Computes the image of the language (series) accepted by the automaton <aut>
 by the transducer <tdc>.
 	  
 Beware of the order of the arguments.
@@ -65,35 +65,42 @@ Beware of the order of the arguments.
 };
 
 std::string is_functional {
-R"---(Test whether the transducer <tdc> is functional.
+R"---(Tests whether the transducer <tdc> is functional.
 	  
 Exit with 0 if true.
 )---"
 };
 
 std::string is_of_finite_image {
-R"---(Test whether the image of every word by the transducer <tdc> is finite.
+R"---(Tests whether the image of every word by the transducer <tdc> is finite.
 	  
 Exit with 0 if true.
 )---"
 };
 
 std::string is_synchronizable {
-R"---(Test whether the (subnormalized) transducer <tdc> can be synchronized.
+R"---(Tests whether the (subnormalized) transducer <tdc> can be synchronized.
 
 Exit with 0 if true.
 )---"
 };
 
 std::string synchronize {
-R"---(Build a synchronized transducer from the subnormalized transducer <tdc>.
+R"---(Builds a synchronized transducer from the subnormalized transducer <tdc>.
 	  
 The synchronization is applied until a contradiction occurs.
 )---"
 };
 
+std::string subnormalize {
+R"---(Builds a subnormalized transducer from transducer <tdc>.
+	  
+Every tape is labelled by letter or epsilon.
+)---"
+};
+
 std::string compose {
-R"---(Build the transducer composition of <tdc1> by <tdc2>.
+R"---(Builds the transducer composition of <tdc1> by <tdc2>.
 )---"
 };
 

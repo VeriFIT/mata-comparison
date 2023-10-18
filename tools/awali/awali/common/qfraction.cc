@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,19 +23,25 @@
 
 namespace awali {
 
-  q_fraction_t::q_fraction_t(int n, int d)
+  q_fraction_t::q_fraction_t()
+  : num(0), den(1)
+  {
+  }
+
+  q_fraction_t::q_fraction_t(long n, long d)
   {
     if (d < 0) {
       num = -n;
       den = (unsigned) -d;
-    } else  {
+    } 
+    else  {
       num = n;
       den = d;
     }
 
   }
 
-  q_fraction_t::q_fraction_t(int n, unsigned d)
+  q_fraction_t::q_fraction_t(num_t n, den_t d)
     : num(n)
     , den(d)
   {}
@@ -46,6 +52,11 @@ namespace awali {
     num /= gc;
     den /= gc;
     return *this;
+  }
+  
+  bool q_fraction_t::operator!=(const q_fraction_t& w) const
+  {
+    return (! ((*this) == w));
   }
 
   bool q_fraction_t::operator==(const q_fraction_t& w) const
@@ -65,6 +76,46 @@ namespace awali {
     if (v.den != 1)
       o << '/' << v.den;
     return o;
+  }
+  
+
+
+  q_fraction_t 
+  q_fraction_t::operator-(q_fraction_t const& other) 
+  const 
+  {
+    q_fraction_t res = { ((long) this->num) * ((long) other.den)
+                         - ((long) this->den) * ((long) other.num),
+                        ((long) this->den) * ((long)other.den)    };
+    return res.reduce();
+  }
+
+  q_fraction_t 
+  q_fraction_t::operator*(q_fraction_t const& other) 
+  const 
+  {
+    q_fraction_t res = { ((long) this->num) * ((long) other.num),
+                         ((long) this->den) * ((long) other.den) };
+    return res.reduce();
+  }
+  
+  q_fraction_t 
+  q_fraction_t::operator/(q_fraction_t const& other) 
+  const 
+  {
+    q_fraction_t res = {((long) this->num) * ((long) other.den),
+                        ((long) this->den) * ((long) other.num) };
+    return res.reduce();
+  }
+
+  q_fraction_t 
+  q_fraction_t::operator+(q_fraction_t const& other) 
+  const 
+  {
+    q_fraction_t res = {((long) this->num) * ((long) other.den) 
+                        + ((long) this->den) * ((long) other.num),
+                        ((long) this->den) * ((long) other.den)  };
+    return res.reduce();
   }
 
   std::istream& operator>>(std::istream& i, q_fraction_t& v) {
@@ -142,7 +193,7 @@ namespace std {
     return o;
   }
 
-  ostream& operator<<(ostream& o, basic_string<int>& s) {
+  ostream& operator<<(ostream& o, const basic_string<int>& s) {
     std::string sep="";
     for(auto c : s) {
       o << sep;

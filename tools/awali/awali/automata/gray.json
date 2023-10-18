@@ -3,28 +3,24 @@
  "metadata":
    {"name":"gray",
     "caption":"Gray code increment",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:57Z"}},
  "context":
    {"labels":
       {"labelKind":"Multi-tape",
        "tapeLabels":
-         [{"labelKind":"Letters",
-           "letterType":"Char",
-           "allowEpsilon":true,
-           "alphabet":["0","1"]},
-          {"labelKind":"Letters",
-           "letterType":"Char",
-           "allowEpsilon":true,
-           "alphabet":["0","1"]}]},
+         [{"labelKind":"Letters",  "letterType":"Char",
+           "allowEpsilon":true,    "alphabet":["0","1"]},
+          {"labelKind":"Letters",  "letterType":"Char",
+           "allowEpsilon":true,    "alphabet":["0","1"]}]},
     "weights":{"semiring":"B"}},
  "data":
    {"states":
-      [{"id":0, "name":"s0", "initial":true},
-       {"id":1, "name":"s1", "initial":true},
-       {"id":2, "name":"s2", "final":true},
-       {"id":3, "name":"s3"},
-       {"id":4, "name":"s4", "final":true}],
+      [{"id":0, "name":"i", "initial":true},
+       {"id":1, "name":"p", "initial":true},
+       {"id":2, "name":"q", "final":true},
+       {"id":3, "name":"r"},
+       {"id":4, "name":"t", "final":true}],
     "transitions":
       [{"source":0, "destination":0, "label":["0","0"]},
        {"source":0, "destination":1, "label":["1","1"]},

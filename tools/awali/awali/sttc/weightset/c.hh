@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <awali/sttc/misc/raise.hh>
 #include <awali/sttc/misc/stream.hh> // eat
 #include <awali/sttc/weightset/r.hh>
+#include <awali/sttc/weightset/lr_parse_number.hh>
 
 namespace awali {
   namespace sttc {
@@ -108,6 +109,16 @@ namespace awali {
           if (std::norm(v) < 1)
             // No need to reduce: numerator and denominators are primes.
             return value_t(1)/(value_t(1)-v);
+          else
+            raise(sname(), ": star: invalid value: ", format(*this, v));
+        }
+
+        value_t plus(const value_t v) const
+        {
+          // Bad casting when v.den is too big
+          if (std::norm(v) < 1)
+            // No need to reduce: numerator and denominators are primes.
+            return value_t(v)/(value_t(1)-v);
           else
             raise(sname(), ": star: invalid value: ", format(*this, v));
         }
@@ -250,36 +261,29 @@ namespace awali {
           return value_t{re}; // no imaginary part
         }
 
-        static double parse_simple_real(const std::string & s, size_t& p, double def=0) {
-          size_t i=p;
-          for(; i>0 && ((s[i-1]>='0' && s[i-1]<='9') || s[i-1]=='.'); --i)
-            ;
-          double r=def;
-          if(p>i) {
-            std::istringstream st(s.substr(i, p-i));
-            st >> r;
-          }
-          if(s[i-1]=='-') {
-            --i;
-            r=-r;
-          }
-          if(s[i-1]=='+')
-            --i;
-          p=i;
-          return r;
-        }
+//         static double parse_simple_real(const std::string & s, size_t& p, double def=0) {
+//           size_t i=p;
+//           for(; i>0 && ((s[i-1]>='0' && s[i-1]<='9') || s[i-1]=='.'); --i)
+//             ;
+//           double r=def;
+//           if(p>i) {
+//             std::istringstream st(s.substr(i, p-i));
+//             st >> r;
+//           }
+//           if(s[i-1]=='-') {
+//             --i;
+//             r=-r;
+//           }
+//           if(s[i-1]=='+')
+//             --i;
+//           p=i;
+//           return r;
+//         }
 
 
         static value_t
         parse(const std::string & s, size_t& p) {
-          //size_t i=p;
-          if(s[p-1]=='i') {
-            --p;
-            double im = parse_simple_real(s,p,1);
-            double re = parse_simple_real(s,p);
-            return {re,im};
-          }
-          return {r::parse(s,p)};
+          return internal::lr_parse_complex(s,p);
         }
 
 
@@ -334,10 +338,9 @@ namespace awali {
     json::node_t*
     to_json() const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[c] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::object_t("semiring", new json::string_t("C"));
@@ -350,10 +353,9 @@ namespace awali {
     value_to_json(value_t v) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[c] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           json::object_t* l = new json::object_t();
@@ -369,60 +371,61 @@ namespace awali {
       }
     }
 
-        template<unsigned version = version::fsm_json>
-        value_t
-        value_from_json(json::node_t const* p)
-        const
-        {
-          switch (version) {
-            case 0:
-            case 1:
-            default:
-              try { return value_t{p->to_double(),0}; }
-              catch (json::exception const&){}
-              switch(p->kind) {
-                case json::ARRAY: {
-                  std::vector<json::node_t*> const& v = p->array()->values;
-                  if (p->arity() !=2)
-                      throw json::coercion_exception("This ARRAY node should have exactly two elements.","c",p);
-                  double a[2];
-                  for(int i=0;i<2;i++)
-                    a[i]=v[i]->to_double();
-                  return value_t{a[0],a[1]};
-                }
-                case json::OBJECT: {
-                  if(   !p->has_child("real") && !p->has_child("imag") 
-                     && !p->has_child("re") && !p->has_child("im"))
-                    throw json::coercion_exception("Should have either a field \"real\" or \"imag\".","c",p);
-                  double a[2] = {0,0};
-                  if(p->has_child("real"))
-                    a[0]=p->at("real")->to_double();
-                  else if(p->has_child("re"))
-                    a[0]=p->at("re")->to_double();
-                  if(p->has_child("imag"))
-                    a[1]=p->at("imag")->to_double();
-                  if(p->has_child("im"))
-                    a[1]=p->at("im")->to_double();
-                  return value_t{a[0],a[1]};
-                }
-                case json::STRING: {
-                  std::string const& str = p->string()->value;
-                  size_t pos = str.length();
-                  value_t v = parse(str, pos);
-                  if (pos != 0)
-                    break;
-                  return v;
-                }
-                default : {}
-              }
-              throw json::coercion_exception("Unable to coerce this "
-                                             + json::string_of(p->kind)
-                                             + " node to a complex number.",
-                                             "c",p);
+    template<unsigned version = version::fsm_json>
+    value_t
+    value_from_json(json::node_t const* p)
+    const
+    {
+      version::check_fsmjson<version>();
+      switch (version) {
+        case 0: /* Never occurs due to above check. */
+        case 1:
+        default:
+          try { return value_t{p->to_double(),0}; }
+          catch (json::exception const&){}
+          switch(p->kind) {
+            case json::ARRAY: {
+              std::vector<json::node_t*> const& v = p->array()->values;
+              if (p->arity() !=2)
+                  throw json::coercion_exception("This ARRAY node should have exactly two elements.","c",p);
+              double a[2];
+              for(int i=0;i<2;i++)
+                a[i]=v[i]->to_double();
+              return value_t{a[0],a[1]};
+            }
+            case json::OBJECT: {
+              if(   !p->has_child("real") && !p->has_child("imag") 
+                 && !p->has_child("re") && !p->has_child("im"))
+                throw json::coercion_exception("Should have either a field \"real\" or \"imag\".","c",p);
+              double a[2] = {0,0};
+              if(p->has_child("real"))
+                a[0]=p->at("real")->to_double();
+              else if(p->has_child("re"))
+                a[0]=p->at("re")->to_double();
+              if(p->has_child("imag"))
+                a[1]=p->at("imag")->to_double();
+              if(p->has_child("im"))
+                a[1]=p->at("im")->to_double();
+              return value_t{a[0],a[1]};
+            }
+            case json::STRING: {
+              std::string const& str = p->string()->value;
+              size_t pos = str.length();
+              value_t v = parse(str, pos);
+              if (pos != 0)
+                break;
+              return v;
+            }
+            default : {}
           }
-        }
+          throw json::coercion_exception("Unable to coerce this "
+                                         + json::string_of(p->kind)
+                                         + " node to a complex number.",
+                                         "c",p);
+      }
+    }
 
-      };
+  };
     
   inline c join(const c&, const c&) { return {}; }
 

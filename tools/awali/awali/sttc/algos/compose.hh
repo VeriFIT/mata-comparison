@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include <awali/sttc/algos/outsplit.hh>
 #include <awali/sttc/algos/sort.hh>
+#include <awali/sttc/algos/is_proper.hh>
 #include <awali/sttc/labelset/tupleset.hh>
 #include <awali/sttc/misc/sub_tuple.hh> // make_index_sequence
 #include <awali/sttc/misc/add_epsilon_trans.hh> // is_epsilon
@@ -254,7 +255,9 @@ namespace awali { namespace sttc {
   composeIJ(TDC1& tdc1, TDC2& tdc2, bool keep_history=true)
     -> typename internal::composer<TDC1, TDC2, I, J>::automaton_t
   {
-    auto l = outsplit<I>(tdc1, keep_history);
+    auto l = tdc1;
+    if(!is_proper_tape<J>(tdc2))
+       l=outsplit<I>(tdc1, keep_history);
     sort_tape<I>(l);
     sort_tape<J>(tdc2);
     internal::composer<TDC1, TDC2, I, J> compose(l, tdc2);

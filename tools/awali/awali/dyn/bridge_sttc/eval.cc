@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace awali {
   template <typename C, typename T>
   dyn::weight_t eval_(dyn::automaton_t aut, dyn::any_t word, priority::ONE<T>)
   {
-    throw std::runtime_error("eval only supported for free label-sets.");
+    throw std::runtime_error("eval only supported for free label-sets with no epsilon-transitions allowed.");
   }
 
   template <typename C, typename T>
@@ -62,7 +62,7 @@ namespace awali {
     std::map<dyn::any_t,dyn::weight_t>
     enumerate(dyn::automaton_t aut, unsigned max, priority::ONE<T>)
     {
-      throw std::runtime_error("enumerate only supported for free label-sets.");
+      throw std::runtime_error("enumerate only supported for free label-sets with no epsilon-transitions allowed.");
     }
 
     template<typename C, typename T>
@@ -89,7 +89,7 @@ namespace awali {
     auto shortest(dyn::automaton_t aut, unsigned max, priority::ONE<T>)
       -> std::map<dyn::any_t,dyn::weight_t>
     {
-      throw std::runtime_error("shortest only supported for free label-sets.");
+      throw std::runtime_error("shortest only supported for free label-sets with no epsilon-transitions allowed.");
     }
 
     template <typename C, typename T>

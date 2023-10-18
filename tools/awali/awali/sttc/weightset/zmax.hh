@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -92,6 +92,15 @@ namespace awali {
     {
       if (0 >= v)
         return one();
+      else
+        raise(sname(), ": star: invalid value: ", format(*this, v));
+    }
+
+    value_t
+    plus(const value_t v) const
+    {
+      if (0 >= v)
+        return v;
       else
         raise(sname(), ": star: invalid value: ", format(*this, v));
     }
@@ -190,7 +199,7 @@ namespace awali {
 
     static value_t
     parse(const std::string & s, size_t& p) {
-      if (p>=3 && s[p-3]=='-' && s[p-2]=='o'& s[p-1]=='o'){
+      if (p>=3 && s[p-3]=='-' && s[p-2]=='o' && s[p-1]=='o'){
         p -= 3;
         return zero();
       }
@@ -242,10 +251,9 @@ namespace awali {
     value_t
     static value_from_json(json::node_t const* p)
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0: /* stored as string */
-          if (p->kind == json::STRING && p->to_string() == "oo")
-            return zero();
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           try {

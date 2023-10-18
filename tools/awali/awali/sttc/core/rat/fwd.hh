@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ namespace awali { namespace sttc
       conjunction,
       shuffle,
       star,
+      maybe,
+      plus,
       transposition,
       lweight,
       rweight,
@@ -73,6 +75,8 @@ namespace awali { namespace sttc
     {
       return (t == type_t::complement
               || t == type_t::star
+              || t == type_t::maybe
+              || t == type_t::plus
               || t == type_t::transposition);
     }
 
@@ -127,6 +131,12 @@ namespace awali { namespace sttc
 
     template <typename Label, typename Weight>
     using star = unary<type_t::star, Label, Weight>;
+
+    template <typename Label, typename Weight>
+    using maybe = unary<type_t::maybe, Label, Weight>;
+
+    template <typename Label, typename Weight>
+    using plus = unary<type_t::plus, Label, Weight>;
 
     template <typename Label, typename Weight>
     using transposition = unary<type_t::transposition, Label, Weight>;

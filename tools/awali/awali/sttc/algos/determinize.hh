@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -106,6 +106,64 @@ namespace awali {
     {
       internal::detweighted_algo_impl<Aut> algo(aut);
       auto res = algo();
+      return res;
+    }
+
+    /** Exploration of the automaton up to a given depth
+     *
+     * The result is a deterministic automaton where the weight of the
+     * word is given by the final function.
+     * The result is a restriction of the determinization to the states
+     * at distance at most \p depth of the initial state.
+     * @tparam Aut the type of the automaton
+     * @param aut the input automaton
+     * @param depth the depth of the exploration
+     * return a deterministic automaton
+     */
+    template <typename Aut>
+    inline
+    auto
+    explore_by_length(const Aut& aut, unsigned depth)
+      -> mutable_automaton<context_t_of<Aut>>
+    {
+      internal::detweighted_algo_impl<Aut> algo(aut, depth);
+      auto res = algo();
+      return res;
+    }
+
+    /** Exploration of the automaton up to a given bound
+     *
+     * The result is a deterministic automaton where the weight of the
+     * word is given by the final function.
+     * The result is a restriction of the determinization to the states
+     * corresponding to multisets of states where no weight is larger
+     *than \p bound.
+     * The comparison is made through the less_than method of the weightset
+     * applied to the square of the component and the square of the bound.
+     *
+     * Caveat : in zmin, the ordering of the weightset is opposite to the
+     * natural way, such that zero (=oo) is smaller than one (=0).
+     *
+     * @tparam Aut the type of the automaton
+     * @param aut the input automaton
+     * @param bound the bound for the exploration
+     * return a deterministic automaton
+     */
+    template <typename Aut>
+    inline
+    auto
+    explore_with_bound(const Aut& aut, typename weightset_t_of<Aut>::value_t bound)
+      -> mutable_automaton<context_t_of<Aut>>
+    {
+      internal::detweighted_algo_impl<Aut> algo(aut);
+      auto ws = *aut->weightset();
+      auto bb=ws.mul(bound,bound);
+      auto res = algo([=](typename internal::detweighted_algo_impl<Aut>::state_name_t& st){
+	  for (const auto& p : st)
+	    if(ws.less_than(bb,ws.mul(p.second,p.second)))
+	      return false;
+	  return true;
+	});
       return res;
     }
 

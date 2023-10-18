@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace awali {
       make_wordset(const LabelSet& ls)
       {
         return labelset_trait<LabelSet>::wordset_t::value(ls);
-      };
+      }
 
       /*--------------------.
         | make_word_context.  |

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -154,6 +154,28 @@ namespace awali {
         stream_ << '*';
       }
 
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        const auto& v = e.sub();
+        if(v->type()==type_t::sum || v->type()==type_t::prod)
+          stream_ << '(';
+        v->accept(*this);
+        if(v->type()==type_t::sum || v->type()==type_t::prod)
+          stream_ << ')';
+        stream_ << '?';
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        const auto& v = e.sub();
+        if(v->type()==type_t::sum || v->type()==type_t::prod)
+          stream_ << '(';
+        v->accept(*this);
+        if(v->type()==type_t::sum || v->type()==type_t::prod)
+          stream_ << ')';
+        stream_ << "{+}";
+      }
+
       AWALI_RAT_VISIT(lweight, e)
       {
         const auto& v = e.sub();
@@ -162,22 +184,26 @@ namespace awali {
         stream_ << '>';
         if(    v->type()==type_t::sum 
             || v->type()==type_t::prod 
-            || v->type()==type_t::star )
+            || v->type()==type_t::star 
+            || v->type()==type_t::maybe 
+            || v->type()==type_t::plus )
           stream_ << '(';
         v->accept(*this);
         if(    v->type()==type_t::sum 
             || v->type()==type_t::prod 
-            || v->type()==type_t::star )
+            || v->type()==type_t::star 
+            || v->type()==type_t::maybe 
+            || v->type()==type_t::plus )
           stream_ << ')';
       }
 
       AWALI_RAT_VISIT(rweight, e)
       {
         const auto& v = e.sub();
-        if(v->type()==type_t::sum || v->type()==type_t::prod || v->type()==type_t::star)
+        if(v->type()==type_t::sum || v->type()==type_t::prod || v->type()==type_t::star || v->type()==type_t::maybe || v->type()==type_t::plus)
           stream_ << '(';
         v->accept(*this);
-        if(v->type()==type_t::sum || v->type()==type_t::prod || v->type()==type_t::star)
+        if(v->type()==type_t::sum || v->type()==type_t::prod || v->type()==type_t::star || v->type()==type_t::maybe || v->type()==type_t::plus)
           stream_ << ')';
         stream_ << '<';
         ws_.print(e.weight(), stream_);

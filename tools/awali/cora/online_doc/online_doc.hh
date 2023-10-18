@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #define CORA_ONLINE_DOC_HH
 
 #include <cstring>
-#include <cora/color.hh>
+#include <cora/print_out/color.hh>
 
 #include <cora/online_doc/basic.hh>
 #include <cora/online_doc/generic.hh>

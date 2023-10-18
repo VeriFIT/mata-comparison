@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,6 +122,24 @@ namespace awali { namespace sttc {
           res_->new_transition(initial, initial_, " ");
           initial_ = initial;
           res_->set_state_name(initial_,"[*]");
+        }
+
+        AWALI_RAT_VISIT(maybe, e)
+        {
+          e.sub()->accept(*this);
+          state_t initial = res_->add_state();
+          res_->new_transition(initial, initial_, " ");
+          initial_ = initial;
+          res_->set_state_name(initial_,"[?]");
+        }
+
+        AWALI_RAT_VISIT(plus, e)
+        {
+          e.sub()->accept(*this);
+          state_t initial = res_->add_state();
+          res_->new_transition(initial, initial_, " ");
+          initial_ = initial;
+          res_->set_state_name(initial_,"[^+]");
         }
 
         AWALI_RAT_VISIT(lweight, e)

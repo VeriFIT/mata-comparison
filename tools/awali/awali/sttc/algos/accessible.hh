@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -211,7 +211,7 @@ namespace awali {
     typename Aut::element_type::automaton_nocv_t
     accessible(const Aut& aut, bool keep_history=true)
     {
-      return copy(aut, accessible_states(aut), keep_history);
+      return copy(aut, accessible_states(aut), keep_history,false,true);
     }
     
     /** @brief In-place accessible subautomaton
@@ -244,7 +244,7 @@ namespace awali {
     typename Aut::element_type::automaton_nocv_t
     coaccessible(const Aut& aut, bool keep_history=true)
     {
-      return copy(aut, coaccessible_states(aut), keep_history);
+      return copy(aut, coaccessible_states(aut), keep_history, false, true);
     }
 
     /** @brief In-place coaccessible subautomaton
@@ -277,7 +277,7 @@ namespace awali {
     typename Aut::element_type::automaton_nocv_t
     trim(const Aut& aut, bool keep_history=true)
     {
-      return copy(aut, useful_states(aut), keep_history);
+      return copy(aut, useful_states(aut), keep_history, false, true);
     }
 
     /** @brief In-place trim subautomaton

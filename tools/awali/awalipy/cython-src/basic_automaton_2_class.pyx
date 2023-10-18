@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ cdef _BasicAutomaton _BasicAutomaton_(basic_automaton_t aut_or_tdc):
         a= Transducer([], "hack!!")
     else:
         a = Automaton(empty_shell=True)
-    a._this= aut_or_tdc
+    a._set_cpp_class(aut_or_tdc)
     return a
 
 ## ========================================================================= ##
@@ -47,6 +47,9 @@ cdef class _BasicAutomaton:
 ## ========================================================================= ##
     cdef basic_automaton_t _this
 
+## ========================================================================= ##
+    cdef dict _state_name_map
+
 
 ## ========================================================================= ##
     cdef void _set_cpp_class(self, basic_automaton_t other):
@@ -55,6 +58,7 @@ cdef class _BasicAutomaton:
         This seems to be quite fragile. Modify the code with caution.
         """
         self._this.rewrap_into_me_(other)
+        self._recompute_state_names()
 
 ## ========================================================================= ##
     cdef void _set_cpp_class_bis(self, _BasicAutomaton other):
@@ -62,12 +66,57 @@ cdef class _BasicAutomaton:
         Modify wrapped object. Internal use only.
         This seems to be quite fragile. Modify the code with caution.
         """
-        self._this.rewrap_into_me_(other._this)
+        self._set_cpp_class(other._this)
+
+## ========================================================================= ##
+    def _register_state_name(self, i):
+        if (self.has_explicit_name(i)):
+                name = self.get_state_name(i)
+                if name in self._state_name_map:
+                    if type(self._state_name_map[name]) is list:
+                        self._state_name_map[name].append(i)
+                    else:
+                        self._state_name_map[name] = [self._state_name_map[name],i]
+                else:
+                    self._state_name_map[name] = i
+
+## ========================================================================= ##
+    def _unregister_state_name(self, i):
+        if (self.has_explicit_name(i)):
+                name = self.get_state_name(i)
+                if type(self._state_name_map[name]) is list:
+                    l = [x for x in self._state_name_map[name] if x != i]
+                    if len (l) == 1:
+                        self._state_name_map[name] = l[0]
+                    else:
+                        self._state_name_map[name] = l
+                else:
+                    del self._state_name_map[name]
+
+## ========================================================================= ##
+    def _recompute_state_names(self):
+        self._state_name_map = dict()
+        for i in self.states():
+            self._register_state_name(i)
+            
+## ========================================================================= ##
+    def _id_or_name(self, id):
+        if type(id) is int:
+            return id
+        elif type(id) is str:
+            state = self.get_state_by_name(id);
+            if type(state) is list:
+                raise ValueError("The name \""+id+"\" is associated with multiple states: "+ str(state))
+            return state
+        else:
+            raise TypeError("Expected a state id (int) or state name (str). Got type: "+ str(type(id)))
+
+            
 
 
 ## ========================================================================= ##
     def __init__(self):
-        pass
+        self._recompute_state_names();
 
 
 ## ========================================================================= ##
@@ -76,16 +125,16 @@ cdef class _BasicAutomaton:
 ## These methods are overridden in derived class (Automaton and Transducer)
 ## and hence are probably not visible for users.
 
-    def del_transition(self, int transition_or_source, dest_or_none=None):
+    def del_transition(self, transition_or_source, dest_or_none=None):
         if dest_or_none is None:
             self._this.del_transition1(transition_or_source)
         else:
-            self._this.del_transition2(transition_or_source, dest_or_none)
+            self._this.del_transition2(self._id_or_name(transition_or_source), self._id_or_name(dest_or_none))
 
-    def predecessors(self, int stt_id):  return self._this.predecessors1(stt_id)
-    def successors(self, int stt_id):  return self._this.successors1(stt_id)
-    def incoming(self, int stt_id):  return self._this.incoming1(stt_id)
-    def outgoing(self, int stt_id):  return self._this.outgoing1(stt_id)
+    def predecessors(self, stt):  return self._this.predecessors1(self._id_or_name(stt))
+    def successors(self, stt):  return self._this.successors1(self._id_or_name(stt))
+    def incoming(self, stt):  return self._this.incoming1(self._id_or_name(stt))
+    def outgoing(self, stt):  return self._this.outgoing1(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
@@ -218,20 +267,29 @@ cdef class _BasicAutomaton:
 #  
 
 ## ========================================================================= ##
-    def save(self, str s, str fmt = 'json'):
+    def save(self, str s, format = None, history = None):
         """
-        Usage:  automaton.save( filename [, format='json' ] )
+        Usage:  automaton.save( filename [, format='json' [, history=False]] )
 
         Description:  writes <automaton> in file <filename> using <format>.
 
         Args:
           filename (str)
           format (str, optional),
-              admissible values are 'dot', 'fado', 'grail' and 'json'
+              admissible values are 'dot', 'fado', 'json', 'svg', 'pdf', 'grail'
               defaults to 'json'
-        """
-        save_automaton_(self._this, s, fmt)
+          history(bool, optional)
+              Whether the history of states is put in states
+              Only meaningfull when using format "pdf" or "svg"
 
+        Note: only automata saved in format 'json' may be loaded back later on.
+        """
+        if format == None:
+            save_automaton2_(self._this, s)
+        elif history == None:
+            save_automaton3_(self._this, s, format)
+        else:
+            save_automaton4_(self._this, s, format, history)
 
 ## ========================================================================= ##
     def states(self):
@@ -296,83 +354,83 @@ cdef class _BasicAutomaton:
 
 
 ## ========================================================================= ##
-    def is_initial(self, int stt_id):
+    def is_initial(self, stt):
         """
-        Usage:  aut_or_tdc.is_initial(stt_id)
+        Usage:  aut_or_tdc.is_initial(stt)
 
-        Description:  returns True if the state identified by <stt_id> is initial in <aut_or_tdc>
+        Description:  returns True if the state identified by <stt> is initial in <aut_or_tdc>
 
-        Args:  stt_id (int)
+        Args:  stt (int or str): state identifier (int) or state name (str)
 
         Returns: bool
         """
-        return self._this.is_initial(stt_id);
+        return self._this.is_initial(self._id_or_name(stt));
 
 
 ## ========================================================================= ##
-    cpdef str get_initial_weight(self, int stt_id):
+    def get_initial_weight(self, stt):
         """
-        Usage:  aut_or_tdc.get_initial_weight(stt_id):
+        Usage:  aut_or_tdc.get_initial_weight(stt):
 
-        Description:  returns the initial weight of the state identified by <stt_id> in <aut_or_tdc/self>; returns the neutral additive element of the weight-set if the state is not initial
+        Description:  returns the initial weight of the state identified by <stt> in <aut_or_tdc/self>; returns the neutral additive element of the weight-set if the state is not initial
 
-        Args:  stt_id (int)
+        Args:  stt (int or str): state identifier (int) or state name (str)
 
         Returns:  str
         """
-        return self._this.get_initial_weight(stt_id)
+        return self._this.get_initial_weight(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
-    def set_initial(self, int stt_id, str weight= None):
+    def set_initial(self, stt, str weight= None):
         """
-        Usage:  aut_or_tdc.set_initial(stt_id [, weight=aut.get_weightset().one() ] )
+        Usage:  aut_or_tdc.set_initial(stt [, weight=aut.get_weightset().one() ] )
 
-        Description:  sets in <aut_or_tdc/self> the initial weight to the state identified by <stt_id>; overwrites the eventual previous initial weight
+        Description:  sets in <aut_or_tdc/self> the initial weight to the state identified by <stt>; overwrites the eventual previous initial weight
 
         Args:
-            stt_id (int), identifier of a state
+            stt (int or str): state identifier (int) or state name (str)
             weight (str, optional)
                 defaults to aut.get_weightset().one()
 
         Returns:  str, the new initial weight
         """
         if weight is None:
-            self._this.set_initial1(stt_id)
+            self._this.set_initial1(self._id_or_name(stt))
         else:
-            self._this.set_initial2(stt_id, weight)
+            self._this.set_initial2(self._id_or_name(stt), weight)
 
 
 ## ========================================================================= ##
-    cpdef str add_initial(self, int stt_id, str weight= None):
+    def add_initial(self, stt, str weight= None):
         """
-        Usage:  aut_or_tdc.add_initial(stt_id [, weight=aut.get_weightset().one() ] )
+        Usage:  aut_or_tdc.add_initial(stt [, weight=aut.get_weightset().one() ] )
 
-        Description:  adds in <aut_or_tdc/self> some initial weight to the state identified by <stt_id>
+        Description:  adds in <aut_or_tdc/self> some initial weight to the state identified by <stt>
 
         Args:
-            stt_id (int), identifier of a state
+             stt (int or str): state identifier (int) or state name (str)
             weight (str, optional)
                 defaults to aut.get_weightset().one()
 
         Returns:  str, the new initial weight
         """
         if (weight is None):
-            return self.add_initial(stt_id, self.get_weightset().one())
+            return self.add_initial(self._id_or_name(stt), self.get_weightset().one())
         else:
-            return self._this.add_initial(stt_id, weight)
+            return self._this.add_initial(self._id_or_name(stt), weight)
 
 
 ## ========================================================================= ##
-    def unset_initial(self, int stt_id):
+    def unset_initial(self, stt):
         """
-        Usage:  aut_or_tdc.unset_initial(stt_id)
+        Usage:  aut_or_tdc.unset_initial(stt)
 
-        Description:  makes the state identified by <stt_id> non-initial, that is, sets its initial weight to aut.weight_zero().
+        Description:  makes the state identified by <stt> non-initial, that is, sets its initial weight to aut.weight_zero().
 
-        Args:  stt_id (int), identifier of a state
+        Args:   stt (int or str): state identifier (int) or state name (str)
         """
-        self._this.unset_initial(stt_id)
+        self._this.unset_initial(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
@@ -400,60 +458,60 @@ cdef class _BasicAutomaton:
 
 
 ## ========================================================================= ##
-    def is_final(self, int stt_id):
+    def is_final(self, stt):
         """
-        Usage:  aut_or_tdc.is_final(stt_id):
+        Usage:  aut_or_tdc.is_final(stt):
 
-        Description:  returns True if the state identified by <stt_id> is final in <aut_or_tdc/self>
+        Description:  returns True if the state identified by <stt> is final in <aut_or_tdc/self>
 
-        Args:  stt_id (int)
+        Args:  stt (int or str): state identifier (int) or state name (str)
 
         Returns:  bool
         """
-        return self._this.is_final(stt_id)
+        return self._this.is_final(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
-    cpdef str get_final_weight(self, int stt_id):
+    cpdef str get_final_weight(self, stt):
         """
-        Usage:  aut_or_tdc.get_final_weight(stt_id):
+        Usage:  aut_or_tdc.get_final_weight(stt):
 
-        Description:  returns the final weight of the state identified by <stt_id> in <aut_or_tdc/self>; returns the neutral additive element of the weight-set if the state is not final
+        Description:  returns the final weight of the state identified by <stt> in <aut_or_tdc/self>; returns the neutral additive element of the weight-set if the state is not final
 
-        Args:  stt_id (int)
+        Args:  stt (int)
 
         Returns: str
         """
-        return self._this.get_final_weight(stt_id)
+        return self._this.get_final_weight(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
-    def set_final(self, int stt_id, str weight=None):
+    def set_final(self, stt, str weight=None):
         """
-        Usage:  aut_or_tdc.set_final(stt_id [, weight=aut.get_weightset().one() ] )
+        Usage:  aut_or_tdc.set_final(stt [, weight=aut.get_weightset().one() ] )
 
-        Description:  sets in <aut_or_tdc/self> the final weight to the state identified by <stt_id>; overwrites the eventual previous final weight
+        Description:  sets in <aut_or_tdc/self> the final weight to the state identified by <stt>; overwrites the eventual previous final weight
 
         Args:
-            stt_id (int), identifier of a state
+             stt (int or str): state identifier (int) or state name (str)
             weight (str, optional)
                 defaults to aut.get_weightset().one()
         """
         if weight is None:
-            self._this.set_final1(stt_id)
+            self._this.set_final1(self._id_or_name(stt))
         else:
-            self._this.set_final2(stt_id, weight)
+            self._this.set_final2(self._id_or_name(stt), weight)
 
 
 ## ========================================================================= ##
-    cpdef str add_final(self, int stt_id, str weight=None):
+    cpdef str add_final(self, stt, str weight=None):
         """
-        Usage:  aut_or_tdc.add_final(stt_id [, weight=aut.get_weightset().one() ] )
+        Usage:  aut_or_tdc.add_final(stt [, weight=aut.get_weightset().one() ] )
 
-        Description:  adds in <aut_or_tdc/self> some final weight to the state identified by <stt_id>
+        Description:  adds in <aut_or_tdc/self> some final weight to the state identified by <stt>
 
         Args:
-            stt_id (int), identifier of a state
+             stt (int or str): state identifier (int) or state name (str)
             weight (str, optional)
                 defaults to aut.get_weightset().one()
 
@@ -461,21 +519,21 @@ cdef class _BasicAutomaton:
         """
         if (weight is None):
             weight = self.get_weightset().one()
-        return self._this.add_final(stt_id, weight)
+        return self._this.add_final(self._id_or_name(stt), weight)
 
 
 ## ========================================================================= ##
-    def unset_final(self, int stt_id):
+    def unset_final(self, stt):
         """
-        Usage:  aut_or_tdc.unset_final(stt_id)
+        Usage:  aut_or_tdc.unset_final(stt)
 
-        Description:  makes the state identified by <stt_id> non-final, that is, sets its final weight to aut.weight_zero().
+        Description:  makes the state identified by <stt> non-final, that is, sets its final weight to aut.weight_zero().
 
-        Args:  stt_id (int), identifier of a state
+        Args:   stt (int or str): state identifier (int) or state name (str)
 
         Returns:  str, the new final weight
         """
-        self._this.unset_final(stt_id)
+        self._this.unset_final(self._id_or_name(stt))
 
 
 ## ========================================================================= ##
@@ -494,18 +552,22 @@ cdef class _BasicAutomaton:
         if (name is None):
           return self._this.add_state0()
         else:
-          return self._this.add_state1(name)
+          i = self._this.add_state1(name)
+          self._register_state_name(i)
+          return i
 
 
 ## ========================================================================= ##
-    def del_state(self, int stt_id):
+    def del_state(self, stt):
         """
-        Usage:  aut_or_tdc.del_state(stt_id)
+        Usage:  aut_or_tdc.del_state(stt)
 
-        Description:  deletes from <aut_or_tdc/self> the state identified by <stt_id> and all its incoming and outgoing transitions
+        Description:  deletes from <aut_or_tdc/self> the state identified by <stt> and all its incoming and outgoing transitions
 
-        Args:  stt_id (int), a state identifier
+        Args:   stt (int or str): state identifier (int) or state name (str)
         """
+        stt_id = self._id_or_name(stt)
+        self._unregister_state_name(stt_id)
         self._this.del_state(stt_id)
 
 
@@ -717,20 +779,6 @@ cdef class _BasicAutomaton:
         return self._this.outin(src,dst)
 
 
-## ========================================================================= ##
-    def get_state_name(self, int stt_id):
-        """
-        Usage:  aut_or_tdc.get_state_name(stt_id)
-
-        Description:  returns the name of the state
-
-        Args:  stt_id (int), identifier of a state
-
-        Returns:  str
-        """
-        return self._this.get_state_name(stt_id)
-
-
 
 ## ========================================================================= ##
     def get_weightset(self):
@@ -798,6 +846,23 @@ cdef class _BasicAutomaton:
         """
         return is_accessible_(self._this)
 
+## ========================================================================= ##
+    def promote(self, weightset):
+        """
+        Usage:  aut_or_tdc.promote(weightset)
+
+        Description:  returns a copy of <aut_or_tdc/self>, except its weightset is <weightset>
+
+        Args: 
+            weightset (str or WeightSet), the weightset to promote tp
+
+        Precondition:  <weightset> must be a supersemiring of the weightset of <aut_or_tdc/self>. (Use method `characteristic` to pass from B to any other semiring.)
+
+        Returns:  Automaton or Transducer 
+        """
+        if isinstance(weightset, WeightSet):
+            weightset = str(weightset)
+        return _BasicAutomaton_(promote_automaton_(self._this,weightset))
 
 ## ========================================================================= ##
     def accessible(self):
@@ -1081,25 +1146,122 @@ cdef class _BasicAutomaton:
         return sccs_(self._this)
 
 ## ========================================================================= ##
-    def scc_of(self, stt_id):
+    def scc_of(self, stt):
         """
-        Usage:  aut_or_tdc.scc_of(stt_id)
+        Usage:  aut_or_tdc.scc_of(stt)
 
-        Description:  computes the scc of <aut_or_tdc> that contains <stt_id>.
+        Description:  computes the scc of <aut_or_tdc> that contains <stt>.
 
-        Args:  stt_id (int), identifier of a state
+        Args:   stt (int or str): state identifier (int) or state name (str)
 
         Returns:  List of int
         """
-        return scc_of_(self._this, stt_id)
+        return scc_of_(self._this, self._id_or_name(stt))
 
 ## ========================================================================= ##
     def condensation(self):
         """
         Usage:  aut_or_tdc.condensation()
 
-        Description:  computes the sccs of <aut_or_tdc> condensed as a DAG.
+        Description:  computes the strong components of <aut_or_tdc>, and merge every connected component into a single state.  The result is a graph that describes the strong-connexity relation in <aut_or_tdc>.
 
         Returns:  an Automaton or Transducer
+
+        Precise definition:
+        1) The context of the condensation is the same as <aut_or_tdc>, that is an Automaton or a Transducer, weighted or not.  However, the behavior of the condensation has no particular meaning.
+        2) Each vertex in the condensation is a strong component of <aut_or_tdc> .
+        3) There is an edge in the condensation from some vertex S to some vertex T in the condensation if there is one in <aut_or_tdc> from some s in S to some t in T.
+        4) If, in the previous item, there are multiple pairs (s,t), then one edge is created in the condensation for each distinct label, and the weight of that edge is equal to the sum of the weights of the corresponding edges in <aut_or_tdc> . (If you use a weightset that is not positive, such as Z, you should probably use `characteristic` before `condensation` to avoid strange behavior.)
+        5) A vertex S in the condensation is initial (resp. final) if and only if some state s in S is initial (resp. final) in <aut_or_tdc>.  Initial and final weights are added if there are several state s.
+
+        Precondition: This function works for all weightsets, but the result might be not what you want if the weightset is not Positive.  Indeed, if it is possible that the sum of two weights is equal the additive neutral element, then some edges might be missing from the result. In that case, it is recommended to use `characteristic` prior to `condensation`.
         """
         return _BasicAutomaton_(condensation_(self._this))
+
+
+## ========================================================================= ##
+    def strip_history(self):
+        """
+        Usage: aut_or_tdc.strip_history()
+
+        Description: removes the history from <aut_or_tdc>.
+        """
+        self._this.strip_history()
+
+## ========================================================================= ##
+    def aut_to_exp(self, str method=None):
+        """
+        Usage:  aut_or_tdc.aut_to_exp([method="min_inout_degree"])
+
+        Description:  computes the rational expression of the language accepted by <aut_or_tdc/self> by state elimination.
+
+        Argument:
+            method (str, optional): govers the order in which states are eliminated
+              - "min_inout_degree": always eliminate the state with minimal (in degree)x(out degree).
+              - "min_id": eliminates state by increasing identifier (hence in an arbitrary order)
+
+        Returns:
+            RatExp, (weighted) expression of the language accepted by <aut_or_tdc/self>.
+        """
+        if method == None:
+            return _RatExp(aut_to_exp1_(self._this))
+        else:
+            return _RatExp(aut_to_exp2_(self._this, method))
+            
+## ========================================================================= ##
+    def has_explicit_name(self, int stt_id):
+        """
+        Usage:  aut_or_tdc.has_explicit_name(stt_id)
+
+        Description:  returns True if <stt_id> has an explicit name.
+
+        Args:  stt_id (int), identifier of a state
+
+        Returns:  bool
+
+        Note: states always has a name; if it is not explicit, it is built from its identifier.
+        """
+        return self._this.has_explicit_name(stt_id)
+
+## ========================================================================= ##
+    def get_state_name(self, int stt_id):
+        """
+        Usage:  aut_or_tdc.get_state_name(stt_id)
+
+        Description:  returns the name of the state
+
+        Args:  stt_id (int), identifier of a state
+
+        Returns:  str
+        """
+        return self._this.get_state_name(stt_id)
+
+## ========================================================================= ##
+    def get_state_by_name(self, str name):
+        """
+        Usage:  aut_or_tdc.get_state_by_name(name)
+
+        Argument: name (str): name to the state
+
+        Returns: int or list, the state or the list of states that are named <name>
+
+        Warning: Nothing ensures that state names are unique.
+        """
+        return self._state_name_map[name]
+
+## ========================================================================= ##
+    def set_state_name(self, int stt_id, str name):
+        """
+        Usage:  aut_or_tdc.set_state_name(stt_id, name)
+
+        Description: changes the name of <stt_id> to <name>
+
+        Argument: name (str): new name of the state <stt_id>
+
+        See also: get_state_by_name and get_state_name
+        """
+        self._unregister_state_name(stt_id);
+        self._this.set_state_name(stt_id, name);
+        self._register_state_name(stt_id);
+
+

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,39 +17,38 @@
 #ifndef AWALI_DEMANGLE_CC
 #define AWALI_DEMANGLE_CC
 
+#include <string>
+
 
 #ifdef __GNUG__
 
-#include<cxxabi.h>
+#include <cxxabi.h>
 
 
-namespace awali {
-  namespace internal {
+namespace awali { namespace internal {
 
-    static std::string demangle(char const* name)
-    {
-      int status = -4;
-      char* res = abi::__cxa_demangle (name, NULL, NULL, &status);
-      std::string str_res = (status == 0)?res:name ;
-      if (res != nullptr)
-        free(res);
-      return str_res;
-    }
-
+  inline std::string demangle(char const* name)
+  {
+    int status = -4;
+    char* res = abi::__cxa_demangle(name, NULL, NULL, &status);
+    std::string str_res = (status == 0) ? res : name;
+    if (res != nullptr)
+      free(res);
+    return str_res;
   }
-}
+
+}} // namespace awali::internal
 
 #else
 
-namespace awali {
-  namespace internal {
+namespace awali { namespace internal {
 
-    static std::string
-    demangle(const char* name)
-    { return name; }
-
+  inline std::string demangle(const char* name)
+  {
+    return name;
   }
-}
+
+}} // namespace awali::internal
 
 #endif
 

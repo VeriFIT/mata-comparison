@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include <awali/sttc/algos/js_print.hh>
 #include <awali/sttc/algos/exp_parser.hh>
 #include<awali/sttc/labelset/traits.hh>// ratexpset_of
+#include<awali/sttc/json.hxx>//json_support
+
 
 namespace awali {
   namespace sttc {
@@ -56,6 +58,25 @@ namespace awali {
       make_automaton(const std::set<char>& letters)
     {
       return make_automaton<b>(letters);
+    }
+
+    template<typename T>
+    context<ctx::lal_char,T>
+    make_context(const std::set<char>& letters) {
+      return {ctx::lal_char(letters),T()};
+    }
+
+    context<ctx::lal_char,b>
+    make_context(const std::set<char>& letters) {
+      return {ctx::lal_char(letters),b()};
+    }
+
+    ctx::lan_char::value_t get_epsilon() {
+      return ctx::lan_char::one();
+    }
+
+    bool is_epsilon(ctx::lan_char::value_t v) {
+      return ctx::lan_char::is_one(v);
     }
     
     /**
@@ -102,25 +123,49 @@ namespace awali {
     template<typename T>
     mutable_automaton<context<ctx::lal_char,T>>
       load_automaton(std::istream& is) {
-      awali::json::object_t* jo= awali::json::object_t::parse(is);
-      if(!jo->has_child("kind") || jo->at("kind")->to_string() != "Automaton")
+      json_ast_t p = json_ast::from(is);
+      if(!p->has_child("kind") || p->at("kind")->to_string() != "Automaton")
         throw std::runtime_error("json: Automaton");
-      awali::json::object_t* jl=jo->at({"context","labels"})->object();
+      if(!p->has_child("context"))
+	throw std::runtime_error("No context in Automaton description");
+      awali::json::object_t* jk=p->at({"context"})->object();
+      awali::json::object_t* jl=jk->at({"labels"})->object();
       if(jl->at("labelKind")->to_string() != "Letters" 
          || jl->at("letterType")->to_string() != "Char")
         throw std::runtime_error("Not a letter automaton");
-      if(jl->has_child("withEpsilon"))
+      if(jl->has_child("allowEpsilon"))
         throw std::runtime_error("Epsilon transitions not supported by this function");
       auto ctx = context<ctx::lal_char,T>(ctx::lal_char({}),T());
       for(auto jv : *jl->at("alphabet")->array())
         const_cast<ctx::lal_char::genset_t&>(ctx.labelset()->genset()).add_letter(jv->to_string()[0]);
-      auto aut = js_parse_aut_content(ctx, jo->at("data")->object());
-      if(jo->has_child("metadata"))
-        js_add_metadata(aut, jo->at("metadata")->object());
-      delete jo;
+      auto aut = js_parse_aut_content(ctx, p->at("data")->object());
+      if(p->has_child("metadata"))
+        js_add_metadata(aut, p->at("metadata")->object());
       return aut;
     }
-    
+      
+    template<typename T>
+    mutable_automaton<context<ctx::lan_char,T>>
+      load_automaton_with_epsilon(std::istream& is) {
+      json_ast_t p = json_ast::from(is);
+      if(!p->has_child("kind") || p->at("kind")->to_string() != "Automaton")
+        throw std::runtime_error("json: Automaton");
+      if(!p->has_child("context"))
+	throw std::runtime_error("No context in Automaton description");
+      awali::json::object_t* jk=p->at({"context"})->object();
+      awali::json::object_t* jl=jk->at({"labels"})->object();
+      if(jl->at("labelKind")->to_string() != "Letters" 
+         || jl->at("letterType")->to_string() != "Char")
+        throw std::runtime_error("Not a letter automaton");
+      auto ctx = context<ctx::lan_char,T>(ctx::lan_char(std::set<char>()),T());
+      for(auto jv : *jl->at("alphabet")->array())
+        const_cast<ctx::lan_char::genset_t&>(ctx.labelset()->genset()).add_letter(jv->to_string()[0]);
+      auto aut = js_parse_aut_content(ctx, p->at("data")->object());
+      if(p->has_child("metadata"))
+        js_add_metadata(aut, p->at("metadata")->object());
+      return aut;
+    }
+
     mutable_automaton<context<ctx::lal_char,b>>
     load_automaton(std::istream& is) {
         return load_automaton<b>(is);
@@ -169,6 +214,23 @@ namespace awali {
       using ratset_t = ratexpset_of<context_t_of<AUTOMATON>>;
       return ratset_t(get_rat_context(aut->context()),ratset_t::identities_t::trivial);
     }
+
+   template <typename Automaton, unsigned version = version::fsm_json>
+   std::ostream& js_print(Automaton aut,
+			  std::ostream& o,
+			  bool full = false,
+			  json_ast_t extra_metadata = json_ast::empty()) {
+     return put(aut_to_ast(aut, extra_metadata, full), o);
+   }
+
+    template <typename RatExpSet, unsigned version = version::fsm_json>
+    std::ostream& js_print(const RatExpSet& rs,
+			   const typename RatExpSet::ratexp_t& e,
+			   std::ostream& o,
+			   json_ast_t extra_metadata = json_ast::empty()) {
+      return put(ratexp_to_ast(rs, e, extra_metadata), o);
+   }
+    
   }
 }
 

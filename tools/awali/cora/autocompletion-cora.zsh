@@ -1,7 +1,7 @@
 #compdef cora
 
 #This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ out=/dev/null
 # out=log.txt  # COMMENT/UNCOMMENT to activate/deactivate debug-information
                # writing to file log.txt
 
-reply=( "${(@f)$(__cora_autocompletion $(( ${#words} - 1 )) "${words[@]}" 2> ${out})}" )
+reply=( "${(@f)$(__cora_autocompletion $((${#words}-1)) "${words[@]}"  $((${CURRENT}-1)) 2> ${out})}" )
 echo ${#words} >> ${out}
 echo ${words[@]} >> ${out}
 echo \"$reply\" >> ${out}

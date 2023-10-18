@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,12 +49,11 @@ namespace awali {
     {
       /// The type of the resulting automaton.
     public:
-      history_kind_t get_nature() const
+      history_kind_t get_nature() const override
       {
         return history_kind_t::TUPLE;
       }
 
-    public:
       /// The type of origin automata.
       using automata_t = Auts;
       /// Tuple of states of input automata.
@@ -71,7 +70,7 @@ namespace awali {
 
       std::ostream&
       print_state_name(state_t s, std::ostream& o,
-                       const std::string& fmt) const
+                       const std::string& fmt) const override
       {
         o << '(';
         print_state_name_(s, o, fmt, indices);
@@ -117,11 +116,11 @@ namespace awali {
         return o;
       }
 
-      bool has_history(state_t s) const {
+      bool has_history(state_t s) const override {
         return (origins_.find(s)!=origins_.end());
       }
 
-      bool remove_history(state_t s) {
+      bool remove_history(state_t s) override {
         return origins_.erase(s);
       };
 
@@ -136,7 +135,7 @@ namespace awali {
 
       mutable origins_t origins_;
 
-      state_t get_state(state_t s) {
+      state_t get_state(state_t) override {
         throw std::runtime_error("Origin state not available");
       }
 
@@ -145,7 +144,9 @@ namespace awali {
         return {std::get<I>(origins_[s])...};
       }
 
-      std::vector<state_t> get_state_set(state_t s) {
+      std::vector<state_t> 
+      get_state_set(state_t s) override
+      {
         return get_state_set(s,indices);
       }
     };

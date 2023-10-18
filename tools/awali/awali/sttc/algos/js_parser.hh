@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,9 +47,9 @@ namespace awali { namespace sttc {
         : rs_(rs)
       {}
 
-      ratexp_t parseNode(json::node_t* p) {
+      ratexp_t parseNode(json::node_t const* p) {
         require(p->kind==json::OBJECT,"js parse ratexp:","object expected");
-        json::object_t* jo=dynamic_cast<json::object_t*>(p);
+        json::object_t const* jo=dynamic_cast<json::object_t const*>(p);
         ratexp_t e;
         if(jo->has_child("sum")) {
           auto& v=jo->at("sum")->array()->values;
@@ -65,6 +65,10 @@ namespace awali { namespace sttc {
         }
         else if(jo->has_child("star"))
           e= rs_.star(parseNode(jo->at("star")));
+        else if(jo->has_child("maybe"))
+          e= rs_.maybe(parseNode(jo->at("maybe")));
+        else if(jo->has_child("plus"))
+          e= rs_.plus(parseNode(jo->at("plus")));
         else if(jo->has_child("label"))
           e= rs_.atom(ls_.value_from_json(jo->at("label")));
         else if(jo->has_child("one"))
@@ -93,7 +97,7 @@ namespace awali { namespace sttc {
   inline
   typename RatExpSet::ratexp_t
   js_parse_exp_content(const RatExpSet& rs,
-                       json::node_t* p)
+                       json::node_t const* p)
   {
     internal::js_exp_parser<RatExpSet> parser{rs};
     return parser.parseNode(p);
@@ -108,7 +112,6 @@ namespace awali { namespace sttc {
     auto ws = context.weightset();
     auto ls = context.labelset();
     mutable_automaton<Context> aut = make_mutable_automaton(context);
-    char c;
     std::unordered_map<unsigned,state_t> states;
     unsigned s;
     require(p->has_child("states"),"json automaton:","no field states");

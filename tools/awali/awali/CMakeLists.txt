@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,12 +26,27 @@ IF (NOT DEFINED AWALICPP_DYNLIB_INSTALL_DIR)
   set(AWALICPP_DYNLIB_INSTALL_DIR "${AWALICPP_INSTALL_PREFIX}/lib")
 ENDIF()
 
+
 IF (NOT DEFINED AWALICPP_SHARE_INSTALL_PREFIX)
     set(AWALICPP_SHARE_INSTALL_PREFIX "${AWALICPP_INSTALL_PREFIX}/share")
 ENDIF()
 
 IF (NOT DEFINED AWALICPP_MODULE_INSTALL_DIR)
   set(AWALICPP_MODULE_INSTALL_DIR "${AWALICPP_INSTALL_PREFIX}/lib/awali_modules")
+ENDIF()
+
+IF (NOT DEFINED COMPILE_MODULE_IN_INSTALL_DIR)
+  set(COMPILE_MODULE_IN_INSTALL_DIR "FALSE")
+ENDIF()
+
+IF (NOT DEFINED AWALICPP_MODULE_COMPILE_DIR) 
+  IF (COMPILE_MODULE_IN_INSTALL_DIR)
+    set(AWALICPP_MODULE_COMPILE_DIR "${AWALICPP_MODULE_INSTALL_DIR}")
+  ENDIF()
+ENDIF()
+
+IF (DEFINED AWALICPP_MODULE_COMPILE_DIR)
+  MESSAGE(WARNING "A directory was specified for on-the-fly compilation of module.  Any program linked to awalidyn might attempt to write in that directory; it thus must be writable by any user that might use the program.")
 ENDIF()
 
 IF (NOT DEFINED DOT_BIN)
@@ -54,6 +69,7 @@ FOREACH(F
         parse_exception
         qfraction
         json_ast
+	ato
         )
   set(AWALIDYN_SOURCES common/${F}.cc ${AWALIDYN_SOURCES})
 ENDFOREACH()
@@ -77,6 +93,7 @@ ENDFOREACH()
 FOREACH(F
         any
         automaton
+        abstract_context
         context
         context_description
         context_description_deprecated
@@ -117,7 +134,7 @@ ENDFOREACH()
 ################################################################################
 # OPTIONS
 ################################################################################
-FOREACH(F options option)
+FOREACH(F options option value)
   set(AWALIDYN_SOURCES dyn/options/${F}.cc ${AWALIDYN_SOURCES})
 ENDFOREACH()
 
@@ -147,6 +164,7 @@ FOREACH(F
         transducer
         transpose
         words
+        join
        )
   set(AWALIDYN_SOURCES dyn/modules/${F}.cc ${AWALIDYN_SOURCES} )
 ENDFOREACH()

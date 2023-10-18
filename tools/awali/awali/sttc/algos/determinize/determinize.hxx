@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -354,6 +354,7 @@ namespace awali { namespace sttc {
     /// word is given by the final function.
     /// If the semiring is not locally finite, the termination is not assured.
     ///
+    ///
     /// \tparam Aut an weighted automaton type.
     /// \pre labelset is free.
     template <typename Aut>
@@ -391,24 +392,30 @@ namespace awali { namespace sttc {
 
       /// Build the weighted determinizer.
       /// \param a         the weighted automaton to determinize
-      detweighted_algo_impl(const automaton_t& a)
+      /// \param lim        the depth of the determinisation; -1 means infinity
+      detweighted_algo_impl(const automaton_t& a, int lim=-1)
         : input_(a)
         , output_(make_mutable_automaton(a->context()))
+	, limit_(lim)  
       {}
 
-      // Initialize initial state of new weighted automaton.
-      void init_initial_state()
-      {
-        state_name_t ss;
-        for (auto t : input_->initial_transitions())
-          ss.emplace(input_->dst_of(t), input_->weight_of(t));
-        output_->set_initial(state_(ss));
+      automaton_t operator()() {
+	return (*this)([](state_name_t) {return true;});
       }
 
       /// The determinization of weighted automaton
-      automaton_t operator()()
+      /// the state is added to the result only if the predicate \p pred is true,
+      /// otherwise it is replace by the 'unknown' state
+      /// @param pred a lambda state_name_t -> bool
+      /// @tparam Pred the type of pred
+      template<typename Pred>
+	automaton_t operator()(Pred pred)
       {
-        init_initial_state();
+        state_name_t ss;
+	unknown_ = output_->null_state();
+        for (auto t : input_->initial_transitions())
+          ss.emplace(input_->dst_of(t), input_->weight_of(t));
+        output_->set_initial(state_(ss,0,pred(ss)));
 
         // label -> <destination, sum of weights>.
         std::map<label_t,
@@ -416,10 +423,10 @@ namespace awali { namespace sttc {
                  internal::less<labelset_t_of<automaton_t>>> dests;
         while (!todo_.empty())
           {
-            auto ss = std::move(todo_.front());
+            ss = std::move(todo_.front().first);
+	    unsigned depth = todo_.front().second; 
             todo_.pop();
             auto src = map_[ss];
-
             dests.clear();
             for (const auto& p : ss)
               {
@@ -442,7 +449,7 @@ namespace awali { namespace sttc {
               }
             for (auto& d : dests)
               output_->new_transition(src,
-                                   state_(d.second.first),
+				      state_(d.second.first, depth+1, pred(d.second.first)),
                                    d.first);
           }
           return output_;
@@ -451,24 +458,32 @@ namespace awali { namespace sttc {
     private:
       /// The state for set of states \a ss.
       /// If this is a new state, schedule it for visit.
-      state_t state_(const state_name_t& name)
-      {
+      state_t state_(const state_name_t& name, unsigned depth, bool true_state) {
         // Benches show that the map_.emplace technique is slower, and
         // then that operator[] is faster than emplace.
         state_t res;
         auto i = map_.find(name);
         if (i == std::end(map_))
-          {
+	  if(true_state && (limit_ <0 || depth <= (unsigned) limit_)) {
             res = output_->add_state();
             map_[name] = res;
             for (const auto& p : name)
               if (input_->is_final(p.first))
                 output_->add_final(res,
-                                ws_.mul(p.second,
-                                        input_->get_final_weight(p.first)));
+				   ws_.mul(p.second,
+					   input_->get_final_weight(p.first)));
 
-            todo_.push(name);
+            todo_.push(std::make_pair(name,depth));
           }
+	  else {
+	    if(unknown_ == output_->null_state()) {
+	      unknown_ = output_->add_state();
+	      for(auto l : output_->labelset()->genset())
+		output_->new_transition(unknown_, unknown_, l);
+	      output_->set_state_name(unknown_,"...");
+	    }
+	    res = unknown_;
+	  }
         else
           res = i->second;
         return res;
@@ -495,8 +510,11 @@ namespace awali { namespace sttc {
       unsigned state_size_ = input_->max_state() + 1;
 
       /// The sets of (input) states waiting to be processed.
-      using queue = std::queue<state_name_t>;
+      using queue = std::queue<std::pair<state_name_t,unsigned>>;
       queue todo_;
+      /// The maximal depth in the exploration (-1 = infinity)
+      int limit_;
+      state_t unknown_;
     };
   }
 

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -74,18 +74,35 @@ namespace awali {
       return loading::call1<weight_t>("constant_term", "ratexp", exp);
     }
 
+    ratexp_t ratexp_support(ratexp_t exp) {
+      return loading::call1<ratexp_t>("ratexp_support", "ratexp", exp);
+    }
+
+    ratexp_t ratexp_copy(ratexp_t exp) {
+      return loading::call1<ratexp_t>("ratexp_copy", "ratexp", exp);
+    }
+
+    ratexp_t
+    ratexp_characteristic(ratexp_t exp, std::string const& semiring)
+    {
+      std::string stat_ctx
+        = exp->get_context()->labelset_name() + "_"
+          + context::tostring(context::weightset(semiring), false);
+      return loading::call0<ratexp_t>("ratexp_characteristic", "ratexp",
+                                         stat_ctx, exp);
+    }
+
     json_ast_t to_json_ast(ratexp_t exp, json_ast_t em)
     {
       return loading::call1<json_ast_t>("to_json_tree", "ratexp", exp, em);
     }
 
-
     std::ostream& 
     internal::json(ratexp_t ratexp, 
                    std::ostream& out, 
-                   json_ast_t extra_medata)
+                   json_ast_t extra_metadata)
     {
-      json_ast_t ast = to_json_ast(ratexp);
+      json_ast_t ast = to_json_ast(ratexp, extra_metadata);
       return ::awali::put(ast, out);
     }
   

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ namespace awali {
         template<typename Aut>
         static inline
         auto
-        new_epsilon_trans(Aut a,
-                          state_t src, state_t dst,
-                          ::awali::sttc::weight_t_of<Aut> w)
+        new_epsilon_trans(Aut,
+                          state_t, state_t,
+                          ::awali::sttc::weight_t_of<Aut>)
           -> transition_t
         {
           throw std::runtime_error("No epsilon transition");
@@ -39,9 +39,8 @@ namespace awali {
         template<typename Aut>
         static inline
         auto
-        set_epsilon_trans(Aut a,
-                          state_t src, state_t dst,
-                          ::awali::sttc::weight_t_of<Aut> w)
+        set_epsilon_trans(Aut, state_t, state_t,
+                          ::awali::sttc::weight_t_of<Aut>)
           -> transition_t
         {
           throw std::runtime_error("No epsilon transition");
@@ -50,9 +49,9 @@ namespace awali {
         template<typename Aut>
         static inline
         auto
-        add_epsilon_trans(Aut a,
-                          state_t src, state_t dst,
-                          ::awali::sttc::weight_t_of<Aut> w)
+        add_epsilon_trans(Aut,
+                          state_t, state_t,
+                          ::awali::sttc::weight_t_of<Aut>)
           -> ::awali::sttc::weight_t_of<Aut>
         {
           throw std::runtime_error("No epsilon transition");
@@ -68,15 +67,14 @@ namespace awali {
         template<typename Labelset>
         static inline
         bool
-        is_epsilon(const typename Labelset::value_t& l) {
+        is_epsilon(const typename Labelset::value_t&) {
           return false;
         }
 
         template<typename Aut>
         static inline
         void
-        del_epsilon_trans(Aut a,
-                          state_t src, state_t dst)
+        del_epsilon_trans(Aut, state_t, state_t)
         {
           throw std::runtime_error("No epsilon transition");
         }

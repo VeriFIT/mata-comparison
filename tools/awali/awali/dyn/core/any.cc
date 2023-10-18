@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,9 +43,11 @@ namespace awali { namespace dyn {
     {
       try { return any_cast<typename M::value_t>(a); } 
       catch(any_cast_exception const& e) {
-        std::stringstream ss;
-        ss << a << std::flush;
-        try { return awali::internal::to_value_of(set,ss.str()); } 
+        try { /* Trying to parse */
+          std::stringstream ss;
+          ss << a << std::flush;
+          return awali::internal::to_value_of(set,ss.str()); 
+        } 
         catch (parse_exception const&) { 
           std::stringstream ss;
           ss << e.what();
@@ -71,9 +73,11 @@ namespace awali { namespace dyn {
     typename M::genset_t::word_t extract_word(const any_t& a, M const& set){
       try { return any_cast<typename M::genset_t::word_t>(a); } 
       catch(any_cast_exception const& e) {
-        std::stringstream ss;
-        ss << a << std::flush;
-        try { return awali::internal::to_word_of(set,ss.str()); } 
+        try {
+          std::stringstream ss;
+          ss << a << std::flush;
+          return awali::internal::to_word_of(set,ss.str()); 
+        } 
         catch (parse_exception const&) { 
           std::stringstream ss;
           ss << e.what();
@@ -108,7 +112,7 @@ namespace awali { namespace dyn {
     }
 
     template<unsigned i, typename M, typename P>
-    any_t extract_(const any_t& a, unsigned n, const M& sets, priority::ONE<P>) 
+    any_t extract_(const any_t&, unsigned, const M& sets, priority::ONE<P>) 
     {
       throw any_cast_exception (
         "Values in set "+sets.vname()+" are not tuples.");
@@ -122,7 +126,7 @@ namespace awali { namespace dyn {
 
     template<typename M, std::size_t... I>
     std::list<any_t>
-    expand__(const any_t& a, const M& sets, 
+    expand__(const any_t& a, const M&, 
         awali::internal::index_sequence<I...>) 
     {
       typename M::value_t tuple = any_cast<typename M::value_t>(a);
@@ -141,7 +145,7 @@ namespace awali { namespace dyn {
 
     template <typename P, typename M>
     std::list<any_t>
-    expand_(any_t const& a, M const& sets, awali::priority::ONE<P>)
+    expand_(any_t const&, M const& sets, awali::priority::ONE<P>)
     {
       throw any_cast_exception("Values in set "+sets.sname()+" are not tuples."); 
     }

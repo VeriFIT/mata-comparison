@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,9 +24,11 @@
 // Do not forget to include the entry files, or the compiler
 // will cry and you wont understand why 
 #include <awali/common/docstring/entry.hh>
-#include <awali/common/docstring/ratexp.hh>
+#include <awali/common/docstring/eps_removal.hh>
 // #include <awali/common/docstring/exp_to_aut.hh>
 #include <awali/common/docstring/json_format.hh>
+#include <awali/common/docstring/ratexp.hh>
+#include <awali/common/docstring/reduction.hh>
 
 namespace awali { namespace docstring {
 
@@ -34,9 +36,11 @@ namespace awali { namespace docstring {
 
   static std::vector<entry_t> entries = 
   {
-    ratexp,
+	eps_removal,
 // 	exp_to_aut,
-    json_format
+    json_format,
+    ratexp,
+	reduction
   };
 
 }}

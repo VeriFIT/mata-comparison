@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@ namespace awali { namespace sttc
       rweight = 0;
       shuffle = 0;
       star = 0;
+      maybe = 0;
+      plus = 0;
       sum = 0;
       transposition = 0;
       zero = 0;
@@ -90,6 +92,18 @@ namespace awali { namespace sttc
     VISIT(star)
     {
       ++star;
+      v.sub()->accept(*this);
+    }
+
+    VISIT(maybe)
+    {
+      ++maybe;
+      v.sub()->accept(*this);
+    }
+
+    VISIT(plus)
+    {
+      ++plus;
       v.sub()->accept(*this);
     }
 

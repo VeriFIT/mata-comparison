@@ -1,6 +1,5 @@
-
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -137,7 +136,7 @@ namespace awali { namespace dyn {
                     + "\" for a new automaton context ("
                     + static_context + ")." ) <<  std::endl;
       std::string cxx{STR(CXX_COMPILER)};
-      std::string opt_11{STR(CXX_FLAGS)};
+      std::string static cmake_cxx_flags{STR(CXX_FLAGS)};
 //       std::string vauc_path{STR(COMPIL_FLAGS)" "};
       std::vector<std::string> includes = {  compile_dir };
       std::vector<std::string> tmp;
@@ -160,7 +159,7 @@ namespace awali { namespace dyn {
         includes_conc+=s;
       }
 
-      std::string cxx_flags = " "+opt_11+" -Wall -Wextra -Wsign-conversion -g -rdynamic -w -O3 -fpic";
+      std::string cxx_flags = " "+cmake_cxx_flags+" -rdynamic -fpic";
 
 
       std::string source;
@@ -177,7 +176,7 @@ namespace awali { namespace dyn {
       }
 
       if (fail)
-        std::runtime_error("Could not find source file: awali/dyn/bridge_sttc/"+name+".cc");
+        throw std::runtime_error("Could not find source file: awali/dyn/bridge_sttc/"+name+".cc");
 
 //       std::string lname=libname(static_context,name);
 
@@ -194,7 +193,6 @@ namespace awali { namespace dyn {
 #define STR_VALUE(arg)      #arg
 #define STR(name) STR_VALUE(name)
 #endif
-        +
         + " -c " + source
         + " -o " + objectpath
         + " -MMD" 
@@ -223,6 +221,13 @@ namespace awali { namespace dyn {
 //       std::string ld_flags = " -shared"
       std::string lib_cmd = cxx+" -shared"
       +" -o " + modulepath
+#ifdef CMAKE_OSX_SYSROOT
+#define STR_VALUE(arg)      #arg
+#define STR(name) STR_VALUE(name)
+        + " -isysroot "+STR(CMAKE_OSX_SYSROOT)
+#define STR_VALUE(arg)      #arg
+#define STR(name) STR_VALUE(name)
+#endif
       +" "+objectpath 
 //       +" -L"+get_dynlib_directory()[0]
 //       +" -Wl,-rpath,"+get_dynlib_directory()[0]

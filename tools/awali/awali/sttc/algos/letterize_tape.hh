@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -69,9 +69,28 @@ namespace awali {
       
       template <typename Tdc, unsigned I, typename Labelset>
       struct tdc_letterizer {
-        using ret_transducer_t = Tdc;
+        using labelset_t = labelset_t_of<Tdc>;
+        using weightset_t = weightset_t_of<Tdc>;
+        using Ilabelset_t = typename labelset_t::template valueset_t<I>;
+        using letterset_t = typename labelset_trait<Ilabelset_t>::letterset_t;
+        using nletterset_t = typename labelset_trait<letterset_t>::nullable_t;
+        
+        using nullable_labelset_t = typename map_nullable<labelset_t>::type;
+        using nullable_label_t = typename nullable_labelset_t::value_t;
+        
+        using ret_labelset_t =  typename replace_in_tupleset<nullable_labelset_t,I,nletterset_t>::type;
+        using ret_context_t = sttc::context<ret_labelset_t, weightset_t>;
+        using ret_transducer_t = mutable_automaton<ret_context_t>;
+        using ret_label_t = typename ret_labelset_t::value_t;
+        
         static ret_transducer_t tdc_letterize(const Tdc& tdc, bool keep_history) {
-          return copy(tdc, keep_history);
+          const labelset_t& in_labelset=*tdc->context().labelset();
+          nletterset_t nletset = get_nullableset(get_letterset(in_labelset.template set<I>()));
+          nullable_labelset_t null_labelset=map_nullable<labelset_t>::get(in_labelset);
+          ret_labelset_t ret_labelset = replace_in_tupleset<nullable_labelset_t,I,nletterset_t>::get(null_labelset,nletset);
+          auto ret= make_mutable_automaton(ret_context_t{ret_labelset,*tdc->context().weightset()});
+	  copy_into(tdc, ret, keep_history);
+          return ret;
         }
       };
       
@@ -125,8 +144,12 @@ namespace awali {
           }
           if(keep_history) {
             auto sg_history = std::make_shared<single_history<transducer_t>>(tdc);
-            for(auto p : state_map)
+            for(auto p : state_map) {
               sg_history->add_state(p.second,p.first);
+	      if(tdc->has_name(p.first)) {
+		ret->set_state_name(p.second, tdc->get_state_name(p.first));
+	      }
+	    }
             ret->set_history(sg_history);
           }
           return ret;

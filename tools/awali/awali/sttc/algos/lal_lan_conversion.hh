@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,13 +42,13 @@ namespace awali {
         using l_automaton_t = Aut;
         using n_automaton_t = mutable_automaton<n_context_t>;
         
-        static const Aut proper_(const Aut& aut, direction_t dir, bool prune, bool keep_history) {
-          return copy(aut, keep_history);
+        static const Aut proper_(const Aut& aut, direction_t, bool /*prune*/, bool keep_history) {
+          return copy(aut, keep_history,false,true);
         }
         
         static n_automaton_t allow_eps_(const Aut&  aut, bool keep_history) {
           auto res = sttc::make_mutable_automaton<n_context_t>(sttc::get_nullable_context(aut->context()));
-          sttc::copy_into(aut,res, keep_history);
+          sttc::copy_into(aut,res, keep_history,false,true);
           return res;
         }
       };
@@ -63,7 +63,7 @@ namespace awali {
         static l_automaton_t proper_(const Aut& aut, direction_t dir, bool prune, bool keep_history) {
           auto tmp = sttc::proper(aut, dir, prune, keep_history);
           auto res = sttc::make_mutable_automaton<l_context_t>(sttc::get_not_nullable_context(aut->context()));
-          sttc::copy_into(tmp,res, keep_history);
+          sttc::copy_into(tmp,res, keep_history, false, true);
           if(keep_history) {
             auto final_history = std::make_shared<single_history<n_automaton_t>>(aut);
             auto & tmp_history = tmp->history()->template as<single_history<n_automaton_t>>();

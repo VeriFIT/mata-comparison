@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -94,6 +94,12 @@ namespace awali {
       return one();
     }
 
+    value_t
+    plus(const value_t v) const
+    {
+      return v;
+    }
+
     static value_t
     one()
     {
@@ -137,7 +143,7 @@ namespace awali {
 
     static constexpr bool is_commutative_semiring() { return true; }
 
-    static constexpr bool show_one() { return false; }
+    static constexpr bool show_one() { return true; }
     static constexpr star_status_t star_status() { return star_status_t::STARRABLE; }
 
     static value_t
@@ -212,11 +218,19 @@ namespace awali {
     print(const value_t v, std::ostream& o,
           const std::string& format = "text")
     {
-      if (is_zero(v))
-        o << "\"-oo\"";
+      if (is_zero(v)) {
+	if(format == "dot")
+	  o << "_";
+	else
+	  o << "\"-oo\"";
+      }
       else
-        if (is_one(v))
-          o << "\"oo\"";
+        if (is_one(v)) {
+	  if(format == "dot")
+	    o << "T";
+	  else
+	    o << "\"oo\"";
+	}
         else
           o << v;
       return o;

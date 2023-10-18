@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace awali {
       /// Check equivalence between Boolean automata on a free labelset.
       template <typename Aut1, typename Aut2, typename P>
       auto
-      are_equivalent_(const Aut1& aut1, const Aut2& aut2, priority::FIVE<P> p)
+      are_equivalent_(const Aut1& aut1, const Aut2& aut2, priority::FIVE<P>)
         -> typename std::enable_if<(labelset_t_of<Aut1>::is_free()
                                     && std::is_same<weightset_t_of<Aut1>, b>::value
                                     && labelset_t_of<Aut2>::is_free()
@@ -74,7 +74,7 @@ namespace awali {
       bool
       are_equivalent_(const Aut1& aut1, const Aut2& aut2, priority::ONE<P>)
       {
-        raise("Function are_equivalent is only supported for weightsets with subtraction and for boolean automata over a free label-sets.");
+        raise("Function are_equivalent is only supported for weightsets with subtraction and for boolean automata over a free label-sets with no epsilon-transitions allowed.");
       }
       
     } // end of namespace awali::sttc::internal

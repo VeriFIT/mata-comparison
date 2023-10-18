@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ namespace awali { namespace sttc {
         e.head()->accept(*this);
         weight_t w = cst_;
         res_->new_transition(initial, initial_, epsilon_);
-        state_t final, current = final_;
+        state_t final = 0, current = final_;
         unsigned cnt=0;
         for(auto c: e.tail()) {
             c->accept(*this);
@@ -168,26 +168,67 @@ namespace awali { namespace sttc {
         history_->add_state(initial_,"star");
       }
 
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        e.sub()->accept(*this);
+        state_t initial = res_->add_state();
+        state_t final = res_->add_state();
+        weight_t w = ws_.star(cst_);
+        res_->new_transition(initial, initial_, epsilon_,w);
+        res_->new_transition(final_,  final,    epsilon_,w);
+        initial_ = initial;
+        final_ = final;
+        cst_ = ws_.add(w, ws_.one());
+        res_->set_state_name(initial_,"s"+std::to_string(counter));
+        res_->set_state_name(final_,"t"+std::to_string(counter++));
+        history_->add_state(initial_,"maybe");
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        e.sub()->accept(*this);
+        state_t initial = res_->add_state();
+        state_t final = res_->add_state();
+        weight_t w = ws_.star(cst_);
+        res_->new_transition(initial, initial_, epsilon_,w);
+        res_->new_transition(final_,  final,    epsilon_,w);
+        res_->new_transition(final_,  initial_, epsilon_,w);
+        initial_ = initial;
+        final_ = final;
+        cst_ = ws_.plus(cst_);
+        res_->set_state_name(initial_,"s"+std::to_string(counter));
+        res_->set_state_name(final_,"t"+std::to_string(counter++));
+        history_->add_state(initial_,"plus");
+      }
+
       AWALI_RAT_VISIT(lweight, e)
       {
         e.sub()->accept(*this);
-
+        state_t initial = res_->add_state();
+        state_t final = res_->add_state();
         const weight_t& w = e.weight();
-        for (auto t: res_->out(initial_))
-          res_->set_weight(t, ws_.mul(w, res_->weight_of(t)));
+        res_->new_transition(initial, initial_, epsilon_, w);
+        res_->new_transition(final_,  final,    epsilon_);
+        initial_ = initial;
+        final_ = final;
         cst_ = ws_.mul(w, cst_);
+        history_->add_state(initial_,"left wgt");	
       }
 
       AWALI_RAT_VISIT(rweight, e)
       {
         e.sub()->accept(*this);
-
+        state_t initial = res_->add_state();
+        state_t final = res_->add_state();
         const weight_t& w = e.weight();
-        for (auto t: res_->in(final_))
-          res_->set_weight(t, ws_.mul(res_->weight_of(t), w));
+        res_->new_transition(initial, initial_, epsilon_);
+        res_->new_transition(final_,  final,    epsilon_, w);
+        initial_ = initial;
+        final_ = final;
         cst_ = ws_.mul(cst_, w);
+        history_->add_state(initial_,"right wgt");	
       }
-
+      
     private:
       automaton_t res_;
       const weightset_t& ws_ = *res_->weightset();

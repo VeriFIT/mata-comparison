@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -256,7 +256,7 @@ namespace awali { namespace sttc {
              const state_chooser_t<Aut>& next_state)
   {
     // State elimination is performed on the lifted automaton.
-    auto aut = lift(a);
+    auto aut = internal::unnormalized_lift(a);
     internal::state_eliminator<decltype(aut)> eliminate_states(aut);
     eliminate_states(next_state);
     return aut->get_initial_weight(aut->post());

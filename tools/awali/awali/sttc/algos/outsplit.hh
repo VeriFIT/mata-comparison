@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ namespace awali { namespace sttc {
 
   template<size_t I, typename Aut>
   typename std::enable_if<!internal::select_one<labelset_t_of<Aut>,I>::has_one(), void>::type
-  outsplit_here(Aut& aut)
+  outsplit_here(Aut&)
   {}
 
   template <size_t I, typename Aut>
@@ -115,7 +115,7 @@ namespace awali { namespace sttc {
   Aut
   outsplit(const Aut& aut, bool keep_history=true)
   {
-    auto a = copy(aut, keep_history);
+    auto a = copy(aut, keep_history, false, true);
     outsplit_here<I>(a);
     sort_tape<I>(a);
     return a;

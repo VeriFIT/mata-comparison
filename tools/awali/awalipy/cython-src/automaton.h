@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <awali/dyn.hh>
+#include <awalipy/bridge-to-dyn/callback_ostream.hh>
 #include <awalipy/bridge-to-dyn/weightset.hh>
 #include <awalipy/bridge-to-dyn/basic_automaton.hh>
 #include <awalipy/bridge-to-dyn/automaton.hh>

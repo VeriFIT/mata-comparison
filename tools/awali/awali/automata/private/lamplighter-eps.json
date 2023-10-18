@@ -1,0 +1,29 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"lamplighter-eps",
+    "caption":"Letter-to-letter transducer which realizes the Lamplighter group as a group automaton",
+    "creator": {"programName":"awali", "version":"2.1.0-sid"},
+    "timestamp": {"date":"2021-09-30", "time":"16:02:23Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Multi-tape",
+       "tapeLabels":
+         [{"labelKind":"Letters", 
+           "letterType":"Char", 
+           "allowEpsilon":true,
+           "alphabet":["a","b"]},
+          {"labelKind":"Letters", 
+           "letterType":"Char", 
+           "allowEpsilon":true,
+           "alphabet":["a","b"]}]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"s0", "initial":true, "final":true},
+       {"id":1, "name":"s1", "final":true}],
+    "transitions":
+      [{"source":0, "destination":0, "label":["b","b"]},
+       {"source":0, "destination":1, "label":["a","a"]},
+       {"source":1, "destination":0, "label":["a","b"]},
+       {"source":1, "destination":1, "label":["b","a"]}]}}

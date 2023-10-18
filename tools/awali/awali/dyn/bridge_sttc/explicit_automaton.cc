@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,14 +53,14 @@ namespace awali { namespace dyn {
     explicit_automaton_t(sttc::mutable_automaton<Context> aut) :
       aut_(aut) {}
 
-    state_t add_state(std::string s) {
+    state_t add_state(std::string s) override {
       state_t i= aut_->add_state();
-      aut_->set_state_name(i,s);
+      aut_->set_state_name(i,std::move(s));
       return i;
     }
 
-    #define GEN_METH(TYPERET, NAME,CONST)               \
-    TYPERET NAME() CONST {                      \
+    #define GEN_METH(TYPERET, NAME,CONST)       \
+    TYPERET NAME() CONST override {             \
       return aut_->NAME();                      \
     }
 
@@ -75,17 +75,17 @@ namespace awali { namespace dyn {
     GEN_METH(unsigned, post, const)
     #undef GEN_METH
 
-    bool is_final(unsigned s) const {
+    bool is_final(unsigned s) const override {
       return !outin(s,post()).empty();
     }
 
-    void unset_final(unsigned s) {
+    void unset_final(unsigned s) override {
       for(auto tr : outin(s,post()))
         aut_->del_transition(tr);
     }
 
     #define GEN_METH(TYPERET, NAME, T1, CONST)  \
-    TYPERET NAME(T1 x) CONST {                  \
+    TYPERET NAME(T1 x) CONST override {         \
       return aut_->NAME(x);                     \
     }
     GEN_METH(bool, has_state, unsigned, const)
@@ -100,20 +100,20 @@ namespace awali { namespace dyn {
     GEN_METH(unsigned, get_state_by_name, std::string, const)
     #undef GEN_METH
 
-    any_t label_of (unsigned tr, unsigned i) const {
+    any_t label_of (unsigned tr, unsigned i) const override {
       any_t lab = label_of(tr);
       return awali::dyn::internal::extract(lab, i, 
         *(aut_->context().labelset()));
     }
 
     std::list<any_t> 
-    labels_of(unsigned tr) const 
+    labels_of(unsigned tr) const override
     {
       return internal::expand( label_of(tr), *(aut_->context().labelset()) );
     }
 
     #define GEN_METH(NAME, T1, CONST)           \
-    void NAME(T1 x) CONST {                     \
+    void NAME(T1 x) CONST override {            \
       aut_->NAME(x);                            \
     }
     GEN_METH(del_state, unsigned, )
@@ -125,20 +125,23 @@ namespace awali { namespace dyn {
     GEN_METH(set_desc, const std::string&, )
     #undef GEN_METH
 
-    unsigned get_transition(unsigned src, unsigned dst, any_t label) const {
+    unsigned 
+    get_transition(unsigned src, unsigned dst, any_t label) const override {
       return aut_->get_transition(src, dst, l(label));
     }
 
-    bool has_transition(unsigned src, unsigned dst, dyn::any_t label) const {
+    bool 
+    has_transition(unsigned src, unsigned dst, dyn::any_t label) 
+    const override {
       return aut_->has_transition(src, dst, l(label));
     }
 
 
-    history_kind_t history_kind() const {
+    history_kind_t history_kind() const override {
       return aut_->history()->get_nature();
     }
 
-    state_t origin_of(state_t s) const {
+    state_t origin_of(state_t s) const override {
       if (aut_->history()->has_history(s))
         return aut_->history()->get_state(s);
       else 
@@ -146,125 +149,130 @@ namespace awali { namespace dyn {
         return (std::numeric_limits<unsigned>::max()-2);
     }
 
-    std::vector<state_t> origins_of(state_t s) const {
+    std::vector<state_t> origins_of(state_t s) const override {
       return aut_->history()->get_state_set(s);
     }
 
 
-    void strip_history() {
+    void strip_history() override {
       aut_->strip_history();
     }
 
-    bool is_eps_transition(unsigned tr) const {
+    bool is_eps_transition(unsigned tr) const override {
      return sttc::is_epsilon<typename Context::labelset_t>(aut_->label_of(tr));
     }
 
 
-    bool has_explicit_name(unsigned s) const 
+    bool has_explicit_name(unsigned s) const override 
     {
       return aut_->has_explicit_name(s);
     }
 
-    std::string get_state_name(unsigned s) const {
+    std::string get_state_name(unsigned s) const override {
       return aut_->get_state_name(s);
     }
 
-    void set_state_name(unsigned s, std::string name) {
+    void set_state_name(unsigned s, std::string name) override {
       aut_->set_state_name(s, name);
     }
     
-    void set_state_names_from_history() {
+    void set_state_names_from_history() override {
       aut_->set_state_names_from_history();
     }
     
-    void set_initial(unsigned s, dyn::any_t weight) {
+    void set_initial(unsigned s, dyn::any_t weight) override {
       aut_->set_initial(s, w(weight));
     }
     
-    dyn::any_t add_initial(unsigned s, dyn::any_t weight) {
+    dyn::any_t add_initial(unsigned s, dyn::any_t weight) override {
       return aut_->add_initial(s, w(weight));
     }
-    void set_final(unsigned s, dyn::any_t weight) {
+    void set_final(unsigned s, dyn::any_t weight) override {
       aut_->set_final(s, w(weight));
     }
-    dyn::any_t add_final(unsigned s, dyn::any_t weight) {
+    dyn::any_t add_final(unsigned s, dyn::any_t weight) override {
       return aut_->add_final(s, w(weight));
     }
 
-    transition_t del_transition(unsigned src, unsigned dst, dyn::any_t label) {
+    transition_t 
+    del_transition(unsigned src, unsigned dst, dyn::any_t label) override {
       return aut_->del_transition(src, dst, l(label));
     }
 
-    void del_transition(unsigned src, unsigned dst) {
+    void del_transition(unsigned src, unsigned dst) override {
       aut_->del_transition(src, dst);
     }
 
-    void del_eps_transition(unsigned src, unsigned dst) {
+    void del_eps_transition(unsigned src, unsigned dst) override {
       sttc::del_epsilon_trans(aut_, src, dst);
     }
 
 
     unsigned 
     set_transition(unsigned src, unsigned dst, dyn::any_t label, 
-        dyn::any_t weight) 
+        dyn::any_t weight) override 
     {
       return aut_->set_transition(src, dst, l(label), w(weight));
     }
 
-    unsigned set_transition(unsigned src, unsigned dst, dyn::any_t label) {
+    unsigned 
+    set_transition(unsigned src, unsigned dst, dyn::any_t label) override {
       return aut_->set_transition(src, dst, l(label));
     }
 
-    unsigned set_eps_transition(unsigned src, unsigned dst, dyn::any_t weight) {
+    unsigned 
+    set_eps_transition(unsigned src, unsigned dst, dyn::any_t weight) override {
       return sttc::set_epsilon_trans(aut_, src, dst, w(weight)) ;
     }
 
-    unsigned set_eps_transition(unsigned src, unsigned dst) {
+    unsigned set_eps_transition(unsigned src, unsigned dst) override {
       return sttc::set_epsilon_trans(aut_, src, dst);
     }
 
 
     dyn::any_t 
     add_transition(unsigned src, unsigned dst, dyn::any_t label, 
-      dyn::any_t weight) 
+      dyn::any_t weight)override
     {
       return aut_->add_transition(src, dst, l(label), w(weight));
     }
 
-    dyn::any_t add_transition(unsigned src, unsigned dst, dyn::any_t label) {
+    dyn::any_t 
+    add_transition(unsigned src, unsigned dst, dyn::any_t label) override {
       return aut_->add_transition(src, dst, l(label));
     }
 
     dyn::any_t 
-    add_eps_transition(unsigned src, unsigned dst, dyn::any_t weight) {
+    add_eps_transition(unsigned src, unsigned dst, dyn::any_t weight) override {
       return sttc::add_epsilon_trans(aut_,src, dst, w(weight));
     }
 
-    dyn::any_t add_eps_transition(unsigned src, unsigned dst) {
+    dyn::any_t add_eps_transition(unsigned src, unsigned dst) override {
       return sttc::add_epsilon_trans(aut_,src, dst);
     }
 
-    dyn::any_t set_weight(unsigned tr, dyn::any_t weight) {
+    dyn::any_t set_weight(unsigned tr, dyn::any_t weight) override {
       return aut_->set_weight(tr, w(weight));
     }
 
-    dyn::any_t add_weight(unsigned tr, dyn::any_t weight) {
+    dyn::any_t add_weight(unsigned tr, dyn::any_t weight) override {
       return aut_->add_weight(tr, w(weight));
     }
 
-    dyn::any_t lmul_weight(unsigned tr, dyn::any_t weight) {
+    dyn::any_t lmul_weight(unsigned tr, dyn::any_t weight) override {
       return aut_->lmul_weight(tr, w(weight));
     }
 
-    dyn::any_t rmul_weight(unsigned tr, dyn::any_t weight) {
+    dyn::any_t rmul_weight(unsigned tr, dyn::any_t weight) override {
       return aut_->rmul_weight(tr, w(weight));
     }
 
     std::vector<dyn::transition_t> 
-    transitions(bool all) const {
+    transitions(bool all) const
+    {
       std::vector<dyn::transition_t> transitions;
       for (dyn::transition_t t : all ? aut_->all_transitions()
-                                                       : aut_->transitions()     )
+                                     : aut_->transitions()     )
         transitions.push_back(t);
       return transitions;
     }
@@ -322,28 +330,28 @@ namespace awali { namespace dyn {
       return transitions;
     }
 
-    std::vector<unsigned> initial_states() const {
+    std::vector<unsigned> initial_states() const override {
       std::vector<unsigned> res;
       for(unsigned i : aut_->initial_transitions())
         res.emplace_back(dst_of(i));
       return res;
     }
 
-    std::vector<unsigned> final_states() const {
+    std::vector<unsigned> final_states() const override {
       std::vector<unsigned> res;
       for(unsigned i : aut_->final_transitions())
         res.emplace_back(src_of(i));
       return res;
     }
 
-    std::vector<unsigned> successors(unsigned s) const {
+    std::vector<unsigned> successors(unsigned s) const override {
       std::vector<unsigned> res;
       for(unsigned i : aut_->out(s))
         res.emplace_back(aut_->dst_of(i));
       return res;
     }
 
-    std::vector<unsigned> successors(unsigned s, dyn::any_t label) const {
+    std::vector<unsigned> successors(unsigned s, dyn::any_t label) const override {
       std::vector<unsigned> res;
       auto lab = l(label);
       for(unsigned i : aut_->out(s,lab))
@@ -351,14 +359,14 @@ namespace awali { namespace dyn {
       return res;
     }
 
-    std::vector<unsigned> predecessors(unsigned s) const {
+    std::vector<unsigned> predecessors(unsigned s) const override {
       std::vector<unsigned> res;
       for(unsigned i : aut_->in(s))
         res.emplace_back(aut_->src_of(i));
       return res;
     }
 
-    std::vector<unsigned> predecessors(unsigned s, dyn::any_t label) const {
+    std::vector<unsigned> predecessors(unsigned s, dyn::any_t label) const override {
       std::vector<unsigned> res;
       auto lab = l(label);
       for(unsigned i : aut_->in(s,lab))
@@ -366,7 +374,16 @@ namespace awali { namespace dyn {
       return res;
     }
 
-    std::vector<unsigned> out(unsigned s, dyn::any_t label) const {
+//     std::vector<unsigned> out(unsigned s, dyn::any_t label) const overr {
+//       std::vector<unsigned> res;
+//       auto lab = l(label);
+//       for(unsigned i : aut_->out(s, lab))
+//         res.emplace_back(i);
+//       return res;
+//     }
+
+    std::vector<unsigned> 
+    outgoing(unsigned s, dyn::any_t label) const override {
       std::vector<unsigned> res;
       auto lab = l(label);
       for(unsigned i : aut_->out(s, lab))
@@ -374,23 +391,16 @@ namespace awali { namespace dyn {
       return res;
     }
 
-    std::vector<unsigned> outgoing(unsigned s, dyn::any_t label) const {
-      std::vector<unsigned> res;
-      auto lab = l(label);
-      for(unsigned i : aut_->out(s, lab))
-        res.emplace_back(i);
-      return res;
-    }
+//     std::vector<unsigned> in(unsigned s, dyn::any_t label) const override {
+//       std::vector<unsigned> res;
+//       auto lab = l(label);
+//       for(unsigned i : aut_->in(s, lab))
+//         res.emplace_back(i);
+//       return res;
+//     }
 
-    std::vector<unsigned> in(unsigned s, dyn::any_t label) const {
-      std::vector<unsigned> res;
-      auto lab = l(label);
-      for(unsigned i : aut_->in(s, lab))
-        res.emplace_back(i);
-      return res;
-    }
-
-    std::vector<unsigned> incoming(unsigned s, dyn::any_t label) const {
+    std::vector<unsigned> 
+    incoming(unsigned s, dyn::any_t label) const override {
       std::vector<unsigned> res;
       auto lab = l(label);
       for(unsigned i : aut_->in(s, lab))
@@ -398,14 +408,14 @@ namespace awali { namespace dyn {
       return res;
     }
 
-    std::vector<unsigned> outin(unsigned s, unsigned d) const {
+    std::vector<unsigned> outin(unsigned s, unsigned d) const override {
       std::vector<unsigned> res;
       for(unsigned i : aut_->outin(s, d))
         res.emplace_back(i);
       return res;
     }
 
-    std::vector<dyn::any_t> alphabet() const {
+    std::vector<dyn::any_t> alphabet() const override {
       std::vector<dyn::any_t> res;
       for(auto l : aut_->labelset()->genset())
         res.emplace_back(l);
@@ -419,24 +429,24 @@ namespace awali { namespace dyn {
     }
 
     template<typename... T>
-    bool is_transducer(const sttc::tupleset<T...>& lab) const {
+    bool is_transducer(const sttc::tupleset<T...>&) const {
       return true;
     }
 
     template<typename T>
-    bool is_int_automaton(const T& l) const {
+    bool is_int_automaton(const T&) const {
       return false;
     }
 
     template<typename... T>
-    bool is_int_automaton(const sttc::tupleset<T...>& l) const {
+    bool is_int_automaton(const sttc::tupleset<T...>&) const {
       return false;
     }
 
     template<typename T>
     typename std::enable_if<std::is_same<typename T::letter_t,int>::value,bool>
     ::type 
-    is_int_automaton(const sttc::letterset<T>& l) const{
+    is_int_automaton(const sttc::letterset<T>&) const{
       return true;
     }
 
@@ -446,26 +456,41 @@ namespace awali { namespace dyn {
     }
 
 
+    
+    template<typename T>
+    bool is_word_automaton(const T&) const {
+      return false;
+    }
 
-    unsigned null_state () const {
+    template<typename T>
+    bool is_word_automaton(const sttc::wordset<T>&) const{
+      return true;
+    }
+
+  public:
+    unsigned null_state () const override
+    {
       return sttc::mutable_automaton<Context>::element_type::null_state();
     }
 
-    unsigned null_transition () const {
+    unsigned null_transition () const override {
       return sttc::mutable_automaton<Context>::element_type::null_state();
     }
 
 
-    public:
-    bool is_transducer() const {
+    bool is_transducer() const override {
       return is_transducer(*(aut_->context().labelset()));
     }
 
-    bool is_int_automaton() const {
+    bool is_int_automaton() const override {
       return is_int_automaton(*(aut_->context().labelset()));
     }
 
-    bool is_eps_allowed() const {
+    bool are_words_allowed() const override {
+      return is_word_automaton(*(aut_->context().labelset()));
+    }
+
+    bool is_eps_allowed() const override {
       return this->get_context()->is_eps_allowed();
 //       return Context::labelset_t::has_one();
     }
@@ -474,7 +499,7 @@ namespace awali { namespace dyn {
     //         return sttc::js_print(aut_, o, true);
     //       }
 
-    dyn::context_t get_context() const {
+    dyn::context_t get_context() const override {
     aut_->context();
       return std::make_shared<dyn::explicit_context_t<Context>>(aut_->context());
     }
@@ -482,7 +507,7 @@ namespace awali { namespace dyn {
     sttc::mutable_automaton<Context> get_automaton() {
       return aut_;
     }
-    };
+  };
 
 
   template<typename Context>

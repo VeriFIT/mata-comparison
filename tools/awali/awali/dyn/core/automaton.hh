@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,20 +22,20 @@
 namespace awali { namespace dyn {
 
 
-    /** 
-   An {@link automaton_t} is essentially a shared pointer to an 
+    /**
+   An {@link automaton_t} is essentially a shared pointer to an
    {@link abstract_automaton_t}, but also contains static functions
    serving as constructors.
-   
-   See the documentation of 
+
+   See the documentation of
    {@link abstract_automaton_t} for help on the methods on automata.
-   
+
    @example (Building an automaton)
    \code
-    automaton_t aut = automaton_t::from("ab"); // Builds an empty automaton over the alphabet 
-    
+    automaton_t aut = automaton_t::from("ab"); // Builds an empty automaton over the alphabet
+
     state_t s = aut->add_state(); // adding two states
-    state_t t = aut->add_state(); 
+    state_t t = aut->add_state();
 
     aut->set_initial(s);  // making state `s` initial
     aut->set_final(t);    //making state `t` final
@@ -44,10 +44,10 @@ namespace awali { namespace dyn {
     aut->set_transition(t,t,'b');
 
     aut->set_transition(s,t,'a'); // Reading an 'a' changes the states
-    aut->set_transition(t,s,'a'); 
+    aut->set_transition(t,s,'a');
 
     //aut now recognizes the words over {a,b} with an odd number of 'a's.
-    
+
     pdfdisplay(aut); // Outputs `aut` to a temporary file as a pdf image
                      // and opens it with the default pdf viewer.
    \endcode
@@ -67,8 +67,8 @@ namespace awali { namespace dyn {
   @example (Building a weighted automaton)
   \code
     // Builds an automaton with transitions labelled in {a,b} and weighted in Z.
-    automaton_t aut = automaton_t::from("ab","Z", false); 
-    
+    automaton_t aut = automaton_t::from("ab","Z", false);
+
     state_t s = aut->add_state();
     state_t t = aut->add_state();
 
@@ -88,63 +88,63 @@ namespace awali { namespace dyn {
   \endcode
 
    See also group {@link Factories}.
-   
+
      */
     class automaton_t : public std::shared_ptr<abstract_automaton_t> {
     public:
-      
-      
+
+
       /** Buils an automaton_t that is essentially a `nullptr`; should
-       * generally not be used. 
+       * generally not be used.
        */
       automaton_t();
 
-    /** Builds a automaton from a shared pointer to a class derived
-     * of {@link abstract_automaton_t}; should generally not be
-     * used. 
-     *
-     *  Both @pname{ptr} and the built {@link automaton_t} will share ownership
-     *  of pointed object.
-     */
-      template <class T>
-      automaton_t(
-        const std::shared_ptr<T> &ptr,
-        typename std::enable_if<
-          std::is_base_of<abstract_automaton_t,T>::value,int
-        >::type = 0 
-      ) 
-        : std::shared_ptr<abstract_automaton_t>(ptr)
-      {}
-
-      /** \ingroup Factories
-       * Builds a new automaton whose labelset and weightset are given by
-       * @pname{ctx}.
+      /** Builds a automaton from a shared pointer to a class derived
+       * of {@link abstract_automaton_t}; should generally not be
+       * used.
        *
-       * This function is mostly useful for copying context, as in example
-       * below.
-       * @example
-         \code
-           automaton_t aut = load("a1"); // Here, aut is the automaton that is
-                                         // over the context we want to copy
-           context_t ctx = aut->get_context();
-           automaton_t aut2 = automaton_t::from_context(ctx);
-           // aut2 is an empty automaton with the same labelset/weightset as aut
-         \endcode
-       *
-       * @param ctx Context of automaton given
-       * @return a new empty automaton
-       * @beware 
-       * Although the return type is {@link automaton_t}, 
-       * this might return a transducer depending on @pname{ctx}.
-       * If you know that this will produce a transducer, just store it in 
-       * a variable of type {@link transducer_t}:
-       * {@code transducer_t tdc = automaton_t::from_context(ctx); }
+       *  Both @pname{ptr} and the built {@link automaton_t} will share ownership
+       *  of pointed object.
        */
-      static automaton_t from_context(context_t ctx);
-      
+        template <class T>
+        automaton_t(
+          const std::shared_ptr<T> &ptr,
+          typename std::enable_if<
+            std::is_base_of<abstract_automaton_t,T>::value,int
+          >::type = 0
+        )
+          : std::shared_ptr<abstract_automaton_t>(ptr)
+        {}
+
+        /** \ingroup Factories
+         * Builds a new automaton whose labelset and weightset are given by
+         * @pname{ctx}.
+         *
+         * This function is mostly useful for copying context, as in example
+         * below.
+         * @example
+           \code
+             automaton_t aut = load("a1"); // Here, aut is the automaton that is
+                                           // over the context we want to copy
+             context_t ctx = aut->get_context();
+             automaton_t aut2 = automaton_t::from_context(ctx);
+             // aut2 is an empty automaton with the same labelset/weightset as aut
+           \endcode
+         *
+         * @param ctx Context of automaton given
+         * @return a new empty automaton
+         * @beware
+         * Although the return type is {@link automaton_t},
+         * this might return a transducer depending on @pname{ctx}.
+         * If you know that this will produce a transducer, just store it in
+         * a variable of type {@link transducer_t}:
+         * {@code transducer_t tdc = automaton_t::from_context(ctx); }
+         */
+        static automaton_t from_context(context_t ctx);
+
 
       /** \ingroup Factories
-       *  Builds a new empty automaton whose labelset is described by 
+       *  Builds a new empty automaton whose labelset is described by
        *  @pname{ld} and weightset by @pname{wd}.
        *
        *  Experts only.
@@ -154,7 +154,7 @@ namespace awali { namespace dyn {
        *  implemented weightset and labelsets.
        *  @example
           \code
-            std::vector<context::labelset_description> v = 
+            std::vector<context::labelset_description> v =
               {
                 context::letterset("ab"),
                 context::nullableset(context::intletterset(12,14)),
@@ -172,23 +172,23 @@ namespace awali { namespace dyn {
        * @param ld A dynamical description of a labelset
        * @param wd A dynamical description of a weightset
        * @return a new empty automaton
-       * @beware 
-       * Although this is a constructor for type {@link automaton_t}, 
+       * @beware
+       * Although this is a constructor for type {@link automaton_t},
        * this might return a transducer depending on @pname{ld}
        * (as in example above.)
-       * If you know that this will produce a transducer, just store it in 
+       * If you know that this will produce a transducer, just store it in
        * a variable of type {@link transducer_t}:
        {@code transducer_t tdc = automaton_t(ld,wd);}
        * @see Documentation of namespace {@link dyn::context}
        */
       automaton_t(context::labelset_description ld,
                   context::weightset_description wd);
-      
+
       /** \ingroup Factories
        * Builds an automaton with labels in given @pname{alphabet} possibly
        * allowing epsilon transitions, and with weights in given
        * @pname{weightset}.
-       *  
+       *
        * @param alphabet String representation of the alphabet of the returned
        * automaton: each char is a letter of the automaton.
        *
@@ -203,9 +203,10 @@ namespace awali { namespace dyn {
        *
        * @return A new empty automaton.
        */
-      static automaton_t from(std::string alphabet, std::string weightset = "B",
+      static automaton_t from(std::string alphabet,
+                              std::string weightset = "B",
                               bool allow_eps_transitions = false);
-      
+
       /** \ingroup Factories
        * Builds a boolean automaton over given \p alphabet, that possibly
        * allows eps_transitions.
@@ -217,12 +218,13 @@ namespace awali { namespace dyn {
        * epsilon-transitions and automata without epsilon-transitions have
        * different static types.  Post construction, allowing/disallowing
        * epsilon-transitions always requires a complete copy of the automaton.
-       * @note 
-       * This function simply calls: 
+       * @note
+       * This function simply calls:
        * \code from(alphabet, "B", allow_eps_transition) \endcode
        */
-      static automaton_t from(std::string alphabet, bool allow_eps_transitions,
-      std::string = "B");
+      static automaton_t from(std::string alphabet,
+                              bool allow_eps_transitions,
+                              std::string = "B");
 
 
       /** \private
@@ -231,22 +233,22 @@ namespace awali { namespace dyn {
        */
       static automaton_t from(std::string alphabet, char const* ws);
 
-      /** 
+      /**
        * Helper class that contains convenience constructor for automata with
        * int labels.
        *
        * @example
        * \code
        *   // Builds an automaton with labels in {0,1,2,3,4} .
-       *   automaton_t aut = automaton_t::with_int_labels::from_size(5); 
+       *   automaton_t aut = automaton_t::with_int_labels::from_size(5);
        * \endcode
        * \code
        *   // Builds an automaton with labels in {2,3,4,5}.
-       *   automaton_t aut = automaton_t::with_int_labels::from_range(2,5); 
+       *   automaton_t aut = automaton_t::with_int_labels::from_range(2,5);
        * \endcode
        * \code
        *   // Builds an automaton with labels in {2,3,4,5}, and with weights in Z.
-       *   automaton_t aut = automaton_t::with_int_labels::from_range(2, 5, "Z"); 
+       *   automaton_t aut = automaton_t::with_int_labels::from_range(2, 5, "Z");
        * \endcode
        *
        * @beware
@@ -258,7 +260,7 @@ namespace awali { namespace dyn {
        public:
 
 
-        /** \ingroup Factories 
+        /** \ingroup Factories
          *  Builds an automaton with alphabet {@pname{l}, @pname{l}+1, ...,
          *  @pname{u}}
          *  and weightset  @pname{weightset}
@@ -269,15 +271,17 @@ namespace awali { namespace dyn {
          *  allows epsilon-transitions.
          *  @return A new empty automaton.
          */
-        static automaton_t from_range(int l, int u, std::string weightset = "B",
+        static automaton_t from_range(int l,
+                                      int u,
+                                      std::string weightset = "B",
                                       bool allow_eps_transitions = false);
-  
+
 
         /** \ingroup Factories
          *  Builds an automaton with alphabet {@pname{l}, @pname{l}+1, ...,
          *  @pname{u}}, possibly allowing epsilon transitions.
          *
-         *  
+         *
          *  @param l Lower bound of the range
          *  @param u Upper bound of the range
          *  @param allow_eps_transitions If `true`, built automaton allows
@@ -301,32 +305,32 @@ namespace awali { namespace dyn {
          *  weightset @pname{weightset}.
          *
          *  @param n size of the alphabet
-         *  
+         *
          *  @param weightset String representation of the weightset of the built
          *  automaton
          *
          *  @param allow_eps_transitions If set to `true`, built automaton
          *  allows epsilon-transitions.
-         *  
+         *
          *  @return a new empty automaton.
          */
-        static automaton_t from_size(unsigned n, 
-                                          std::string weightset = "B",
-                                          bool allow_eps_transitions = false);
+        static automaton_t from_size(unsigned n,
+                                     std::string weightset = "B",
+                                     bool allow_eps_transitions = false);
 
         /** \ingroup Factories
          *  Builds a Boolean automaton with alphabet {0, 1, ..., @pname{n}-1},
          *  possibly allowing epsilon transitions.
          *
          *  @param n size of the alphabet
-         *  
+         *
          *  @param allow_eps_transitions If set to `true`, built automaton
          *  allows epsilon-transitions.
-         *  
+         *
          *  @return a new empty automaton.
          */
         static automaton_t from_size(unsigned n, bool allow_eps_transitions);
-        
+
         /** \private
          *  This function exists because C++ would rather cast `char const*`
          *  to bool rather than std::string.

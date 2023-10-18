@@ -1,6 +1,5 @@
-
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -123,5 +122,4 @@ sys.stderr.write(
 suite = unittest.TestLoader().loadTestsFromTestCase(RatexpTests)
 runner = unittest.TextTestRunner(verbosity=2,failfast=True)
 result = runner.run(suite)
-if len(result.failures):
-    exit(1)
+exit(not result.wasSuccessful())

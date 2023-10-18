@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -105,6 +105,15 @@ namespace awali { namespace sttc {
     {
       if (is_zero(v))
         return one();
+      else
+        raise("z: star: invalid value: ", format(*this, v));
+    }
+
+    value_t
+    plus(const value_t v) const
+    {
+      if (is_zero(v))
+        return zero();
       else
         raise("z: star: invalid value: ", format(*this, v));
     }

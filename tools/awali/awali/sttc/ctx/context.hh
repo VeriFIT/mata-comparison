@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -111,6 +111,9 @@ namespace awali { namespace sttc {
                 weightset_t{}}
     {}
 
+  
+    /* The fact that this operator is default is deprecated. */
+    context& operator=(const context& other) = default;
     /*
     context& operator=(context&& that)
     {
@@ -172,6 +175,7 @@ namespace awali { namespace sttc {
     template<unsigned version = version::fsm_json>
     json::node_t* 
     to_json() const {
+      version::check_fsmjson<version>();
       json::object_t* obj = new json::object_t();
       obj->push_back("labels",  ls_->template to_json<version>());
       obj->push_back("weights", ws_->template to_json<version>());

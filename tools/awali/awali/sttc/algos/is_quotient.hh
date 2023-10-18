@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ namespace awali { namespace sttc {
         std::map<state_t, state_t> morphism;
         std::vector<bool> visited;
 
-        bool visit(state_t s) {
+        bool visit(state_t) {
           return true;
         }
 //           if (visited[s])

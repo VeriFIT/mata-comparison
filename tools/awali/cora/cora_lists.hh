@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ enum chc_t {
   ACC_STATS, COACC_STATS, SC_COMPONENTS_STATS,
   SIZE_STATS, LENGTH_STATS, DEPTH_STATS, STAR_HEIGHT_STATS,
   // help_tokens for doc
-  LABELSET_TKN, // RAT_EXP_HLP,, AUT_HLP,
+//   LABELSET_TKN, // RAT_EXP_HLP,, AUT_HLP,   deprecated
   // list_choices
   COMMANDS_LST,
   BASIC_LST, GENERIC_LST, WFA_CMDS_LST, 
@@ -61,7 +61,7 @@ struct choice {
 std::vector<choice> double_type_cmds;
 std::vector<choice> is_choices;
 std::vector<choice> stats_choices;
-std::vector<choice> help_tokens;
+// std::vector<choice> help_tokens;  // deprecated
 std::vector<choice> list_choices;
 std::vector<choice> doc_choices;
 
@@ -77,8 +77,11 @@ void init_lists()
   double_type_cmds.emplace_back(choice{"info"});
   double_type_cmds.emplace_back(choice{"statistics"});
   double_type_cmds.emplace_back(choice{"is"});
+  double_type_cmds.emplace_back(choice{"support"});
+  double_type_cmds.emplace_back(choice{"characteristic"});
+  double_type_cmds.emplace_back(choice{"promote"});
   double_type_cmds.emplace_back(choice{"is-valid"});
-  double_type_cmds.emplace_back(choice{"minimal"});
+  double_type_cmds.emplace_back(choice{"minimal-automaton"});
 //
 ///// Filling the is_choices list
   is_choices.emplace_back(choice{"empty", MPTY_CHC});
@@ -107,15 +110,15 @@ void init_lists()
   stats_choices.emplace_back(choice{"depth", DEPTH_STATS});
   stats_choices.emplace_back(choice{"star-height", STAR_HEIGHT_STATS});
 //
-////// Filling the help_tokens list
-  help_tokens.emplace_back(choice{"labelset", LABELSET_TKN, "blabla", "blibli"});
+////// Filling the help_tokens list   deprecated
+//   help_tokens.emplace_back(choice{"labelset", LABELSET_TKN, "blabla", "blibli"});
 //
 ////// Filling the list_choices list
   list_choices.emplace_back(choice{"commands", COMMANDS_LST});
   list_choices.emplace_back(choice{"basic-cmds", BASIC_LST});
   list_choices.emplace_back(choice{"generic-cmds", GENERIC_LST});
   list_choices.emplace_back(choice{"wfa-cmds", WFA_CMDS_LST});
-  list_choices.emplace_back(choice{"rat-exp-cmds", EXP_CMDS_LST});
+  list_choices.emplace_back(choice{"ratexp-cmds", EXP_CMDS_LST});
   list_choices.emplace_back(choice{"nfa-cmds", NFA_CMDS_LST});
   list_choices.emplace_back(choice{"transducer-cmds", TRANSDUCERS_LST});
   list_choices.emplace_back(choice{"options", OPTIONS_LST});
@@ -124,7 +127,7 @@ void init_lists()
   list_choices.emplace_back(choice{"ratexps", RATEXPS_LST});
   list_choices.emplace_back(choice{"factories", FACTORIES_LST});
   list_choices.emplace_back(choice{"weightsets", WEIGHTSET_LST});
-};
+}
 
 
 // // End of file cora_lists.hh --- return to cora.hh

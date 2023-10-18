@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ namespace awali {
       context_t make_context(context::labelset_description ls,
                              context::weightset_description ws);
 
-      automaton_t make_automaton(std::string alphabet, 
-                                 std::string semiring ="B");
+//       automaton_t make_automaton(std::string alphabet, 
+//                                  std::string semiring ="B");
 //       automaton_t make_automaton_with_eps(std::string alphabet,
 //                                           std::string semiring ="B");
 

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -113,6 +113,16 @@ namespace awali { namespace sttc
         res_ = rs_.star(transpose(e.sub()));
       }
 
+      AWALI_RAT_VISIT(maybe, e)
+      {
+        res_ = rs_.star(transpose(e.sub()));
+      }
+
+      AWALI_RAT_VISIT(plus, e)
+      {
+        res_ = rs_.star(transpose(e.sub()));
+      }
+
       AWALI_RAT_VISIT(complement, e)
       {
         res_ = rs_.complement(transpose(e.sub()));
@@ -135,11 +145,13 @@ namespace awali { namespace sttc
         //
         // (E\F).transpose() => (E\F){T}
         // (E\F){T}.transpose() => (E\F)
+	/*
         if (e.sub()->kind == rat::type_t::transposition
             || e.sub()->kind == rat::type_t::ldiv)
           res_ = e.sub();
         else
           res_ = rs_.transposition(e.shared_from_this());
+	*/
       }
 
       AWALI_RAT_VISIT(ldiv, e)

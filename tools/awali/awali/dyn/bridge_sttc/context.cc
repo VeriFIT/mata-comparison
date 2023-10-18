@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace awali {
 
   template<>
   struct make_labelset<sttc::oneset>{
-    static sttc::oneset get(dyn::context::labelset_description ct) {
+    static sttc::oneset get(dyn::context::labelset_description) {
       return {};
     }
   };
@@ -100,7 +100,7 @@ namespace awali {
 
   template<typename Weightset>
   struct make_weightset{
-    static Weightset get(dyn::context::weightset_description ct) {
+    static Weightset get(dyn::context::weightset_description) {
       return {};
     }
   };

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace editter {
     sentence_t(font_style_t ft) : font_style(ft) {}
     sentence_t() {}
     sentence_t(const std::string& str, font_style_t = NO_STYLE, const std::string& sep =" ");
-    sentence_t(const sentence_t& tokens);
+//     sentence_t(const sentence_t& tokens);
 
 
     /* If apply is `true` insert spaces before first token and after last token. */

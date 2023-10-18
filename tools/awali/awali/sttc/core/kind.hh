@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -84,17 +84,17 @@ namespace awali { namespace sttc {
                                                                         \
     */
     /// marker type for labelsets where labels are letters
-  DEFINE(lal, letters);
+  DEFINE(lal, letters)
     /// marker type for labelsets where labels are nullable
-  DEFINE(lan, nullable);
+  DEFINE(lan, nullable)
     /// marker type for labelsets where labels are one
-  DEFINE(lao, one);
+  DEFINE(lao, one)
     /// marker type for labelsets where labels are rational expressions
-  DEFINE(lar, ratexps);
+  DEFINE(lar, ratexps)
     /// marker type for labelsets where labels are tuples
-  DEFINE(lat, tuples);
+  DEFINE(lat, tuples)
     /// marker type for labelsets where labels are words
-  DEFINE(law, words);
+  DEFINE(law, words)
 
 # undef DEFINE
 }}//end of ns awali::stc

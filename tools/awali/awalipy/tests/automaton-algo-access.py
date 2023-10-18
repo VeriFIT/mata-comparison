@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,14 +74,17 @@ class AutomatonAccessTests(unittest.TestCase):
         self.assertEqual(A.coaccessible_states(), [4,5,6,7,8,9,10,11])
         self.assertEqual(awalipy.coaccessible_states(B), [4,5,6,7,8,9,10,11])
         C = A.accessible();
+        self.assertEqual(C.states(), [0,1,2,3,4,5,6])
         D = A.coaccessible();
+        self.assertEqual(D.states(), [4,5,6,7,8,9,10,11])
         E = A.trim();
+        self.assertEqual(E.states(), [4,5,6])
         for i in range(2):
             self.assertTrue(C.has_transition(i+1, i+2, 'a'))
             self.assertTrue(C.has_transition(i+4, i+5, 'b'))
-            self.assertTrue(D.has_transition(i, i+1, 'b'))
-            self.assertTrue(D.has_transition(i+3, i+4, 'c'))
-            self.assertTrue(E.has_transition(i, i+1, 'b'))
+            self.assertTrue(D.has_transition(i+4, i+5, 'b'))
+            self.assertTrue(D.has_transition(i+7, i+8, 'c'))
+            self.assertTrue(E.has_transition(i+4, i+5, 'b'))
         self.assertAutomatonSynctacticEquality(E, C.coaccessible());
         self.assertAutomatonSynctacticEquality(C.coaccessible(), D.accessible());
         for Z in [A, C, D]:
@@ -113,5 +116,5 @@ while(semiring.next()):
     suite = unittest.TestLoader().loadTestsFromTestCase(AutomatonAccessTests)
     runner = unittest.TextTestRunner(verbosity=2,failfast=True)
     result = runner.run(suite)
-    if len(result.failures):
+    if not result.wasSuccessful():
         exit(1)

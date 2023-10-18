@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -399,8 +399,8 @@ namespace awali { namespace sttc {
     template<unsigned version = version::fsm_json>
     value_t
     value_from_json(json::node_t* p) const {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
         case 1:
         default:
           if(p->kind == json::ARRAY)
@@ -471,10 +471,8 @@ namespace awali { namespace sttc {
     json::node_t* to_json() 
     const 
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[Nullable Set] Unsupported fsm-json version:"
-                                + std::to_string(version));
         case 1:
         default:
           json::object_t* obj = ls_->template to_json<version>()->object();
@@ -489,10 +487,8 @@ namespace awali { namespace sttc {
     value_to_json(value_t value) 
     const 
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[Nullable Set] Unsupported fsm-json version:"
-                                + std::to_string(version));
         case 1:
         default:
           if(is_one(value))
@@ -523,13 +519,13 @@ namespace awali { namespace sttc {
 
   /// Compute the meet with another labelset.
   DEFINE(meet, intersection, nullableset<letterset<GenSet>>,
-         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>);
+         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>)
 
   DEFINE(meet, intersection, letterset<GenSet>,
-         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>);
+         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>)
 
   DEFINE(meet, intersection, nullableset<letterset<GenSet>>,
-         letterset<GenSet>, nullableset<letterset<GenSet>>);
+         letterset<GenSet>, nullableset<letterset<GenSet>>)
 
   template <typename Lls, typename Rls>
   auto
@@ -541,13 +537,13 @@ namespace awali { namespace sttc {
 
   /// compute the join with another labelset.
   DEFINE(join, get_union, nullableset<letterset<GenSet>>,
-         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>);
+         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>)
 
   DEFINE(join, get_union, letterset<GenSet>,
-         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>);
+         nullableset<letterset<GenSet>>, nullableset<letterset<GenSet>>)
 
   DEFINE(join, get_union, nullableset<letterset<GenSet>>,
-         letterset<GenSet>, nullableset<letterset<GenSet>>);
+         letterset<GenSet>, nullableset<letterset<GenSet>>)
 
   template <typename Lls, typename Rls>
   auto

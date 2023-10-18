@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ namespace awali {
       */
       
  
-      void* get_handler(const std::string name, const std::string group,
+      void* get_handler(const std::string& name, const std::string& group,
                         const std::string& static_context);
 
-      void* get_handler(const std::string name, const std::string group,
+      void* get_handler(const std::string& name, const std::string& group,
                         const std::string& static_context1,
                         const std::string& static_context2);
 
-      void* get_handler(const std::string name, const std::string& static_context);
+      void* get_handler(const std::string& name, const std::string& static_context);
 
 //       template<typename TYPERET, TYPERET (*FCT)(automaton_t)>
 //       TYPERET call(std::string name, std::string group, automaton_t aut) {
@@ -55,7 +55,7 @@ namespace awali {
 
     template<typename RET_T, typename... ARGS_T>
     RET_T
-    call0(std::string name, std::string group, std::string stat_ctx,
+    call0(std::string const& name, std::string const& group, std::string const& stat_ctx,
       ARGS_T... args)
     {
         typedef RET_T (*bridge_t)(ARGS_T...);
@@ -66,7 +66,7 @@ namespace awali {
 
     template<typename RET_T, typename ARG1_T, typename... ARGS_T>
     RET_T
-    call1(std::string name, std::string group,
+    call1(std::string const& name, std::string const& group,
       ARG1_T arg1, ARGS_T... args)
     {   
       std::string stat_ctx = arg1->get_context()->sname();
@@ -79,7 +79,7 @@ namespace awali {
     template<typename RET_T, typename ARG2_T, typename ARG1_T, 
         typename... ARGS_T>
     RET_T
-    call2(std::string name, std::string group,
+    call2(std::string const& name, std::string const& group,
       ARG1_T arg1, ARG2_T arg2, ARGS_T... args)
     {   
       std::string stat_ctx1 = arg1->get_context()->sname();
@@ -100,7 +100,7 @@ namespace awali {
       /* In the special case where X=0, the static context is explicitely given as argument 3 */
       template<typename RET_T, typename ARG1_T>
       RET_T 
-      call_0_1(std::string name, std::string group, std::string stat_ctx,
+      call_0_1(std::string const& name, std::string const& group, std::string const& stat_ctx,
           ARG1_T other1,
           RET_T(*fct)(ARG1_T) = nullptr) 
       {
@@ -111,7 +111,7 @@ namespace awali {
 
       template<typename RET_T, typename ARG1_T, typename ARG2_T>
       RET_T 
-      call_0_2(std::string name, std::string group, std::string stat_ctx,
+      call_0_2(std::string const& name, std::string const& group, std::string const& stat_ctx,
           ARG1_T other1, ARG2_T other2,
           RET_T(*fct)(ARG1_T, ARG2_T) = nullptr) 
       {
@@ -123,7 +123,7 @@ namespace awali {
       template<typename RET_T, typename ARG1_T, typename ARG2_T, typename
       ARG3_T>
       RET_T 
-      call_0_3(std::string name, std::string group, std::string stat_ctx,
+      call_0_3(std::string const& name, std::string const& group, std::string const& stat_ctx,
           ARG1_T other1, ARG2_T other2, ARG3_T other3,
           RET_T(*fct)(ARG1_T, ARG2_T, ARG3_T) = nullptr) 
       {
@@ -134,7 +134,7 @@ namespace awali {
 
       template<typename RET_T, typename ARG1_T>
       RET_T 
-      call_1_0(std::string name, std::string group, ARG1_T aut,
+      call_1_0(std::string const& name, std::string const& group, ARG1_T aut,
           RET_T(*fct)(ARG1_T) = nullptr) 
       {
         std::string stat_ctx = aut->get_context()->sname();
@@ -146,10 +146,10 @@ namespace awali {
 
       template<typename RET_T, typename ARG1_T, typename ARG2_T>
       RET_T 
-      call_1_1(std::string name, std::string group, ARG1_T aut1, 
+      call_1_1(std::string const& name, std::string const& group, ARG1_T aut1, 
           ARG2_T other1, RET_T(*fct)(ARG1_T, ARG2_T) = nullptr) 
       {
-        std::string stat_ctx = aut1->get_context()->sname();
+        std::string const& stat_ctx = aut1->get_context()->sname();
         typedef RET_T (*bridge_t)(ARG1_T,ARG2_T);
         bridge_t bridge = (bridge_t) get_handler(name, group, stat_ctx);
         return bridge(aut1, other1);
@@ -158,7 +158,7 @@ namespace awali {
       template<typename RET_T, typename ARG1_T, typename ARG2_T, 
           typename ARG3_T>
       RET_T 
-      call_1_2(std::string name, std::string group, ARG1_T aut1, 
+      call_1_2(std::string const& name, std::string const& group, ARG1_T aut1, 
           ARG2_T other1, ARG3_T other2, RET_T(*fct)(ARG1_T, ARG2_T, ARG3_T) = nullptr) 
       {
         std::string stat_ctx = aut1->get_context()->sname();
@@ -170,7 +170,7 @@ namespace awali {
       template<typename RET_T, typename ARG1_T, typename ARG2_T, 
           typename ARG3_T, typename ARG4_T>
       RET_T 
-      call_1_3(std::string name, std::string group, ARG1_T aut1, 
+      call_1_3(std::string const& name, std::string const& group, ARG1_T aut1, 
           ARG2_T other1, ARG3_T other2, ARG4_T other3,
           RET_T(*fct)(ARG1_T, ARG2_T, ARG3_T, ARG4_T) = nullptr) 
       {
@@ -183,7 +183,7 @@ namespace awali {
       template<typename RET_T, typename ARG1_T, typename ARG2_T, 
           typename ARG3_T, typename ARG4_T, typename ARG5_T>
       RET_T 
-      call_1_4(std::string name, std::string group, ARG1_T aut1, 
+      call_1_4(std::string const& name, std::string const& group, ARG1_T aut1, 
           ARG2_T other1, ARG3_T other2, ARG4_T other3, ARG5_T other4,
           RET_T(*fct)(ARG1_T, ARG2_T, ARG3_T, ARG4_T, ARG5_T) = nullptr) 
       {
@@ -195,7 +195,7 @@ namespace awali {
 
       template<typename RET_T, typename ARG1_T, typename ARG2_T>
       RET_T 
-      call_2_0(std::string name, std::string group, ARG1_T aut1,
+      call_2_0(std::string const& name, std::string const& group, ARG1_T aut1,
         ARG2_T aut2, RET_T(*fct)(ARG1_T, ARG2_T) = nullptr)
       {
         std::string stat_ctx1 = aut1->get_context()->sname();
@@ -209,7 +209,7 @@ namespace awali {
       template<typename RET_T, typename ARG1_T, typename ARG2_T, 
         typename ARG3_T>
       RET_T 
-      call_2_1(std::string name, std::string group, ARG1_T aut1,
+      call_2_1(std::string const& name, std::string const& group, ARG1_T aut1,
         ARG2_T aut2, ARG3_T other1, RET_T(*fct)(ARG1_T, ARG2_T, ARG3_T) = nullptr)
       {
         std::string stat_ctx1 = aut1->get_context()->sname();
@@ -222,7 +222,7 @@ namespace awali {
 
       template<typename TYPERET, typename ARG1, typename ARG2,
         TYPERET(*FCT)(ARG1,ARG2)>
-      TYPERET call_tdc2(std::string name, std::string group, ARG1 aut1, ARG2 aut2) 
+      TYPERET call_tdc2(std::string const& name, std::string const& group, ARG1 aut1, ARG2 aut2) 
       {
         std::string stat_ctx1 = aut1->get_context()->sname();
         std::string stat_ctx2 = aut2->get_context()->sname();

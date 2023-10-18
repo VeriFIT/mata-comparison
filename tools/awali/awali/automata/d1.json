@@ -3,15 +3,15 @@
  "metadata":
    {"name":"d1",
     "caption":"Z-FA computes the difference between the numbers of 'a' and 'b'",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:53Z"}},
  "context":
    {"labels":
       {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
     "weights":{"semiring":"Z"}},
  "data":
    {"states":
-      [{"id":0, "name":"s0", "initial":1}, {"id":1, "name":"s1", "final":1}],
+      [{"id":0, "name":"p", "initial":1}, {"id":1, "name":"q", "final":1}],
     "transitions":
       [{"source":0, "destination":0, "label":"a"},
        {"source":0, "destination":0, "label":"b"},

@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -672,18 +672,7 @@ def union_here(Automaton aut1, Automaton aut2):
     return aut1.union_here(aut2)
 
 
-## ========================================================================= ##
-def are_isomorphic(Automaton aut1, Automaton aut2):
-    """
-    Usage:   are_isomorphic(aut1, aut2)
 
-    Description:  tests whether <aut1> and <aut2> are isomorphic as labelled graph.
-
-    Args:  aut1, aut2 (Automaton):
-
-    Returns:  bool, True if <aut1> and <aut2> are isomorphic.
-    """
-    return aut1.are_isomorphic(aut2)
 
 
 ## ========================================================================= ##

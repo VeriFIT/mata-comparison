@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,4 +32,16 @@ int main(int argc, char** argv) {
     throw std::runtime_error("Patch version does not coincide");
   if (awali::version::suffix != std::string(argv[4]))
     throw std::runtime_error("Suffix of version does not coincide");
+
+  awali::version::check_fsmjson<1>();
+
+  try {
+    awali::version::check_fsmjson<0>();
+    exit(1);
+  } catch (std::runtime_error const&) {}
+  try {
+    awali::version::check_fsmjson<awali::version::fsm_json+1>();
+    exit(1);
+  } catch (std::runtime_error const&) {}
+  
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ out=/dev/null
 _cora()
 {
   COMPREPLY=()
-  cur=${COMP_WORDS[COMP_CWORD]}
+  curw=${COMP_WORDS[COMP_CWORD]}
   IFS=$'\n'
   echo \"${COMP_WORDS[@]}\" > ${out}
   echo ${COMP_CWORD} >> ${out}
 
-  COMPREPLY=($(compgen -W '`__cora_autocompletion ${COMP_CWORD} "${COMP_WORDS[@]}" 2>> ${out}`' -- $curw))
+  COMPREPLY=($(compgen -W '`__cora_autocompletion $((${#COMP_WORDS[@]}-1)) "${COMP_WORDS[@]}" "${COMP_CWORD}" 2>> ${out}`' -- ${curw}))
   echo \"${COMPREPLY[@]}\" >> ${out}
 }
 

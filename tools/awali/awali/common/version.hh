@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #define COMMON_VERSION_HH
 
 #include<string>
+#include<stdexcept>
+	
 
 namespace awali {
 namespace version {
@@ -27,10 +29,10 @@ namespace version {
   static constexpr unsigned major = 2;
 
   /** Current minor version of Awali. */
-  static constexpr unsigned minor = 0;
+  static constexpr unsigned minor = 3;
 
   /** Current minor version of Awali. */
-  static constexpr unsigned patch = 7;
+  static constexpr unsigned patch = 0;
 
   /** Suffix of the version of Awali, used mostly by developers.*/
   static const std::string suffix = "";
@@ -48,6 +50,15 @@ namespace version {
    *  {@link fsm_json} is undefined; usually {@link fsm_json} is used instead. 
    * */
   static constexpr unsigned fsm_json = 1;
+
+
+  template<unsigned version>
+  inline void check_fsmjson() {
+    if (version == 0)
+      throw std::runtime_error("Version 0 of FSM JSON was indeed not proper JSON, it is not supported by Awali anymore.");
+    if (version > fsm_json)
+      throw std::runtime_error(std::string("Version ")+std::to_string(version)+" of FSM JSON did not exist at this version  (v"+full+") of Awali.");
+  } 
 
 }// end of namespace awali::version
 }// end of namespace awali

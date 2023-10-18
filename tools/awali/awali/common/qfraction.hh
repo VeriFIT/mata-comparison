@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,19 +23,32 @@
 
 namespace awali {
 
-  struct q_fraction_t {
-    int num;
-    unsigned int den;
+  class q_fraction_t {
+  public:
+    using num_t = int;
+    using den_t = unsigned int;
 
-    q_fraction_t(int n = 0, unsigned d = 1);
+    num_t num;
+    den_t den;
 
-    q_fraction_t(int n, int d);
+
+    q_fraction_t();
+  
+    q_fraction_t(num_t n, den_t d = 1u);
+
+    q_fraction_t(long n, long d);
 
     q_fraction_t& reduce();
 
     bool operator==(const q_fraction_t& w) const;
-
+    bool operator!=(const q_fraction_t& w) const;
     bool operator<(const q_fraction_t& w) const;
+
+
+    q_fraction_t operator+(q_fraction_t const&) const;
+    q_fraction_t operator-(q_fraction_t const&) const;
+    q_fraction_t operator*(q_fraction_t const&) const;
+    q_fraction_t operator/(q_fraction_t const&) const;
 
   };
 
@@ -50,7 +63,7 @@ namespace std {
                   const std::complex<double>& rhs);
 
   std::ostream& operator<<(std::ostream& o, const std::complex<double>& v);
-  ostream& operator<<(ostream& o, basic_string<int>& s);
+  ostream& operator<<(ostream& o, const basic_string<int>& s);
     
   template<>
   struct hash<awali::q_fraction_t> {

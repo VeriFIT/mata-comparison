@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -210,9 +210,9 @@ namespace awali {
             size_of_part[p]-=s;
           if(pp.size()>1 || !all_states_met) { // there is a split
             bool first=true;
-            unsigned k;
             //update parts
             for(auto& c : pp) {
+              unsigned k;
               if(first && all_states_met) {
                 k=p;
                 size_of_part[p]=c.size();

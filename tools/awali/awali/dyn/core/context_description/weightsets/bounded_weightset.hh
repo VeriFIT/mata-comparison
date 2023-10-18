@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,16 +25,11 @@ namespace context {
 
     struct bounded_weightset : abstract_weightset {
       
-      static std::string static_pub_name;
-
-          static std::string static_pub_description;
+      bounded_weightset(const std::string& public_name,
+		       const std::string& desc);
           
       weightset_description fromstring(const std::string &k) const override;
      
-      std::string const& static_public_name() const override;
-
-      std::string const& static_desc() const override;
-
       std::string const& tostring(weightset_description ws, bool dynamic) 
       const override;
 

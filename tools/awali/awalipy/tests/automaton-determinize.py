@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class AutomatonDeterminizeTests(unittest.TestCase):
 
   def test_01s_a1(self):
     A= vr.load("a1")
-    B= vr.load("private::a1_determinization")
+    B= vr.load("private::a1_determinization", internal_examples=True)
     self.assertTrue(vr.are_isomorphic(A.determinize(), B))
 
   def test_02_ladybird(self):
@@ -71,5 +71,4 @@ sys.stderr.write(
 suite = unittest.TestLoader().loadTestsFromTestCase(AutomatonDeterminizeTests)
 runner = unittest.TextTestRunner(verbosity=2,failfast=True)
 result = runner.run(suite)
-if len(result.failures):
-    exit(1)
+exit(not result.wasSuccessful())

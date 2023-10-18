@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <awali/dyn/core/context_description.hh>
+#include<unordered_map>
 
 #include <awali/dyn/core/context_description/weightsets/weightsets.cc>
 
@@ -31,7 +32,7 @@ namespace awali {
         return ls;
       }
 
-      labelset_description letterset(std::string s) {
+      labelset_description letterset(std::string const& s) {
         labelset_description ls = make_labelset_description();
         ls->type_=CTypes::LETTERSET;
         for(auto c : s)
@@ -51,7 +52,7 @@ namespace awali {
         return intletterset(0, n-1);
       }
 
-      labelset_description wordset(std::string s) {
+      labelset_description wordset(std::string const& s) {
         labelset_description ls = make_labelset_description();
         ls->type_=CTypes::WORDSET;
         for(auto c : s)
@@ -74,7 +75,12 @@ namespace awali {
         return ls;
       }
 
-      weightset_description weightset(const std::string &k) {
+      weightset_description weightset(std::string const&k) {
+        static std::unordered_map<std::string,weightset_description> memo;
+        auto it = memo.find(k);
+        if (it != memo.end())
+          return it->second;
+
         weightset_description ws;
         for(auto wgt : instances()) {
           ws=wgt->fromstring(k);
@@ -83,6 +89,7 @@ namespace awali {
         }
         if(ws.use_count()==0)
           throw std::invalid_argument("Unknown semiring: "+k);
+        memo[k] = ws;
         return ws;
       }
 

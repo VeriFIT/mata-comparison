@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 # define AWALI_ALGOS_LIFT_HH
 
 # include <map>
+# include <list>
 
 #include <awali/sttc/ctx/context.hh>
 #include <awali/sttc/labelset/oneset.hh>
@@ -81,16 +82,10 @@ namespace awali { namespace sttc {
       return {lift_context(rs.context()), rs.identities()};
     }
 
-  }
-
-  /*------------------.
-  | lift(automaton).  |
-  `------------------*/
-
   template <typename Aut>
   inline
   internal::lifted_automaton_t<Aut>
-  lift(const Aut& a, bool keep_history=true)
+  unnormalized_lift(const Aut& a, bool keep_history=true)
   {
     using auto_in_t = typename Aut::element_type;
     using ctx_in_t = context_t_of<auto_in_t>;
@@ -105,9 +100,12 @@ namespace awali { namespace sttc {
     std::map<state_t, state_t> map;
     map[a->pre()] = res->pre();
     map[a->post()] = res->post();
-    for (auto s: a->states())
-      map[s] = res->add_state();
-
+    for (auto s: a->states()) {
+      map[s] = s;
+      res->add_state(s);
+      if(a->has_name(s))
+	res->set_state_name(s, a->get_state_name(s));	     
+    }
     for (auto t: a->all_transitions())
       if (a->src_of(t) == a->pre())
         res->add_initial(map[a->dst_of(t)],
@@ -135,7 +133,59 @@ namespace awali { namespace sttc {
     }
     return res;
   }
+  } //internal
 
+  /*------------------.
+  | lift(automaton).  |
+  `------------------*/
+
+
+     /** Lift labels to weights
+     *
+     * Convert the automaton \p a with labels in M and weights in K
+     * into an automaton with no label (labels actually belong to the oneset labelset)
+     * and weights in K<<M>>.    
+     * Every transition p -- a | k -> q is converted into a transition p' -- {} | <k>a -> q'.
+     * Transitions with the same ends are converted into a single transition where the weight
+       is the sum of the conversion of all original transitions.
+     * Moreover, the result contains two extra states I and T which respectively correspond
+     * to the "pre" and the "post" states of \p a. I is the only initial state; T is the only final state.
+     *
+     * @tparam Aut the type of the automaton
+     * @param aut the automaton
+     * @param keep_history if true, the is an history linking every state of the result to the corresponding state of \p a
+     * @return a normalized labelless automaton
+     */
+ template <typename Aut>
+  inline
+  internal::lifted_automaton_t<Aut>
+  lift(const Aut& a, bool keep_history=true) {
+    auto aut = internal::unnormalized_lift(a, keep_history);
+    state_t i = aut->add_state();
+    state_t t = aut->add_state();
+    std::list<state_t> li;
+    for(auto tr : aut->initial_transitions()) {
+        aut->new_transition(i, aut->dst_of(tr), {}, aut->weight_of(tr));
+        li.emplace_back(aut->dst_of(tr));
+    }
+    aut->set_initial(i);
+    aut->set_state_name(i, "I");
+    
+    for( auto s : li)
+       aut->unset_initial(s);
+    
+    std::list<state_t> lt;
+    for(auto tr : aut->final_transitions()) {
+        aut->new_transition(aut->src_of(tr), t, {}, aut->weight_of(tr));
+        lt.emplace_back(aut->src_of(tr));
+    }
+    aut->set_final(t);
+    aut->set_state_name(t, "T");
+    for( auto s : lt)
+       aut->unset_final(s);
+    return aut;
+  }
+  
   /*---------------.
   | lift(ratexp).  |
   `---------------*/

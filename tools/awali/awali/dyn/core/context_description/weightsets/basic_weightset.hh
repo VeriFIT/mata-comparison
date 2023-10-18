@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,39 +19,30 @@
 
 #include <awali/dyn/core/context_description/weightsets/abstract_weightset.hh>
 
+/* The description of each weightset is given in context_description.hh
+   where abstract_weightset objects are created
+*/
+
 namespace awali {
 namespace dyn {
 namespace context {
 
     struct basic_weightset : abstract_weightset {
     private:
-      const std::string public_name;
       const std::string class_name;
       const std::vector<std::string> promotion;
-      const std::string desc;
     public:
       basic_weightset(const std::string& public_name, 
                                           const std::string& class_name, 
                                           std::initializer_list<std::string> pr,
                                           const std::string& desc
-                                          ) : public_name(public_name), class_name(class_name), 
-                          promotion(pr) , desc(desc) {}
+		      ) : abstract_weightset(public_name, desc), class_name(class_name), 
+                          promotion(pr) {}
                           
-
-      const std::string& tostring(weightset_description ws, bool dynamic) const override
+      std::string const& tostring(weightset_description, bool) const override
       {
         return class_name;
       }
-
-  inline
-  const std::string& static_public_name() const override{
-    return public_name;
-  }
-
-  inline
-  const std::string& static_desc() const override{
-    return desc;
-  }
       //Returns an empty shared pointer if the string does not correspond to the weightset
     weightset_description fromstring(const std::string &k) const override;
 

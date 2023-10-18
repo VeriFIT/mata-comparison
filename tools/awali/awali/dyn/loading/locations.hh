@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ namespace awali { namespace dyn {
 
     /** Returns the temporary compilation directory for the static module named
      * @pname{lname}. */
-    std::vector<std::string> get_compilation_directory(std::string lname);
+    std::vector<std::string> get_compilation_directory(std::string const& lname);
 
     /** Returns the directory where the config.hh file is located, stored by
      * precedence. */
@@ -60,7 +60,7 @@ namespace awali { namespace dyn {
       std::string name;
       std::string ext;
       std::string type;
-      inline std::string full() { return dir+"/"+name+"."+ext;}
+      inline std::string full() const { return dir+"/"+name+"."+ext;}
     };
 
     std::map<std::string,file_loc_t> example_automata(bool recurse = false);

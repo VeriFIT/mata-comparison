@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ cdef extern from "automaton.h" namespace "awali::py":
         vector[transition_t] out2(int s, string label)  except +
         string alphabet() except + ### <- its.
         bool has_letter(string l) except + ### <- its.
+        bool is_eps_allowed() except + ### <- its.
     simple_automaton_t make_simple_automaton2(string alphabet, string semiring) except + ### <- its.
     simple_automaton_t make_simple_automaton1(string alphabet) except + ### <- its.
     simple_automaton_t make_NFA_with_eps1(string alphabet)
@@ -49,7 +50,8 @@ cdef extern from "automaton.h" namespace "awali::py":
 
     simple_automaton_t support_(simple_automaton_t aut) except +
     simple_automaton_t characteristic_(simple_automaton_t aut, string semiring) except +
-    simple_ratexp_t aut_to_exp_(simple_automaton_t aut) except +
+    simple_ratexp_t aut_to_exp1_(basic_automaton_t aut) except +
+    simple_ratexp_t aut_to_exp2_(basic_automaton_t aut, string) except +
 
     simple_transducer_t partial_identity_(simple_automaton_t aut) except +
     simple_automaton_t allow_eps_transition_(simple_automaton_t aut) except +
@@ -76,7 +78,7 @@ cdef extern from "automaton.h" namespace "awali::py":
     simple_automaton_t shuffle_(simple_automaton_t aut1, simple_automaton_t aut2) except +
     simple_automaton_t infiltration_(simple_automaton_t aut1, simple_automaton_t aut2) except +
     simple_automaton_t sum_(simple_automaton_t aut1, simple_automaton_t aut2) except +
-    bool are_isomorphic_(simple_automaton_t aut1, simple_automaton_t aut2) except +
+    bool are_isomorphic_(basic_automaton_t aut1, basic_automaton_t aut2) except +
     void proper_here_(simple_automaton_t aut, bool backward, bool prune)  except +
     simple_automaton_t proper_(simple_automaton_t aut, bool backward, bool prune)  except +
     bool is_proper_(simple_automaton_t aut) except +
@@ -98,3 +100,7 @@ cdef extern from "automaton.h" namespace "awali::py":
     simple_automaton_t min_coquotient_(simple_automaton_t aut) except +
     simple_automaton_t quotient_(simple_automaton_t aut, vector[vector[int]] equiv) except +
     simple_automaton_t coquotient_(simple_automaton_t aut, vector[vector[int]] equiv) except +
+    
+
+    simple_automaton_t explore_by_length_(simple_automaton_t a, int i) except +
+    simple_automaton_t explore_with_bound(simple_automaton_t a, string s) except +

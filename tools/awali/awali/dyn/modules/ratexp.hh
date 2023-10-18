@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@ namespace awali {
     namespace lift {
       /** Builds some kind of copy of \p aut with weights that are
        * rational expressions with the context of \p aut, and with no labels.
+       *
+       * The result is a normalized automaton: there are two extra states,
+       * a single initial state and a final extra state.
        *
        * This is the first step in order to execute a step-by-step state
        * elimination process. (See {@link eliminate_state}).
@@ -92,13 +95,39 @@ namespace awali {
      */
     weight_t constant_term(ratexp_t exp);
 
+    /** Returns a Boolean rational expression where all weights of \p exp are removed.
+     * @param exp
+     * @return a rational expression
+     */
+    ratexp_t ratexp_support(ratexp_t exp);
+    
+    /** Returns a copy of \p exp.
+     * @param exp
+     * @return a rational expression
+     */
+    ratexp_t ratexp_copy(ratexp_t exp);
 
+     /** Computes the characteristic of \p exp over \p weightset.
+     *
+     * Consists in copying \p exp in the context of \p weightset.
+     * The resulting tree is isomorphic to the tree of \p exp.
+     *
+     * @param exp
+     * @param weightset string representation of a weightset
+     * @return a rational expression
+     * - whose weightset is the one represented by string \p weightset,
+     * - whose labelset is the same as the one of \p exp.
+     *
+     *  @pre \p exp must be a boolean rational expression
+     */
+   ratexp_t ratexp_characteristic(ratexp_t exp, std::string const& weightset);
+    
     json_ast_t to_json_ast(ratexp_t exp, 
-                            json_ast_t extra_medata = json_ast::empty());
+                            json_ast_t extra_metadata = json_ast::empty());
 
     namespace internal {
       std::ostream& json(ratexp_t aut, std::ostream& out, 
-                         json_ast_t extra_medata = json_ast::empty());
+                         json_ast_t extra_metadata = json_ast::empty());
     }
 
   }

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ area_t::erase(font_style_t fs)
   int x, y;
   getyx(stdscr, y, x);
   const std::string& bl= blank(w);
-  for (int x = 0; x<h; x++)
-    print_at(fs, r+x, c, bl);
+  for (int i = 0; i<h; i++)
+    print_at(fs, r+i, c, bl);
   move(y, x);
 }
 

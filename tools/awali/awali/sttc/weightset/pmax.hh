@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -91,6 +91,15 @@ namespace awali {
     {
       if (v <= 1)
         return one();
+      else
+        raise(sname(), ": star: invalid value: ", format(*this, v));
+    }
+
+    value_t
+    plus(const value_t v) const
+    {
+      if (v <= 1)
+        return v;
       else
         raise(sname(), ": star: invalid value: ", format(*this, v));
     }
@@ -217,11 +226,10 @@ namespace awali {
 
     template<unsigned version = version::fsm_json>
     value_t
-    value_from_json(json::node_t* p) const {
+    value_from_json(json::node_t const* p) const {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[pmax] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return p->to_double();
@@ -232,10 +240,9 @@ namespace awali {
       static json::node_t* 
       to_json()
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[pmax] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::object_t( "semiring",
@@ -247,10 +254,9 @@ namespace awali {
     json::node_t* value_to_json(value_t v) 
     const
     {
+      version::check_fsmjson<version>();
       switch (version) {
-        case 0:
-          throw parse_exception("[pmax] Unsupported fsm-json version:"
-                                + std::to_string(version));
+        case 0: /* Never occurs due to above check. */
         case 1:
         default:
           return new json::float_t(v);

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,14 +60,14 @@ namespace awali { namespace utils {
     using valueset_t = ValueSet;
     using value_t = typename valueset_t::value_t;
 
-    size_t operator()(const value_t& v) const
+    std::size_t operator()(const value_t& v) const
     {
       return valueset_t::hash(v);
     }
 
     // Not used, but needed to satisfy the specification.  See for example
     // http://www.cplusplus.com/reference/functional/hash/ .
-    using result_type = size_t;
+    using result_type = std::size_t;
     using argument_type = value_t;
   };
 
@@ -83,11 +83,11 @@ namespace awali { namespace utils {
   template<typename F, typename S>
   inline std::size_t hash_value(const std::pair<F,S>& p)
   {
-      size_t res = 0;
-      std::hash_combine(res, hash_value(p.first));
-      std::hash_combine(res, hash_value(p.second));
-      return res;
+    std::size_t res = 0;
+    std::hash_combine(res, hash_value(p.first));
+    std::hash_combine(res, hash_value(p.second));
+    return res;
   }
-}}//end of ns awali::utils
+}}//end of ns awali::utils 
 
 #endif // !AWALI_MISC_HASH_HH

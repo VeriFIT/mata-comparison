@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ namespace awali { namespace sttc {
     template <typename Aut,
                 typename AutOut = typename Aut::element_type::automaton_nocv_t>
     AutOut transpose(Aut& aut, bool keep_history=true) {
-      AutOut out = copy(aut, keep_history);
+      AutOut out = copy(aut, keep_history, false, true);
        transpose_here(out);
        if(aut->get_name().empty()) {
          out->set_name("transpose");

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #include<awali/sttc/algos/derivation.hh> //derived_term
 #include<awali/sttc/algos/standard.hh> //standard
 #include<awali/sttc/algos/compact_thompson.hh> //compact_thompson
+#include<awali/sttc/algos/flat.hh> //"flat" automaton
+#include<awali/sttc/algos/draw_exp.hh> //"flat" automaton
 #include<awali/sttc/weightset/z.hh>
 #include<awali/sttc/ctx/lat.hh>
 #include<awali/sttc/ctx/lan_char.hh>
@@ -54,7 +56,7 @@ int main() {
    * For expressions over letters, one can use the derived term automaton.
    */
   auto aut=derived_term(expset, exp);
-  std::cout << "Automate:" << std::endl;
+  std::cout << "Automate (derrived term):" << std::endl;
   /* The standard format for Awali automata is the json files.
    */
   js_print(aut, std::cout) << std::endl;
@@ -65,13 +67,16 @@ int main() {
   std::cout << "length: " << stats.length  //number of leaves
             << " size: " << stats.size    //number of nodes
             << " height: " << stats.height  
-            << "star height: " << stats.star_height << std::endl;
+            << " star height: " << stats.star_height << std::endl;
 
   /* Another example
    * We want to deal with expressions over pairs (representing transductions).
    */
+  std::cout << "Another expression:" << std::endl;
   auto tdc_expset=make_tdc_ratexpset();
   auto tdc_exp = make_ratexp(tdc_expset,"[a,\\e]*[b,y]");
+  auto tdc_dexp = draw_exp(tdc_expset, tdc_exp);
+  //js_print(tdc_dexp, std::cout) << std::endl;
   js_print(tdc_expset, tdc_exp, std::cout) << std::endl;
   /* Since labels are not letters, one can not use ther derivation.
    * The standard automaton is a construction that applies on
@@ -96,13 +101,16 @@ int main() {
    */
   using int_expset_t = ratexpset_of<int_context_t>;
   int_expset_t int_expset{get_rat_context(int_ctx), int_expset_t::identities_t::trivial};
-  auto int_exp = make_ratexp(int_expset,"0*4.12");
+  auto int_exp = make_ratexp(int_expset,"0*4.12+5");
   js_print(int_expset, int_exp, std::cout) << std::endl;
   /* We use here another construction,
    * compact_thompson builds a Thompson like automaton
    * with less epsilon transitions.
    */
-  auto aut_int = compact_thompson(int_expset, int_exp);
-  js_print(aut_int, std::cout) << std::endl;
-  
+  //auto aut_int = compact_thompson(int_expset, int_exp);
+  //js_print(aut_int, std::cout) << std::endl;
+  //Another variant of Thompson automaton
+  auto aut_flat = compact_thompson(int_expset, int_exp);
+  js_print(aut_flat, std::cout) << std::endl;  
+  dot(aut_flat, std::cerr);
 }

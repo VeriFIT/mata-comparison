@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ namespace awali {
 
     template <typename C, typename P>
     dyn::automaton_t power(dyn::automaton_t aut, unsigned n, priority::ONE<P>) {
-      throw std::runtime_error("power only supported for free label-sets.");
+      throw std::runtime_error("power only supported for free label-sets with no epsilon-transitions allowed.");
     }
 
 

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -349,6 +349,22 @@ namespace awali {
           return s;
         }
 
+        void
+        add_state(state_t index) {
+	  state_t s = states_.size();
+	  assert(!has_state(index));
+          if (index >= s) {
+            states_.resize(index + 1);
+	    for(state_t t=s; t< index; t++) {
+	      states_[t].succ.emplace_back(null_transition()); // So has_state() can work.
+	      states_fs_.emplace_back(t);
+	    }
+          }
+          stored_state_t& ss = states_[index];
+          // De-invalidate this state: remove the invalid transition.
+          ss.succ.clear();
+        }
+
         history_t history() const {
           return history_;
         }
@@ -362,7 +378,7 @@ namespace awali {
         }
 
         void strip_names() {
-          history_ = std::make_shared<string_history>();
+          names_ = std::make_shared<string_history>();
         }
 
         std::ostream& print_state(state_t s, std::ostream& o) const {
@@ -376,7 +392,7 @@ namespace awali {
         }
 
         std::ostream& print_state_name(state_t s, std::ostream& o,
-                         const std::string& fmt = "text") const {
+                         const std::string& = "text") const {
           return print_state(s, o);
         }
 
@@ -397,6 +413,10 @@ namespace awali {
 
         bool has_history(state_t s) const {
           return history_->has_history(s);
+        }
+
+        bool has_name(state_t s) const {
+          return names_->has_history(s);
         }
 
         void set_state_names_from_history() {

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -330,6 +330,12 @@ namespace awali {
         return star_(l, indices);
       }
 
+      value_t
+      plus(const value_t& l) const
+      {
+        return plus_(l, indices);
+      }
+      
       /// Add the special character first and last.
       ///
       /// Templated by Value so that we work for both word_t and label_t.
@@ -419,10 +425,8 @@ namespace awali {
       json::node_t* to_json() 
       const 
       {
+        version::check_fsmjson<version>();
         switch (version) {
-          case 0:
-            throw parse_exception("[tupleset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
           case 1:
           default:
             return to_json<version>(indices);
@@ -434,10 +438,8 @@ namespace awali {
       json::node_t* value_to_json(value_t v) 
       const 
       {
+        version::check_fsmjson<version>();
         switch (version) {
-          case 0:
-            throw parse_exception("[tupleset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
           case 1:
           default:
             return value_to_json<version>(v, indices);
@@ -445,18 +447,12 @@ namespace awali {
       }
 
 
-      
-      template <unsigned version, std::size_t... I>
-      value_t
-      value_from_json(std::vector<json::node_t*> const& v, seq<I...>) 
-      const 
-      {return value_t{set<I>().template value_from_json<version>(v[I])...};}
-
 
       template<unsigned version = version::fsm_json>
       value_t
       value_from_json(json::node_t const* p) const
       {
+        version::check_fsmjson<version>();
         return value_from_json<version>(p->array()->values, indices);
       }
 
@@ -527,7 +523,7 @@ namespace awali {
       value_t
       conv_(const T& tset, typename T::value_t v, seq<I...>) const
       {
-        return make_tuple(std::get<I>(this->sets()).conv(std::get<I>(tset.sets()),std::get<I>(v))...);
+        return std::make_tuple(std::get<I>(this->sets()).conv(std::get<I>(tset.sets()),std::get<I>(v))...);
       }
 
 
@@ -748,6 +744,13 @@ namespace awali {
         return value_t{set<I>().star(std::get<I>(l))...};
       }
 
+      template <std::size_t... I>
+      value_t
+      plus_(value_t const& l, seq<I...>) const
+      {
+        return value_t{set<I>().plus(std::get<I>(l))...};
+      }
+
       template <typename Value, std::size_t... I>
       Value
       delimit_(Value const& l, seq<I...>) const
@@ -842,14 +845,17 @@ namespace awali {
         return o;
       }
 
+      template <unsigned version, std::size_t... I>
+      value_t
+      value_from_json(std::vector<json::node_t*> const& v, seq<I...>) 
+      const 
+      {return value_t{set<I>().template value_from_json<version>(v[I])...};}
+
       template <unsigned version,std::size_t... I>
       json::object_t*
       to_json(seq<I...>) const
       {
         switch(version) {
-          case 0:
-            throw parse_exception("[tupleset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
           case 1:
           default:
             json::object_t* obj = new json::object_t();
@@ -868,9 +874,6 @@ namespace awali {
       value_to_json(value_t value, seq<I...> const) const
       {
         switch(version) {
-          case 0:
-            throw parse_exception("[tupleset] Unsupported fsm-json version:"
-                                  + std::to_string(version));
           case 1:
           default:
             json::array_t* l = new json::array_t();

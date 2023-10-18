@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,6 +81,8 @@ namespace awali { namespace sttc
       DEFINE(rweight);
       DEFINE(shuffle)       { print(v, shuffle_); }
       DEFINE(star)          { print(v, star_); }
+      DEFINE(maybe)          { print(v, maybe_); }
+      DEFINE(plus)          { print(v, plus_); }
       DEFINE(sum)           { print(v, sum_); }
       DEFINE(transposition) { print(v, transposition_); }
       DEFINE(zero);
@@ -105,6 +107,8 @@ namespace awali { namespace sttc
         lweight,
         rweight,
         star,
+        maybe,
+        plus,
         complement,
         transposition,
         zero,
@@ -159,6 +163,8 @@ namespace awali { namespace sttc
       const char* ldiv_ = nullptr;
       /// The ratexp operators.
       const char* star_ = nullptr;
+      const char* maybe_ = nullptr;
+      const char* plus_ = nullptr;
       const char* complement_ = nullptr;
       const char* transposition_ = nullptr;
       const char* conjunction_ = nullptr;

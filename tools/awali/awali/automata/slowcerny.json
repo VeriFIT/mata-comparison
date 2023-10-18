@@ -1,22 +1,22 @@
 {"format": {"name":"fsm-json", "version":"1"},
  "kind":"Automaton",
  "metadata":
-   {"name":"slowCerny",
+   {"name":"slowcerny",
     "caption":"Synchronisable NFA which meets Cerny bound",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:57Z"}},
  "context":
    {"labels":
       {"labelKind":"Letters", "letterType":"Char", "alphabet":["a","b"]},
     "weights":{"semiring":"B"}},
  "data":
    {"states":
-      [{"id":0, "name":"s0", "initial":true},
-       {"id":1, "name":"s1", "initial":true},
-       {"id":2, "name":"s2", "initial":true, "final":true},
-       {"id":3, "name":"s3", "initial":true},
-       {"id":4, "name":"s4", "initial":true},
-       {"id":5, "name":"s5", "initial":true}],
+      [{"id":0, "name":"p", "initial":true},
+       {"id":1, "name":"q", "initial":true},
+       {"id":2, "name":"r", "initial":true, "final":true},
+       {"id":3, "name":"s", "initial":true},
+       {"id":4, "name":"t", "initial":true},
+       {"id":5, "name":"u", "initial":true}],
     "transitions":
       [{"source":0, "destination":1, "label":"a"},
        {"source":1, "destination":2, "label":"a"},

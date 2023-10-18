@@ -1,5 +1,5 @@
 # This file is part of Awali.
-# Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+# Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 #
 # Awali is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,17 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1.0)
 set(VRNAME "awali")
 set(NAME_DISPLAY "Awali")
 set(NAME_DESC "a library for weighted automata and transducers")
 
-project(Awali CXX)
 
 # Standard CMake variable
 set(VERSION_MAJOR "2")
-set(VERSION_MINOR "0")
-set(VERSION_PATCH "7")
+set(VERSION_MINOR "3")
+set(VERSION_PATCH "0")
 set(VERSION_SUFFIX "")
 if ("" STREQUAL "${VERSION_SUFFIX}")
   set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
@@ -34,15 +33,23 @@ endif()
 
 message(STATUS "CMake configuration for ${NAME_DISPLAY}, version ${VERSION}")
 
+project("${NAME_DISPLAY}" LANGUAGES CXX)
+
 # Extra variables 
 set(AUTHORS "Sylvain Lombardy" "Victor Marsault" "Jacques Sakarovitch")
 string(REPLACE ";" "\",\"" AUTHOR_CPP_LIST "\"${AUTHORS}\"")
 set(LICENSE "GPLv3")
-set(COPYRIGHT_YEARS "2016" "2021")
-string(REPLACE ";" "\",\"" YEARS_CPP_LIST "\"${COPYRIGHT_YEARS}\"")
+set(COPYRIGHT_YEARS "2016" "2022")
 
+string(REPLACE ";" "\",\"" YEARS_CPP_LIST "\"${COPYRIGHT_YEARS}\"")
 string(REPLACE ";" " and " AUTHOR_BIB_LIST "${AUTHORS}")
 list(GET COPYRIGHT_YEARS 1 YEAR_BIB)
+
+
+# Awalipy variables
+set(AWALIPY_AUTHORS "${AUTHOR_BIB_LIST}")
+set(AWALIPY_HOMEPAGE "http://vaucanson-project.org/Awali/")
+set(AWALIPY_SUMMARY "Python frontend for ${NAME_DISPLAY}, ${NAME_DESC}")
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -57,20 +64,91 @@ else()
 	endif()
 endif()
 
+if (NOT DEFINED MEMORY_CHECK_COMMAND)
+  set (MEMORY_CHECK_COMMAND valgrind --leak-check=full --error-exitcode=1 --log-file=/tmp/valgrind-%p-log.txt --)
+endif()
+
+if (NOT DEFINED CHECK_MEMORY_LEAK)
+  SET(CHECK_MEMORY_LEAK "FALSE")
+endif()
 
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -I.")
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I.")
 # set (CMAKE_SHARED_LINKER_FLAGS "-rdynamic")
 
 SET(SCRIPT_DIR "${CMAKE_SOURCE_DIR}/scripts")
-SET(CMAKE_BUILD_TYPE NORMAL)
-SET(CMAKE_CXX_FLAGS_DEBUG "-Wall -g")
-if("${CMAKE_BUILD_TYPE}" STREQUAL "COVERAGE")
-	include(CTest)
-SET(CMAKE_BUILD_TYPE COVERAGE)
-set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}  --coverage -ftest-coverage -fprofile-arcs" )
 
-endif()
+
+#set(CMAKE_CONFIGURATION_TYPES "Debug" "RelWithDebInfo" "Release")
+# We cannot use CMAKE_CONFIGURATION_TYPES due to PY
+IF (CMAKE_CONFIGURATION_TYPES)
+  set(FATAL_ERROR "Due to the way this CMakeLists.txt is made to handle multiple package (awali, cora, awalipy) it cannot handle configuration types")
+ENDIF()
+
+# We use only CMAKE_CXX_FLAGS to be able to give it to other sources
+SET(CMAKE_CXX_FLAGS_DEBUG "")
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "")
+SET(CMAKE_CXX_FLAGS_RELEASE "")
+
+IF (NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+  IF(DEBUG)
+    SET(CMAKE_BUILD_TYPE "Debug")
+  ENDIF()
+  IF(TESTING)
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
+  ENDIF()
+ENDIF()
+
+IF (NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+    SET(CMAKE_BUILD_TYPE "Release")
+ENDIF()
+
+STRING(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE)
+
+set(WARNINGS "-Wnull-dereference -Wnon-virtual-dtor -Wpedantic -Wall -Wextra -Wsuggest-override -Wdisabled-optimization -Wformat=2 -Wcast-align -Wcast-qual -Wfatal-errors -Wshadow=local")
+# complete -Wshadow has too many false positive on constructors
+# -Wmaybe-unitialized has many false positive: could need: -Wno-maybe-uninitialized
+
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "debug")
+  set(CMAKE_BUILD_TYPE "Debug")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} -g3")
+  IF(NOT CXX_OPTIM_LEVEL)
+    SET(CXX_OPTIM_LEVEL "g")
+  ENDIF()
+ELSEIF("${CMAKE_BUILD_TYPE}" STREQUAL "relwithdebinfo")
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} -g3")
+  IF(NOT CXX_OPTIM_LEVEL)
+    SET(CXX_OPTIM_LEVEL "3")
+  ENDIF()
+ELSEIF("${CMAKE_BUILD_TYPE}" STREQUAL "release")
+  set(CMAKE_BUILD_TYPE "Release")
+  ## option -w disable all warnings
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -DNDEBUG")
+  IF(NOT CXX_OPTIM_LEVEL)
+    SET(CXX_OPTIM_LEVEL "3")
+  ENDIF()
+ELSE()
+  
+  MESSAGE(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}. Supported values: Debug, RelWithDebInfo, Release.")
+ENDIF()
+
+
+MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "CXX Optimization flag: -O${CXX_OPTIM_LEVEL}")
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O${CXX_OPTIM_LEVEL}")
+
+#IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+  MESSAGE(STATUS "Full CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+#ENDIF()
+
+# if("${CMAKE_BUILD_TYPE}" STREQUAL "Test")
+#         include(CTest)
+#   SET(CMAKE_BUILD_TYPE COVERAGE)
+#   set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}  --coverage -ftest-coverage -fprofile-arcs" )
+# 
+# endif()
 
 
 # if(POLICY CMP0042)
@@ -144,7 +222,7 @@ IF (NOT DEFINED DOCUMENTATION)
   SET(DOCUMENTATION "TRUE")
 ENDIF()
 IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalidoc")
-  IF("${DOCUMENTATION}")
+  IF(DOCUMENTATION)
     add_subdirectory(awalidoc)
   ENDIF()
 ENDIF()
@@ -182,25 +260,49 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
       message (STATUS "Found Python Binary: ${PYTHON_BIN}")
       execute_process(
         COMMAND ${PYTHON_BIN} "-c" "import sys; print (str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.'+str(sys.version_info.micro))"
+        RESULT_VARIABLE PYTHON_NOT_FOUND
         OUTPUT_VARIABLE PYTHON_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-      message (STATUS "Python version: ${PYTHON_VERSION}")
-      IF ("${PYTHON_VERSION}" VERSION_LESS "3" )
-        message(WARNING "Python version is <3, which is not recommended for Awali.  If the wrong Python binary was found by automatic detection, you may specify it with cmake option -DPYTHON_BIN=<binary location>")
+      IF (PYTHON_NOT_FOUND)
+        message (FATAL_ERROR "${PYTHON_BIN} does not seem to be a valid python binary.")
+      ELSE()
+        message (STATUS "Python version: ${PYTHON_VERSION}")
+        IF ("${PYTHON_VERSION}" VERSION_LESS "3" )
+          message(WARNING "Python version is <3, which is not recommended for Awali.  If the wrong Python binary was found by automatic detection, you may specify it with cmake option -DPYTHON_BIN=<binary location>")
+        ENDIF()
       ENDIF()
     ENDIF()
 
 
-    IF (NOT DEFINED CYTHON_BIN)
-      find_program(CYTHON_BIN NAMES "cython" "cython3")
+    IF (DEFINED CYTHON_BIN)
+      MESSAGE(STATUS "CYTHON_BIN is no longer used.  Check that your python binary (currently $PYTHON_BIN, set up with PYTHON_BIN cmake variable) can import Cython.")
     ENDIF()
 
-    IF( ${CYTHON_BIN} STREQUAL CYTHON_BIN-NOTFOUND )
-        MESSAGE (FATAL_ERROR "Could not find \"cython\" nor \"cython3\" binary, required to compile Awalipy.  You may disable the compilation of Awalipy by adding option -DPY=FALSE to the cmake command.  If cython is installed in your system but was not found by automatic detection, you may specify it with cmake option -DCYTHON_BIN=... ")
-   ELSE()
-     message (STATUS "Found Cython Binary: ${CYTHON_BIN}")
+    # Looking for Cython
+    execute_process(
+        COMMAND ${PYTHON_BIN} -B -c "import Cython; print (Cython.__version__)" 
+        RESULT_VARIABLE CYTHON_NOT_FOUND
+        OUTPUT_VARIABLE CYTHON_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    IF (CYTHON_NOT_FOUND)
+      MESSAGE(FATAL_ERROR "No module Cython found (associated with ${PYTHON_BIN})." )
+    ELSE()
+      MESSAGE(STATUS "Cython version associated with ${PYTHON_BIN}: ${CYTHON_VERSION}")
     ENDIF()
+
+    
+
+#       find_program(CYTHON_BIN NAMES "cython" "cython3")
+#     ENDIF()
+# 
+#     IF( ${CYTHON_BIN} STREQUAL CYTHON_BIN-NOTFOUND )
+#         MESSAGE (FATAL_ERROR "Could not find \"cython\" nor \"cython3\" binary, required to compile Awalipy.  You may disable the compilation of Awalipy by adding option -DPY=FALSE to the cmake command.  If cython is installed in your system but was not found by automatic detection, you may specify it with cmake option -DCYTHON_BIN=... ")
+#    ELSE()
+#      message (STATUS "Found Cython Binary: ${CYTHON_BIN}")
+#     ENDIF()
 
     set (PYTHON_DIR "awalipy")
     set (CYTHON_SUBDIR "cython-src") 
@@ -282,12 +384,16 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
 
 
     add_custom_target(check-py DEPENDS awalipy)
-    foreach(VAL transducer-edition
+    foreach(VAL 
                 automaton-determinize
                 automaton-algo-access
                 automaton-binary-op
                 automaton-edition
+                examples
                 ratexp-navigation
+                ratexp-minimal-automaton
+                transducer-edition
+                state-names
                 )
 
         add_custom_target(test-py-${VAL}
@@ -308,8 +414,8 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${PYTHON_DIR}/tests/${VAL}.json"
                                         "${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_DIR}" )
     endforeach(VAL)
-    #
-
+    
+# ls ~/.awali/modules | sed 's:^lib\(.*\).so$:\1:' | sed 's:,:_:g' | xclip -selection c
     add_dependencies(test-py-automaton-determinize copy-a1_det
       lal_char_b-accessible
       lal_char_b-automaton
@@ -319,74 +425,81 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
       lal_char_b_lal_char_b-are_equivalent
       lal_char_b-quotient
     )
+    
+#     add_dependencies(test-py-automaton-algo-access
+# 
+# 
+#     )
 
     add_dependencies(test-py-ratexp-navigation
-      lal_char_z-context
-      lal_char_z-determinize
-      lal_char_z_lal_char_z-are_equivalent
-      lal_char_z-quotient
-      lal_char_z-standard
-      lan-lal_char-_z-context
-      lan-lal_char-_z_lan-lal_char-_z-product
       lal_char_b-context
       lal_char_b-determinize
       lal_char_b_lal_char_b-are_equivalent
       lal_char_b-quotient
       lal_char_b-standard
+      lal_char_q_lal_char_q-are_equivalent
+      lal_char_z-context
+      lal_char_z-determinize
+#       lal_char_z_lal_char_q-promotion
+      lal_char_z-quotient
+      lal_char_z-standard
       lan-lal_char-_b-context
       lan-lal_char-_b_lan-lal_char-_b-product
+      lan-lal_char-_b-proper
+      lan-lal_char-_z-context
+      lan-lal_char-_z_lan-lal_char-_z-product
+      lan-lal_char-_z-proper
     )
-
-
-    add_dependencies(test-py-automaton-algo-access
-      lal_char_b-accessible
+    
+    add_dependencies(test-py-ratexp-minimal-automaton
       lal_char_b-context
-      lal_char_f2-accessible
-      lal_char_f2-context
-      lal_char_pmax-accessible
-      lal_char_pmax-context
-      lal_char_q-accessible
-      lal_char_q-context
-      lal_char_r-accessible
-      lal_char_r-context
-      lal_char_c-accessible
-      lal_char_c-context
-      lal_char_z-accessible
-      lal_char_z-context
-      lal_char_zmax-accessible
-      lal_char_zmax-context
-      lal_char_zmin-accessible
-      lal_char_zmin-context
-      lal_char_zz7-accessible
-      lal_char_zz7-context
-      lal_char_zz99-accessible
-      lal_char_zz99-context
-      lal_char_nn7-accessible
-      lal_char_nn7-context
-      lal_char_noo-accessible
-      lal_char_noo-context
+      lal_char_b-derivation
+      lal_char_b-determinize
+      lal_char_b-proper
+      lal_char_b-quotient
+      lal_char_b-standard
+      lal_int_b-automaton
+      lal_int_b-context
+      lal_int_b-derivation
+      lal_int_b-determinize
+      lal_int_b-proper
+      lal_int_b-quotient
+      lal_int_b-standard
+      lan-lal_char-_b-quotient
+      lan-lal_int-_b-quotient
     )
+
     add_dependencies(test-py-automaton-binary-op
-      lal_char_b-automaton    lal_char_b_lal_char_b-product
-      lal_char_b-context      lal_char_b-quotient
-      lal_char_b-determinize  lal_char_b-standard
-      lal_char_b-eval         lal_char_b-ratexp
+      lal_char_b-automaton
+      lal_char_b-context
+      lal_char_b-determinize
+      lal_char_b-eval
       lal_char_b_lal_char_b-are_equivalent
+      lal_char_b_lal_char_b-join
+      lal_char_b_lal_char_b-product
+      lal_char_b_lal_char_b-promotion
+      lal_char_b-quotient
+      lal_char_b-ratexp
+      lal_char_b-standard
     )
 
     add_dependencies(test-py-automaton-edition
       lal_char_b-automaton
       lal_char_b-context
+      lal_char_c-automaton
+      lal_char_c-context
       lal_char_f2-automaton
       lal_char_f2-context
+      lal_char_nn7-automaton
+      lal_char_nn7-context
+      lal_char_noo-automaton
+      lal_char_noo-context
       lal_char_pmax-automaton
       lal_char_pmax-context
       lal_char_q-automaton
       lal_char_q-context
       lal_char_r-automaton
       lal_char_r-context
-      lal_char_c-automaton
-      lal_char_c-context
       lal_char_z-automaton
       lal_char_z-context
       lal_char_zmax-automaton
@@ -397,10 +510,6 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
       lal_char_zz7-context
       lal_char_zz99-automaton
       lal_char_zz99-context
-      lal_char_noo-automaton
-      lal_char_nn7-automaton
-      lal_char_noo-context
-      lal_char_nn7-context
     )
 
     add_dependencies(test-py-transducer-edition
@@ -444,8 +553,35 @@ IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/awalipy")
       lat-lan-lal_char-_lan-lal_char--_noo-context
       lat-lan-lal_char-_lan-lal_char--_noo-transducer
     )
+    
+    add_dependencies(test-py-examples
+      lal_char_b-context
+      lal_char_b-ratexp
+      lal_char_c-context
+      lal_char_c-ratexp
+      lal_char_q-context
+      lal_char_q-ratexp
+      lal_char_r-context
+      lal_char_r-ratexp
+      lal_char_z-context
+      lal_char_zmax-context
+      lal_char_zmax-ratexp
+      lal_char_zmin-context
+      lal_char_zmin-ratexp
+      lal_char_z-ratexp
+      lal_int_z-context
+      lal_int_z-ratexp
+      lan-lal_char-_b-context
+      lan-lal_char-_b-ratexp
+      lat-lal_char_lal_char-_b-context
+      lat-lal_char_lal_char-_b-transducer
+      lat-lan-lal_char-_lan-lal_char--_b-context
+      lat-lan-lal_char-_lan-lal_char--_b-transducer
+      lat-lan-lal_char-_law_char-_b-context
+      lat-lan-lal_char-_law_char-_b-transducer
+    )
 
-    # add_dependencies(
+# ls ~/.awali/modules | sed 's:^lib\(.*\).so$:\1:' | sed 's:,:_:g' | xclip -selection c
 
   ENDIF() #PY=TRUE
 ENDIF() #EXISTS awalipy dir
@@ -488,4 +624,6 @@ add_custom_target(tarballs
 
 add_custom_target(upload-tarballs
   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/upload_to_vaucanson-project.sh" "files.awali.org" "${VERSION_MAJOR}.${VERSION_MINOR}" "tarballs" "*.tgz"
+  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/upload_to_vaucanson-project.sh" "files.awali.org" "." "tarballs" "*.tgz"
+
 )

@@ -3,8 +3,8 @@
  "metadata":
    {"name":"binary",
     "caption":"Z-FA that converts words of {0,1}^* into their binary values",
-    "creator": {"programName":"awali", "version":"2.0.7"},
-    "timestamp": {"date":"2021-12-15", "time":"09:04:16Z"}},
+    "creator": {"programName":"awali", "version":"2.3.0"},
+    "timestamp": {"date":"2023-05-12", "time":"07:44:53Z"}},
  "context":
    {"labels":
       {"labelKind":"Letters", "letterType":"Char", "alphabet":["0","1"]},

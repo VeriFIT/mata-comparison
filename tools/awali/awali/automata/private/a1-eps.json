@@ -1,0 +1,26 @@
+{"format": {"name":"fsm-json", "version":"1"},
+ "kind":"Automaton",
+ "metadata":
+   {"name":"a1-eps",
+    "caption":"a1 of type lan<lal_char>",
+    "creator": {"programName":"awali", "version":"2.1.0-sid"},
+    "timestamp": {"date":"2021-11-03", "time":"16:54:50Z"}},
+ "context":
+   {"labels":
+      {"labelKind":"Letters",
+       "letterType":"Char",
+       "allowEpsilon":true,
+       "alphabet":["a","b"]},
+    "weights":{"semiring":"B"}},
+ "data":
+   {"states":
+      [{"id":0, "name":"s0", "initial":true},
+       {"id":1, "name":"s1"},
+       {"id":2, "name":"s2", "final":true}],
+    "transitions":
+      [{"source":0, "destination":0, "label":"a"},
+       {"source":0, "destination":0, "label":"b"},
+       {"source":2, "destination":2, "label":"a"},
+       {"source":2, "destination":2, "label":"b"},
+       {"source":0, "destination":1, "label":"a"},
+       {"source":1, "destination":2, "label":"b"}]}}

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,6 +122,16 @@ namespace awali { namespace sttc {
       AWALI_RAT_VISIT(star, v)
       {
         res_ = ws_.star(constant_term(v.sub()));
+      }
+
+      AWALI_RAT_VISIT(maybe, v)
+      {
+        res_ = ws_.add(constant_term(v.sub()),ws_.one());
+      }
+
+      AWALI_RAT_VISIT(plus, v)
+      {
+        res_ = ws_.plus(constant_term(v.sub()));
       }
 
       AWALI_RAT_VISIT(lweight, v)

@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -102,15 +102,9 @@ namespace awali {
     bool are_isomorphic(automaton_t aut1, automaton_t aut2);
 
 
-    /** \ingroup Standard
-     * Produces an automaton that associates with every word the weight (\p w * x), where x is the weight associated with this word in \p aut.
+    /**Produces an automaton that associates with every word the weight (\p w * x), where x is the weight associated with this word in \p aut.
      *
-     * This function has two different behaviours depending on whether \p aut
-     * is {@link is_standard standard} or not:
-     * - if \p aut is standard : multiplies the weight of each outgoing
-     *   transition of the initial state by \p w; (in this case the returned
-     *   automaton is standard)
-     * - if \p aut is not standard : multiplies every initial weight by \p w on
+     * This function multiplies every initial weight by \p w on
      *   the left.
      *
      * The following options may be given in \p opts: {@link KEEP_HISTORY},

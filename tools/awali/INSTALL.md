@@ -148,66 +148,85 @@ the `cmake` command is as follows:
 
 **List of CMake Variables**
 
-- `CMAKE_INSTALL_PREFIX` governs where all the components of Awali will be installed;
-its default value is `/usr/local/bin`.
+- `CMAKE_INSTALL_PREFIX` governs where all the components of Awali will be
+  installed.
+  Defaults to `/usr/local/bin`.
 
-- `AWALICPP_INSTALL_PREFIX` governs where the static and dynamic layers will be installed; its default value is:
-`${CMAKE_INSTALL_PREFIX}` .
+- `AWALICPP_INSTALL_PREFIX` governs where the static and dynamic layers will be
+  installed.
+  Defaults to `${CMAKE_INSTALL_PREFIX}` .
 
-- `AWALICPP_HEADER_INSTALL_DIR` governs where the headers of the dynamic and static libraries will be installed;
-its default value is `${AWALICPP_INSTALL_PREFIX}/lib`.
+- `AWALICPP_HEADER_INSTALL_DIR` governs where the headers of the dynamic and
+  static libraries will be installed.
+  Defaults to `${AWALICPP_INSTALL_PREFIX}/lib`.
 
-- `AWALICPP_DYNLIB_INSTALL_DIR` is the location of the dynamic library;
-its default value is `${AWALICPP_INSTALL_PREFIX}/lib`.
+- `AWALICPP_DYNLIB_INSTALL_DIR` is the location of the dynamic library
+  Defaults to `${AWALICPP_INSTALL_PREFIX}/lib`.
 
-- `AWALICPP_SHARE_INSTALL_PREFIX` governs where the source of the dynamic modules and the examples automata;
-its default value is `${AWALICPP_INSTALL_PREFIX}/share`.
+- `AWALICPP_SHARE_INSTALL_PREFIX` governs where the source of the dynamic
+  modules and the examples automata will be installed.
+  Defaults to `${AWALICPP_INSTALL_PREFIX}/share`.
 
-- `AWALICPP_MODULE_INSTALL_DIR` governs where are the static modules compiled prior to installation;
-its default value is `${AWALICPP_INSTALL_PREFIX}/lib/awali_modules`
+- `AWALICPP_MODULE_INSTALL_DIR` governs where are the static modules compiled
+  prior to installation.
+  Default to `${AWALICPP_INSTALL_PREFIX}/lib/awali_modules`
+
+- `AWALICPP_MODULE_COMPILE_DIR` governs where are compiled the static modules.
+  It is unset by default, and computes `${HOME}/.awali/modules/` at runtime
+  (that is depends on the user).
+
+- If `COMPILE_MODULE_IN_INSTALL_DIR` is equal to `TRUE`, the default value of
+  `AWALICPP_MODULE_COMPILE_DIR` becomes the value of
+  `AWALICPP_MODULE_INSTALL_DIR`.  
+  Defaults to `FALSE`. 
 
 - `CORA_INSTALL_PREFIX` governs where components of Cora will be installed;
-its default value is: `${CMAKE_INSTALL_PREFIX}`.
+  Defaults to `${CMAKE_INSTALL_PREFIX}`.
 
 - `CORA_BINARY_INSTALL_DIR` governs where the `cora` binary and the
-autocompletion binary for `cora` will be installed;
-its default value is `${CORA_INSTALL_PREFIX}/bin`.
+  autocompletion binary for `cora` will be installed.
+  Defaults to `${CORA_INSTALL_PREFIX}/bin`.
 
-- `CORA_BASH_COMPL_DIR` tells where to install the completion directive for `co`ra under bash shell.
-It defaults to `AUTO` meaning that CMake will look for the appropriate directory; the search may fail issueing a warning.
-The value `IN_PREFIX` means that the installation will take place in
-`${CORA_INSTALL_PREFIX}/etc/bash_completion.d`; bash then has to be configured to look for completion file in that directory.
-Other acceptable values are absolute paths.
+- `CORA_BASH_COMPL_DIR` tells where to install the completion directive for
+  the program `cora` under bash shell.  It defaults to `AUTO` meaning that
+  CMake will look for the appropriate directory; the search may fail issuing a
+  warning.  The value `IN_PREFIX` means that the installation will take place
+  in `${CORA_INSTALL_PREFIX}/etc/bash_completion.d`; bash then has to be
+  configured to look for completion file in that directory.  Other acceptable
+  values are absolute paths.
 
-- `CORA_ZSH_COMPL_DIR` is similar to `CORA_BASH_COMPL_DIR` but for the zsh shell (`IN_PREFIX` is effectively equivalent to
-`${CORA_INSTALL_PREFIX}/share/zsh/site-functions`).
+- `CORA_ZSH_COMPL_DIR` is similar to `CORA_BASH_COMPL_DIR` but for the zsh
+  shell (`IN_PREFIX` is effectively equivalent to
+  `${CORA_INSTALL_PREFIX}/share/zsh/site-functions`).
 
-- `AWALIPY_INSTALL_PREFIX` governs where the Python module Awalipy will be installed.
+- `AWALIPY_INSTALL_PREFIX` governs where the Python module Awalipy will be
+  installed.
+  * Its default value is `AUTO` unless variable `FORCE_INSTALL_IN_PREFIX` is
+    set to `TRUE`, in which case its default value is `IN_PREFIX`.
+  * Value `IN_PREFIX` is effectively replaced by `${CMAKE_INSTALL_PREFIX}`
+    before compiling/installing Awalipy.
+  * If set to `AUTO`, the setup from distutils.core module decides where to
+    install the module; otherwise, the option
+    `--prefix=${AWALIPY_INSTALL_PREFIX}` is given to setup.
 
-    - Its default value is `AUTO` unless variable `FORCE_INSTALL_IN_PREFIX` is set to `TRUE`,
-in which case its default value is `IN_PREFIX`.
+- `CORA` governs whether to compile and install Cora.
+  Defaults to `TRUE`.
 
-    - Value `IN_PREFIX` is effectively replaced by
-`${CMAKE_INSTALL_PREFIX}` before compiling/installing Awalipy.
+- `PY` governs whether or not to compile and install the Python layer. Defaults
+  to `TRUE`.
 
-    - If set to `AUTO`, the setup from distutils.core module decides where to install the module;
-otherwise, the option
-`--prefix=${AWALIPY_INSTALL_PREFIX}` is given to setup.
-
-- `CORA` governs whether to compile and install Cora;
-defaults to `TRUE`.
-
-- `PY` governs whether or not to compile and install the Python layer; defaults to `TRUE`.
-
-- `PYTHON_BIN` provides the python binary to use for compiling and installing awalipy;
-defaults to the result provided by the command `python`.
+- `PYTHON_BIN` provides the python binary to use for compiling and installing
+  awalipy.
+- Default to the result provided by the command `python`.
 
 - `CYTHON_BIN` is similar to `PYTHON_BIN` but for the `cython` binary.
 
 - `FORCE_INSTALL_IN_PREFIX` is a shorthand variable to disable all
-smart/automatic installation;
-setting `FORCE_INSTALL_IN_PREFIX` to `TRUE` effectively sets `AWALIPY_INSTALL_PREFIX`, `CORA_BASH_COMPL_DIR` and
-`CORA_ZSH_COMPL_DIR` to `IN_PREFIX`.
+  smart/automatic installation; setting `FORCE_INSTALL_IN_PREFIX` to `TRUE`
+  effectively sets `AWALIPY_INSTALL_PREFIX`, `CORA_BASH_COMPL_DIR` and
+  `CORA_ZSH_COMPL_DIR` to `IN_PREFIX`.
+  However, it does not sets `COMPILE_MODULE_IN_INSTALL_DIR` to `TRUE`, which
+  one might want to.
 
 
 **Common use-cases**

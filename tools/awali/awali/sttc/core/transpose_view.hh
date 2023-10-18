@@ -1,5 +1,5 @@
 // This file is part of Awali.
-// Copyright 2016-2021 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
+// Copyright 2016-2023 Sylvain Lombardy, Victor Marsault, Jacques Sakarovitch
 //
 // Awali is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace awali { namespace sttc {
       using weight_t = typename weightset_t::value_t;
       /// History.
       using history_t = typename Aut::history_t;
+      using names_t = typename Aut::names_t;
 
       using st_store_t = typename Aut::st_store_t;
       using tr_store_t = typename Aut::tr_store_t;
