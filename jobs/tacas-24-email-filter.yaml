@@ -1,45 +1,44 @@
-explicit-stats:
-    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/to_mona_mata.py $1 $2 $3 $4 $5
-
-minterm-stats:
-    cmd: /home/experiments/scripts/run_cunter.sh /home/experiments/scripts/massage_arguments.py $1 $2 $3 $4 $5
-
+# automata.net using original inputs
 automata:
     cmd: /home/experiments/bin/automata /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# automata.net using mintermized inputs
 automata-min:
     cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# mata; our tested library, version 1.0.0
 mata:
     cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# mata; our tested library with simulation reduction, version 1.0.0
 mata-sim:
     cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/email_filter.emp --sim $1 $2 $3 $4 $5
 
-mata-old:
-    cmd: /home/experiments/bin/mata-emp-interpreter-old /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
-
+# vata
 vata:
     cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# awali
 awali:
     cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
-mona:
-    cmd: /home/experiments/scripts/run_mona.sh /home/experiments/bin/mona-emp-interpreter /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
-
+# libmata; python binding for libmata
 pymata:
     cmd: pyinterpret MataEngine /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# fado
 pyfado:
     cmd: pyinterpret FadoEngine /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# automata.py
 pyautomata-lib:
     cmd: pyinterpret AutomataLibEngine /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# automatalib
 java-automatalib:
     cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
+# brics
 java-brics:
     cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar /home/experiments/programs/email_filter.emp $1 $2 $3 $4 $5
 
