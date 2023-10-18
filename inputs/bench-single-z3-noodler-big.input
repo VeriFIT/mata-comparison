@@ -3,7 +3,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06210.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06234.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06244.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06264.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06295.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06296.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance06368.mata
@@ -64,8 +63,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance07947.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08001.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08023.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08029.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08074.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08114.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08116.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance08118.mata
@@ -127,7 +124,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance09928.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10051.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10088.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10092.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10101.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10136.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance10159.mata
@@ -202,7 +198,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12062.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12071.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12107.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12143.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12153.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12167.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance12182.mata
@@ -261,8 +256,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance13934.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance13994.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14063.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14064.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14085.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14207.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14212.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14293.mata
@@ -273,7 +266,6 @@
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14468.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14488.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14621.mata
-/home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14668.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14719.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14761.mata
 /home/experiments/nfa-bench/benchmarks/z3-noodler/automatark/complement-big/instance14763.mata
