@@ -159,9 +159,6 @@ do
         echo -e "${RD}[✗] $job_name contains $errors errors.${NC}"
       fi
     fi
-
-    # All intermediate files are deleted
-    # rm ${intermediate[@]}
 done
 
 python3 "$basedir"/compare_profiles.py "$result_file.csv"

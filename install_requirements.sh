@@ -1,13 +1,28 @@
 #!/bin/bash
 # installs requirements (need to run with sudo! )
 
-# Newer libc
-# echo "================== Installing libc ===================="
-# DEBIAN_FRONTEND=noninteractive dpkg --auto-deconfigure --force-all -i packages/libc/*.deb || echo "Error installing libc"
+# Installing mata / vata / awali prerequisities
+echo "============= Installing Cpp Prerequisities =============="
+dpkg -i packages/cpp/*.deb || echo "Error installing C++ prerequisities"
 
-# Newer Python
-# echo "================== Installing Python ===================="
-# dpkg -i packages/python3/*.deb || echo "Error installing Python (don't panic, this is expected ; pip3 should still work)"
+# Installing automata.net prerequisities
+echo "============ Installing .NET Prerequisities =============="
+dpkg -i packages/dotnet/*.deb || echo "Error installing .NET prerequisities"
+
+# Installing automatalib / brics prerequisities
+echo "============ Installing Java Prerequisities =============="
+dpkg -i packages/java/*.deb || echo "Error installing java prerequisities"
+
+echo "================== Installing libmata ===================="
+pushd tools/mata
+make release
+sudo make install
+popd
+
+echo "=================== Installing awali ====================="
+pushd tools/awali
+./install-awali.sh
+popd
 
 echo "============== Installing Python packages ================"
 sudo -u ae pip3 install pip-packages/* || echo "Error installing Python messages"
