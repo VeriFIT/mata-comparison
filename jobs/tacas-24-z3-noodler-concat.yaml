@@ -1,23 +1,23 @@
 # mata; our tested library, version 1.0.0
 mata:
-    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/concat.emp $1
+    cmd: ./bin/mata-emp-interpreter ./programs/concat.emp $1
 
 # mata; our tested library with simulation reduction, version 1.0.0
 mata-sim:
-    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/concat.emp --sim $1
+    cmd: ./bin/mata-emp-interpreter ./programs/concat.emp --sim $1
 
 # awali
 awali:
-    cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/concat.emp $1
+    cmd: ./bin/awali-emp-interpreter ./programs/concat.emp $1
 
 # libmata; python binding for libmata
 pymata:
-    cmd: pyinterpret MataEngine /home/experiments/programs/concat.emp $1
+    cmd: pyinterpret MataEngine ./programs/concat.emp $1
 
 # fado
 pyfado:
-    cmd: pyinterpret FadoEngine /home/experiments/programs/concat.emp $1
+    cmd: pyinterpret FadoEngine ./programs/concat.emp $1
 
 # brics
 java-brics:
-    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar /home/experiments/programs/concat.emp $1
+    cmd: ./scripts/run_java.sh ./bin/brics-emp-interpreter.jar ./programs/concat.emp $1

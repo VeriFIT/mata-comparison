@@ -1,45 +1,45 @@
 # automata.net using original inputs
 automata:
-    cmd: /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./bin/automata ./programs/bool_comb_inter_sat.emp $1 $2
 
 # automata.net using mintermized inputs
 automata-min:
-    cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./scripts/run_automata.sh ./bin/automata ./programs/bool_comb_inter_sat.emp $1 $2
 
 # mata; our tested library, version 1.0.0
 mata:
-    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./bin/mata-emp-interpreter ./programs/bool_comb_inter_sat.emp $1 $2
 
 # mata; our tested library with simulation reduction, version 1.0.0
 mata-sim:
-    cmd: /home/experiments/bin/mata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp --sim $1 $2
+    cmd: ./bin/mata-emp-interpreter ./programs/bool_comb_inter_sat.emp --sim $1 $2
 
 
 # vata
 vata:
-    cmd: /home/experiments/bin/vata-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./bin/vata-emp-interpreter ./programs/bool_comb_inter_sat.emp $1 $2
 
 # awali
 awali:
-    cmd: /home/experiments/bin/awali-emp-interpreter /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./bin/awali-emp-interpreter ./programs/bool_comb_inter_sat.emp $1 $2
 
 # libmata; python binding for libmata
 pymata:
-    cmd: pyinterpret MataEngine /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: pyinterpret MataEngine ./programs/bool_comb_inter_sat.emp $1 $2
 
 # fado
 pyfado:
-    cmd: pyinterpret FadoEngine /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: pyinterpret FadoEngine ./programs/bool_comb_inter_sat.emp $1 $2
 
 # automata.py
 pyautomata-lib:
-    cmd: pyinterpret AutomataLibEngine /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: pyinterpret AutomataLibEngine ./programs/bool_comb_inter_sat.emp $1 $2
 
 # automatalib
 java-automatalib:
-    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./scripts/run_java.sh ./bin/automatalib-emp-interpreter.jar ./programs/bool_comb_inter_sat.emp $1 $2
 
 # brics
 java-brics:
-    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar /home/experiments/programs/bool_comb_inter_sat.emp $1 $2
+    cmd: ./scripts/run_java.sh ./bin/brics-emp-interpreter.jar ./programs/bool_comb_inter_sat.emp $1 $2
 

@@ -1,26 +1,26 @@
 # automata.net using original inputs
 automata:
-    cmd: /home/experiments/bin/automata $1 $2
+    cmd: ./bin/automata $1 $2
 
 # automata.net using mintermized inputs
 automata-min:
-    cmd: /home/experiments/scripts/run_automata.sh /home/experiments/bin/automata $1 $2
+    cmd: ./scripts/run_automata.sh ./bin/automata $1 $2
 
 # mata; our tested library, version 1.0.0
 mata:
-    cmd: /home/experiments/bin/mata-emp-interpreter $1 $2
+    cmd: ./bin/mata-emp-interpreter $1 $2
 
 # mata; our tested library with simulation reduction, version 1.0.0
 mata-sim:
-    cmd: /home/experiments/bin/mata-emp-interpreter $1 --sim $2
+    cmd: ./bin/mata-emp-interpreter $1 --sim $2
 
 # vata
 vata:
-    cmd: /home/experiments/bin/vata-emp-interpreter $1 $2
+    cmd: ./bin/vata-emp-interpreter $1 $2
 
 # awali
 awali:
-    cmd: /home/experiments/bin/awali-emp-interpreter $1 $2
+    cmd: ./bin/awali-emp-interpreter $1 $2
 
 # libmata; python binding for libmata
 pymata:
@@ -36,9 +36,9 @@ pyautomata-lib:
 
 # automatalib
 java-automatalib:
-    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/automatalib-emp-interpreter.jar $1 $2
+    cmd: ./scripts/run_java.sh ./bin/automatalib-emp-interpreter.jar $1 $2
 
 # brics
 java-brics:
-    cmd: /home/experiments/scripts/run_java.sh /home/experiments/bin/brics-emp-interpreter.jar $1 $2
+    cmd: ./scripts/run_java.sh ./bin/brics-emp-interpreter.jar $1 $2
 
