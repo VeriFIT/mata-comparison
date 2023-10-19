@@ -1,10 +1,27 @@
 #!/bin/bash
+
+# The setup is wrt our paper: 6 parallel jobs with 60s timeout
 BASEDIR=$(dirname "$0")
 TIMEOUT=60
 JOBS=6
-SUFFIX="--suffix .forty-jalib-automata-again"
+SUFFIX=""
 METHODS=""
 EXCLUDE=""
+
+# Each benchmark corresponds to naming in our paper; set to "true" to run concrete benchmark
+# or use the CLI commands.
+ALL="true"
+ARMC_INCL="false"
+B_SMT="false"
+EMAIL_FILTER="false"
+LIA_EXPLICIT="false"
+LIA_SYMBOLIC="false"
+NOODLER_COMPL="false"
+NOODLER_CONCAT="false"
+NOODLER_INTER="false"
+PARAM_INTER="false"
+PARAM_UNION="false"
+PARAM_DIFF="false"
 
 usage() { {
         [ $# -gt 0 ] && echo "error: $1"
@@ -13,6 +30,17 @@ usage() { {
         echo "  -m|--methods                will measure only selected tools"
         echo "  -e|--exclude                will not measure selected tools"
         echo "  -j|--jobs                   will run only number of jobs"
+        echo "     --armc-incl              will run 'armc-incl' benchmark"
+        echo "     --b-smt                  will run 'b-smt' benchmark"
+        echo "     --email-filter           will run 'email-filter' benchmark"
+        echo "     --lia-explicit           will run 'lia-explicit' benchmark"
+        echo "     --lia-symbolic           will run 'lia-symbolic' benchmark"
+        echo "     --noodler-compl          will run 'noodler-compl' benchmark"
+        echo "     --noodler-concat         will run 'noodler-concat' benchmark"
+        echo "     --noodler-inter          will run 'noodler-inter' benchmark"
+        echo "     --param-inter            will run 'param-inter' benchmark"
+        echo "     --param-union            will run 'param-union' benchmark"
+        echo "     --param-diff             will run 'param-diff' benchmark"
     } >&2
 }
 
@@ -30,32 +58,132 @@ while [ $# -gt 0 ]; do
         -j|--jobs)
             JOBS=$2
             shift 2;;
+        --armc-incl)
+            ARMC_INCL="true"
+            ALL="false"
+            shift 1;;
+        --b-smt)
+            B_SMT="true"
+            ALL="false"
+            shift 1;;
+        --email-filter)
+            EMAIL_FILTER="true"
+            ALL="false"
+            shift 1;;
+        --lia-explicit)
+            LIA_EXPLICIT="true"
+            ALL="false"
+            shift 1;;
+        --lia-symbolic)
+            LIA_SYMBOLIC="true"
+            ALL="false"
+            shift 1;;
+        --noodler-compl)
+            NOODLER_COMPL="true"
+            ALL="false"
+            shift 1;;
+        --noodler-concat)
+            NOODLER_CONCAT="true"
+            ALL="false"
+            shift 1;;
+        --noodler-inter)
+            NOODLER_INTER="true"
+            ALL="false"
+            shift 1;;
+        --param-inter)
+            PARAM_INTER="true"
+            ALL="false"
+            shift 1;;
+        --param-union)
+            PARAM_UNION="true"
+            ALL="false"
+            shift 1;;
+        --param-diff)
+            PARAM_DIFF="true"
+            ALL="false"
+            shift 1;;
     esac
 done
 
+run_benchmark() {
+    # :param $1: path to configuration .yaml file
+    # :param $2: path to inputs .input file
+    # :param $3: number of parallel jobs
+    "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config $1 --timeout "$TIMEOUT" --jobs $3 $SUFFIX $2
+}
+
 start_time=$SECONDS
 
-## Inclusion comparison
-# "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tmp-automata-inclusion.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-double-automata-inclusion.input
-# "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tmp-email-filter.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-quintuple-email-filter.input
+if [ "$ALL" = "true" ]; then
+    echo "[!] Running all benchmarks, this will take some time (could take over 14 hours, or even days)"
+fi
 
+if [ "$ARMC_INCL" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "============= Running 'armc-incl' benchmark =============="
+    run_benchmark "$BASEDIR/jobs/tacas-24-automata-inclusion.yaml" "$BASEDIR/inputs/bench-double-automata-inclusion.input" $JOBS
+fi
 
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-automata-inclusion.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-double-automata-inclusion.input
-# "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-email-filter.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-quintuple-email-filter.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-z3-noodler.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-single-z3-noodler.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-z3-noodler.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-single-z3-noodler-big.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-z3-noodler-concat.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-single-z3-noodler.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-presburger-complement.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-single-presburger-complement.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-presburger-complement.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-single-presburger-explicit-complement.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-ere.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-variadic-bool-comb-ere.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-cox-union.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-double-bool-comb-cox.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-cox-inter.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-double-bool-comb-cox.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-intersect-union.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-variadic-bool-comb-intersect.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-intersect.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-variadic-bool-comb-intersect.input
-"$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-intersect.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-variadic-z3-noodler-intersect.input
+if [ "$B_SMT" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "============== Running 'b-smt' benchmark ================"
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-ere.yaml" "$BASEDIR/inputs/bench-variadic-bool-comb-ere.input" $JOBS
+fi
 
-## Not run, everything timeouts
-# "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config "$BASEDIR/jobs/tacas-24-bool-comb-cox-diff.yaml" --timeout "$TIMEOUT" --jobs "$JOBS" $SUFFIX inputs/bench-double-bool-comb-cox.input
+if [ "$EMAIL_FILTER" = "true" ] || [ "$ALL" = "true" ]; then
+    # Note: For email filter we run the results in sequence, since, there might be a minor issue
+    # with our helper scripts that generate transformed .mata formulae. 
+    # The reason is that for each instance, we reuse the .mata files to generate .mata.minterm files, 
+    # in rare cases, the tools might wrongly rewrite the generated .mata.minterm file.
+    echo "=========== Running 'email-filter' benchmark ============"
+    run_benchmark "$BASEDIR/jobs/tacas-24-email-filter.yaml" "$BASEDIR/inputs/bench-quintuple-email-filter.input" 1
+fi
+
+if [ "$LIA_EXPLICIT" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "=========== Running 'lia-explicit' benchmark ============"
+    run_benchmark "$BASEDIR/jobs/tacas-24-presburger-complement.yaml" "$BASEDIR/inputs/bench-single-presburger-explicit-complement.input" $JOBS
+fi
+
+if [ "$LIA_SYMBOLIC" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "============== Running 'b-smt' benchmark ================"
+    echo "=========== Running 'lia-symbolic' benchmark ============"
+    run_benchmark "$BASEDIR/jobs/tacas-24-presburger-complement.yaml" "$BASEDIR/inputs/bench-single-presburger-complement.input" $JOBS
+fi
+
+if [ "$NOODLER_COMPL" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "========== Running 'noodler-compl' benchmark ============"
+    run_benchmark "$BASEDIR/jobs/tacas-24-z3-noodler.yaml" "$BASEDIR/inputs/bench-single-z3-noodler.input" $JOBS
+    run_benchmark "$BASEDIR/jobs/tacas-24-z3-noodler.yaml" "$BASEDIR/inputs/bench-single-z3-noodler-big.input" $JOBS
+fi
+
+if [ "$NOODLER_CONCAT" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "========== Running 'noodler-concat' benchmark ==========="
+    run_benchmark "$BASEDIR/jobs/tacas-24-z3-noodler-concat.yaml" "$BASEDIR/inputs/bench-single-z3-noodler.input" $JOBS
+fi
+
+if [ "$NOODLER_INTER" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "========== Running 'noodler-inter' benchmark ============"
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-intersect.yaml" "$BASEDIR/inputs/bench-variadic-z3-noodler-intersect.input" $JOBS
+fi
+
+if [ "$PARAM_INTER" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "=========== Running 'param-inter' benchmark ============="
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-cox-inter.yaml" "$BASEDIR/inputs/bench-double-bool-comb-cox.input" $JOBS
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-intersect.yaml" "$BASEDIR/inputs/bench-variadic-bool-comb-intersect.input" $JOBS
+fi
+
+if [ "$PARAM_UNION" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "=========== Running 'param-union' benchmark ============="
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-cox-union.yaml" "$BASEDIR/inputs/bench-double-bool-comb-cox.input" $JOBS
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-intersect-union.yaml" "$BASEDIR/inputs/bench-variadic-bool-comb-intersect.input" $JOBS
+fi
+
+if [ "$PARAM_DIFF" = "true" ] || [ "$ALL" = "true" ]; then
+    echo "============ Running 'param-diff' benchmark ============="
+    # Note: we advise, not to run this benchmark. We did not run it for our experimental evaluation
+    # The reason is that the compared tools timeouts most of the time on these instances.
+    # The results are henced not interesting at all.
+    run_benchmark "$BASEDIR/jobs/tacas-24-bool-comb-cox-diff.yaml" "$BASEDIR/inputs/bench-double-bool-comb-cox.input" $JOBS
+fi
+
 secs=$((SECONDS - start_time))
 formated_elapsed=$(printf "%dd:%dh:%dm:%ds\n" $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) $((secs%60)))
 eval "echo [!] All benchmarks done in $formated_elapsed"
