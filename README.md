@@ -303,6 +303,7 @@ If you wish to add a new tool to this virtual machine, please follow these recom
   - Martin Hruška ([martinhruska](https://github.com/martinhruska)): library maintainer;
   - Tomáš Fiedor ([tfiedor](https://github.com/tfiedor)): python binding maintainer;
   - David Chocholatý ([Adda0](https://github.com/Adda0)) library and binding developer;
+  - Vojtěch Havlena ([vhavlena](https://github.com/vhavlena)) library developer;
   - Juraj Síč ([jurajsic](https://github.com/jurajsic)): library developer;
   - Tomáš Vojnar ([vojnar](https://github.com/vojnar)): the spiritual leader;
 
