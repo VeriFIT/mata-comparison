@@ -7,6 +7,8 @@ JOBS=6
 SUFFIX=""
 METHODS=""
 EXCLUDE=""
+TEST_RUN=""
+SAY_YES="false"
 
 # Each benchmark corresponds to naming in our paper; set to "true" to run concrete benchmark
 # or use the CLI commands.
@@ -27,9 +29,11 @@ usage() { {
         [ $# -gt 0 ] && echo "error: $1"
         echo "usage: ./run_all.sh [opt1, ..., optn]"
         echo "options:"
+        echo "  -t|--test-run               will conduct a test run (5s timeout, only 1 instance per benchmark)"
         echo "  -m|--methods                will measure only selected tools"
         echo "  -e|--exclude                will not measure selected tools"
         echo "  -j|--jobs                   will run only number of jobs"
+        echo "  -y|--no-interaction         will not interact with use in --test-run"
         echo "     --armc-incl              will run 'armc-incl' benchmark"
         echo "     --b-smt                  will run 'b-smt' benchmark"
         echo "     --email-filter           will run 'email-filter' benchmark"
@@ -49,6 +53,13 @@ while [ $# -gt 0 ]; do
         -h|--help)
             usage
             exit 0;;
+        -t|--test-run)
+            TIMEOUT=5
+            TEST_RUN="--test-run"
+            shift 1;;
+        -y|--no-interaction)
+            SAY_YES="true"
+            shift 1;;
         -m|--methods)
             METHODS="-m $2"
             shift 2;;
@@ -109,13 +120,29 @@ run_benchmark() {
     # :param $1: path to configuration .yaml file
     # :param $2: path to inputs .input file
     # :param $3: number of parallel jobs
-    "$BASEDIR/scripts/run_pyco.sh" $EXCLUDE $METHODS --config $1 --timeout "$TIMEOUT" --jobs $3 $SUFFIX $2
+    "$BASEDIR/scripts/run_pyco.sh" $TEST_RUN $EXCLUDE $METHODS --config $1 --timeout "$TIMEOUT" --jobs $3 $SUFFIX $2
+    if [ "$TEST_RUN" != "" ] && [ "$SAY_YES" == "false" ]; then
+        read -p "Press <any> key to continue"
+    fi
 }
 
 start_time=$SECONDS
 
 if [ "$ALL" = "true" ]; then
     echo "[!] Running all benchmarks, this will take some time (could take over 14 hours, or even days)"
+fi
+
+if [ "$TEST_RUN" != "" ]; then
+    echo "[!] Selected dry run: timeout set to $TIMEOUT; only one instance per benchmark will be run (unless specific benchmarks were selected)."
+    echo "[!] Note, that there might be some timeouts in the output, which is expected. No errors should be present"
+    echo "[!] At the end of each benchmark, we print: "
+    echo "  (1) short summary with average times,"
+    echo "  (2) short summary with timeouts."
+    if [ "$SAY_YES" = "false" ]; then
+        echo "[!] You will be prompted to press <any> key after each benchmark to inspect the results"
+        echo "[!] Run './run_all.sh --test-run -y' to disable the prompts"
+        read -p "Press <any> key to continue"
+    fi
 fi
 
 if [ "$ARMC_INCL" = "true" ] || [ "$ALL" = "true" ]; then
