@@ -25,4 +25,4 @@ pushd tools/awali
 popd
 
 echo "============== Installing Python packages ================"
-sudo -u ae pip3 install pip-packages/* || echo "Error installing Python messages"
+sudo -u tacas23 pip3 install pip-packages/* || echo "Error installing Python messages"
