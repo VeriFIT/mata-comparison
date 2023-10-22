@@ -1,4 +1,10 @@
 #!/bin/bash
-./git-archive-all.sh
-gzip -9 experiments.tar
-mv experiments.tar.gz tacas24-artifact.tar.gz
+
+BASEDIR=$(realpath $(dirname "$0"))
+PROJECTDIR=$(realpath "$BASEDIR/../..")
+
+TARNAME=tacas24-artifact
+
+git-archive-all $TARNAME.tar
+
+gzip -9 $TARNAME.tar

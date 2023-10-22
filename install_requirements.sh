@@ -1,5 +1,12 @@
 #!/bin/bash
+
+$VM_USER=tacas23
+
 # installs requirements (need to run with sudo! )
+if [ "$EUID" -ne 0 ]; then
+  echo -e "\e[31merror: ./install_requirements.sh must be run as root\e[0m"
+  exit
+fi
 
 # Installing mata / vata / awali prerequisities
 echo "============= Installing Cpp Prerequisities =============="
@@ -15,7 +22,10 @@ dpkg -i packages/java/*.deb || echo "Error installing java prerequisities"
 
 echo "================== Installing libmata ===================="
 pushd tools/mata
-make release
+echo "[!] Note: we are building libmata library only."
+echo "[!] To build libmata complete with tests and examples, enable internet and run:"
+echo "  $ make -C tools/mata release"
+make release-lib
 sudo make install
 popd
 
@@ -25,4 +35,10 @@ pushd tools/awali
 popd
 
 echo "============== Installing Python packages ================"
-sudo -u tacas23 pip3 install pip-packages/* || echo "Error installing Python messages"
+sudo -u $VM_USER tacas23 pip3 install pip-packages/* || echo "Error installing Python messages"
+
+
+echo "========== Installing libmata (python binding) ==========="
+pushd tools/mata/bindings/python
+sudo -u $VM_USER make install
+popd

@@ -5,4 +5,6 @@ program=$1
 shift
 automata="$@"
 
-$binary $program $(python3 ~/scripts/massage_arguments.py $automata)
+BASEDIR=$(dirname "$0")
+
+$binary $program $(python3 $BASEDIR/massage_arguments.py $automata)
