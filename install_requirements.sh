@@ -1,6 +1,6 @@
 #!/bin/bash
 
-$VM_USER=tacas23
+VM_USER=tacas23
 
 # installs requirements (need to run with sudo! )
 if [ "$EUID" -ne 0 ]; then
@@ -35,10 +35,10 @@ pushd tools/awali
 popd
 
 echo "============== Installing Python packages ================"
-sudo -u $VM_USER tacas23 pip3 install pip-packages/* || echo "Error installing Python messages"
+sudo -u $VM_USER pip3 install pip-packages/deps/*.whl || echo "Error installing Python dependencies"
+sudo -u $VM_USER pip3 install --no-deps pip-packages/libmata/libmata-1.0.0-*.whl || echo "Error installing libmata"
+sudo -u $VM_USER pip3 install --no-deps pip-packages/pyinterpret/pyinterpret-1.0.0-*.whl || echo "Error installing pyinterpret"
 
-
-echo "========== Installing libmata (python binding) ==========="
-pushd tools/mata/bindings/python
-sudo -u $VM_USER make install
-popd
+echo "==================== Setting Path ========================"
+echo 'PATH=$PATH:/home/$VM_USER/.local/bin' >> ~/.bashrc
+export "PATH=$PATH:/home/$VM_USER/.local/bin"
