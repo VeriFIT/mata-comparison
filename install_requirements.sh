@@ -38,7 +38,3 @@ echo "============== Installing Python packages ================"
 sudo -u $VM_USER pip3 install pip-packages/deps/*.whl || echo "Error installing Python dependencies"
 sudo -u $VM_USER pip3 install --no-deps pip-packages/libmata/libmata-1.0.0-*.whl || echo "Error installing libmata"
 sudo -u $VM_USER pip3 install --no-deps pip-packages/pyinterpret/pyinterpret-1.0.0-*.whl || echo "Error installing pyinterpret"
-
-echo "==================== Setting Path ========================"
-echo 'PATH=$PATH:/home/$VM_USER/.local/bin' >> ~/.bashrc
-export "PATH=$PATH:/home/$VM_USER/.local/bin"
