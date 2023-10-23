@@ -29,7 +29,8 @@ usage() { {
         [ $# -gt 0 ] && echo "error: $1"
         echo "usage: ./run_all.sh [opt1, ..., optn]"
         echo "options:"
-        echo "  -t|--test-run               will conduct a test run (5s timeout, only 1 instance per benchmark)"
+        echo "     --test-run               will conduct a test run (5s timeout, only 1 instance per benchmark)"
+        echo "  -t|--timeout                will set a timeout to <INT> seconds (default 60s)"
         echo "  -m|--methods                will measure only selected tools"
         echo "  -e|--exclude                will not measure selected tools"
         echo "  -j|--jobs                   will run only number of jobs"
@@ -53,7 +54,7 @@ while [ $# -gt 0 ]; do
         -h|--help)
             usage
             exit 0;;
-        -t|--test-run)
+        --test-run)
             TIMEOUT=5
             TEST_RUN="--test-run"
             shift 1;;
@@ -62,6 +63,9 @@ while [ $# -gt 0 ]; do
             shift 1;;
         -m|--methods)
             METHODS="-m $2"
+            shift 2;;
+        -t|--timeout)
+            TIMEOUT=$2
             shift 2;;
         -e|--exclude)
             EXCLUDE="-e $2"
