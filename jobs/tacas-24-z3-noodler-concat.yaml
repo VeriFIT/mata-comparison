@@ -20,4 +20,4 @@ pyfado:
 
 # brics
 java-brics:
-    cmd: ./scripts/run_java.sh ./bin/brics-emp-interpreter.jar ./programs/concat.emp $1
+    cmd: ./scripts/run_brics.sh ./bin/brics-emp-interpreter.jar ./programs/concat.emp $1

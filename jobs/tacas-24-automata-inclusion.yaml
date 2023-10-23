@@ -36,8 +36,8 @@ pyautomata-lib:
 
 # automatalib
 java-automatalib:
-    cmd: ./scripts/run_java.sh ./bin/automatalib-emp-interpreter.jar ./programs/automata_inclusion.emp $1 $2
+    cmd: ./scripts/run_alib.sh ./bin/automatalib-emp-interpreter.jar ./programs/automata_inclusion.emp $1 $2
 
 # brics
 java-brics:
-    cmd: ./scripts/run_java.sh ./bin/brics-emp-interpreter.jar ./programs/automata_inclusion.emp $1 $2
+    cmd: ./scripts/run_brics.sh ./bin/brics-emp-interpreter.jar ./programs/automata_inclusion.emp $1 $2
