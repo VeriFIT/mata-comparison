@@ -113,6 +113,9 @@ while [ $# -gt 0 ]; do
             PARAM_DIFF="true"
             ALL="false"
             shift 1;;
+        *)
+            echo "unknown parameter: $1"
+	    shift 1;;	
     esac
 done
 
