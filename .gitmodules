@@ -13,3 +13,6 @@
 [submodule "tools/nfa-program-parser"]
 	path = tools/nfa-program-parser
 	url = git@github.com:VeriFIT/nfa-program-parser.git
+[submodule "results"]
+	path = results
+	url = git@github.com:VeriFIT/mata-comparison-results.git
