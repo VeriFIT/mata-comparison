@@ -106,12 +106,7 @@ prepend_directory() {
 tmp_output=$(mktemp)
 "$basedir/"pycobench >& "$tmp_output"
 if grep -q ModuleNotFoundError "$tmp_output"; then
-  echo "[!] Your system is missing python modules for running pycobench."
-  read -p "Do you wish to install these requirements? [y/n] " choice
-  case "$choice" in
-    y|Y ) python3 -m pip install -r requirements.txt;;
-    * ) die "missing pycobench depedencies; please, install then from 'test-integration/requirements.txt'";;
-  esac
+  die "error: your system is missing python modules for running pycobench. Did you run 'install requirements.sh'?"
 fi
 rm "$tmp_output"
 
