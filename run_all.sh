@@ -4,7 +4,8 @@
 BASEDIR=$(dirname "$0")
 TIMEOUT=60
 JOBS=6
-SUFFIX=""
+OUTPUT_DIR=""
+OUTPUT_DIR_NAME=""
 METHODS=""
 EXCLUDE=""
 TEST_RUN=""
@@ -31,6 +32,7 @@ usage() { {
         echo "options:"
         echo "     --test-run               will conduct a test run (5s timeout, only 1 instance per benchmark)"
         echo "  -t|--timeout                will set a timeout to <INT> seconds (default 60s)"
+        echo "  -o|--output-dir             will store the results in 'results/data/<DIR>'"
         echo "  -m|--methods                will measure only selected tools"
         echo "  -e|--exclude                will not measure selected tools"
         echo "  -j|--jobs                   will run only number of jobs"
@@ -63,6 +65,10 @@ while [ $# -gt 0 ]; do
             shift 1;;
         -m|--methods)
             METHODS="-m $2"
+            shift 2;;
+        -o|--output-dir)
+            OUTPUT_DIR="-s $2"
+            OUTPUT_DIR_NAME="$2"
             shift 2;;
         -t|--timeout)
             TIMEOUT=$2
@@ -127,7 +133,7 @@ run_benchmark() {
     # :param $1: path to configuration .yaml file
     # :param $2: path to inputs .input file
     # :param $3: number of parallel jobs
-    "$BASEDIR/scripts/run_pyco.sh" $TEST_RUN $EXCLUDE $METHODS --config $1 --timeout "$TIMEOUT" --jobs $3 $SUFFIX $2
+    "$BASEDIR/scripts/run_pyco.sh" $TEST_RUN $EXCLUDE $METHODS --config $1 --timeout "$TIMEOUT" --jobs $3 $OUTPUT_DIR $2
     if [ "$TEST_RUN" != "" ] && [ "$SAY_YES" == "false" ]; then
         read -p "Press <any> key to continue"
     fi
@@ -221,3 +227,6 @@ fi
 secs=$((SECONDS - start_time))
 formated_elapsed=$(printf "%dd:%dh:%dm:%ds\n" $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) $((secs%60)))
 eval "echo [!] All benchmarks done in $formated_elapsed"
+if [ -n "$OUTPUT_DIR_NAME" ]; then
+    echo "[!] All results stored in '$OUTPUT_DIR_NAME'"
+fi

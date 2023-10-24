@@ -118,6 +118,9 @@ rm "$tmp_output"
 # Prepares configuration
 config=$(escape_extension "$config" "yaml")
 result_dir=$rootdir/results/data
+if [ -n "$suffix" ]; then
+  result_dir="$result_dir/$suffix"
+fi
 mkdir -p "$result_dir"
 
 [ ${#benchmarks[@]} -gt 0 ] 2>/dev/null || die "error: you must specify some *.input file with benchmarks"
@@ -131,7 +134,7 @@ do
     # Run the script with -s|--suffix to append other information to your benchmarks
     benchmark_name=$(basename "$benchmark")
     job_name=$(basename "$config")
-    result_file=$result_dir/${job_name%.*}-${benchmark_name%.*}-$(date +%Y-%m-%d-%H-%M-%S)-timeout-$timeout-jobs-$jobs$methods$suffix
+    result_file=$result_dir/${job_name%.*}-${benchmark_name%.*}-$(date +%Y-%m-%d-%H-%M-%S)-timeout-$timeout-jobs-$jobs$methods
     result_file=$(echo -e "${result_file// /-}")
 
     # Perform actual runs
