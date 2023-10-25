@@ -300,7 +300,7 @@ def generate_figure_four(df):
 
     bench_list = sorted(list(set(list(df['bench']))))
 
-    item_no = len(bench_list)
+    item_no = 11
     item_per_row = 3
     x_dim = item_no // item_per_row + 1
     y_dim = min(item_no, item_per_row)
@@ -404,7 +404,7 @@ def generate_figure_five(df):
         'intersection',
         'union'
     ]
-    item_no = len(op_list)
+    item_no = 7
     x_dim = item_no // 3 + 1
     y_dim = min(item_no, 3)
 
@@ -635,13 +635,15 @@ def compute_relative(mata_d, other_d):
 
 
 def to_relative_table(df, rows, aggregation, tablefmt='latex'):
-    tools = ['mata', 'mata-0.111', 'mata-0.112', 'mata-0.113', 'mata-old', 'mata-sim', 'awali', 'mona', 'vata',  'automata.net', 'brics', 'automatalib-old', 'automatalib', 'fado', 'automata.py', '(py)mata']
+    tools = [
+        'mata', 'mata-sim', 'awali', 'mona', 'vata',  'automata.net', 'brics', 'automatalib', 'fado', 'automata.py', '(py)mata'
+    ]
     tools = [t for t in tools if t in set(df['tool'])]
     data = {
         grp: [grp] + ['-' for i in range(len(tools))] for grp in set(df[rows]) if grp != 'result' and 'result' not in grp
     }
     for grp, series in df.groupby([rows, 'tool'] if not isinstance(rows, list) else rows + ['tool']):
-        if grp[0] == 'result' or 'result' in grp[0]:
+        if grp[0] == 'result' or 'result' in grp[0] or grp[1] not in tools:
             continue
         vals = aggregation(series[['time', 'input']])
         data[grp[0]][tools.index(grp[1]) + 1] = vals
