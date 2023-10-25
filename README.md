@@ -1,5 +1,7 @@
 # A Replication package for reproducing the results of paper "Mata: A Fast and Simple Finite Automata Library"
 
+The link to the Zenodo archive: [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696)
+
 This repository contains data, tools, benchmark and scripts for
 replicating (and processing) tool paper describing `libmata` library.
 This package is meant to be used for running benchmarks on set of
