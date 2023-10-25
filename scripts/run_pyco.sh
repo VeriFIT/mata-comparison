@@ -18,6 +18,7 @@ usage() { {
         echo "  -s|--suffix                 adds suffix to the target file"
         echo "  -v|--verbose                adds verbosity to pycobench"
         echo "  -d|--test-run               will run only single benchmark from each input"
+        echo "  -c|--test-run-count         will run only <INT> benchmark from each input (used for test-run)"
     } >&2
 }
 
@@ -40,6 +41,7 @@ rootdir=$(realpath "$basedir/..")
 config="$rootdir/jobs/tacas-24-automata-inclusion.yaml"
 verbose=""
 testrun=false
+testrun_count=1
 GR='\033[0;32m'
 RD='\033[0;31m'
 NC='\033[0m' # No Color
@@ -73,6 +75,9 @@ while [ $# -gt 0 ]; do
         -d|--test-run)
             testrun=true
             shift 1;;
+        -c|--test-run-count)
+            testrun_count=$2
+            shift 2;;
         *)
             benchmarks+=( $1 )
             shift 1;;
@@ -138,7 +143,7 @@ do
     sub_result_file="$result_file.log"
     intermediate+=( $sub_result_file )
     if [ "$testrun" = true ]; then
-      cat "$benchmark_file" | head -1 | "$basedir/"pycobench $exclude $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file"
+      cat "$benchmark_file" | head -$testrun_count | "$basedir/"pycobench $exclude $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file"
     else
       "$basedir/"pycobench $exclude $methods $verbose -j "$jobs" -c "$config" -t "$timeout" -o "$sub_result_file" < "$benchmark_file"
     fi

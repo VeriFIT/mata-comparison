@@ -9,6 +9,7 @@ OUTPUT_DIR_NAME=""
 METHODS=""
 EXCLUDE=""
 TEST_RUN=""
+TEST_RUN_COUNT=1
 SAY_YES="false"
 
 # Each benchmark corresponds to naming in our paper; set to "true" to run concrete benchmark
@@ -31,6 +32,7 @@ usage() { {
         echo "usage: ./run_all.sh [opt1, ..., optn]"
         echo "options:"
         echo "     --test-run               will conduct a test run (5s timeout, only 1 instance per benchmark)"
+        echo "     --test-run-count         will conduct a test run (5s timeout, only <INT> instance per benchmark)"
         echo "  -t|--timeout                will set a timeout to <INT> seconds (default 60s)"
         echo "  -o|--output-dir             will store the results in 'results/data/<DIR>'"
         echo "  -m|--methods                will measure only selected tools"
@@ -60,6 +62,10 @@ while [ $# -gt 0 ]; do
             TIMEOUT=5
             TEST_RUN="--test-run"
             shift 1;;
+        --test-run-count)
+            TIMEOUT=5
+            TEST_RUN="--test-run --test-run-count $2"
+            shift 2;;
         -y|--no-interaction)
             SAY_YES="true"
             shift 1;;
