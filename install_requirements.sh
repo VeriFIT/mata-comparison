@@ -42,4 +42,4 @@ sudo -u $VM_USER pip3 install --no-deps pip-packages/pyinterpret/pyinterpret-1.0
 echo "==================== Setting Path ========================"
 echo "export PATH=\$PATH:/home/$VM_USER/.local/bin" >> ~/.bashrc
 echo "echo \"export PATH=\$PATH:/home/\$VM_USER/.local/bin\" >> ~/.bashrc"
-echo "Please, run:'export PATH=\$PATH:/home/$VM_USER/.local/bin' to set \$PATH."
+echo "!!! Please, run:'export PATH=\$PATH:/home/$VM_USER/.local/bin' to set \$PATH correctly. !!!"
