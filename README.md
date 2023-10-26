@@ -53,7 +53,7 @@ We make our replication package (and some of its parts) as available as possible
 In the following we describe necessary steps for replicating (to a certain degree) our results
 presented in the tool paper.
 
-Download the `tacas-artifact.tar.gz` from [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696). Then unpack the artifact and change directory.
+Download the `tacas-artifact.tar.gz` from [10.5281/zenodo.10040695](https://doi.org/10.5281/zenodo.10040695). Then unpack the artifact and change directory.
 
 ```shell
 tar -xzvf tacas-artifact.tar.gz
