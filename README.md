@@ -89,7 +89,7 @@ You can test, that everything is set up correctly by running `pyintepret` comman
 To test that the environment is working correctly run the following script:
 
 ```shell
-./run_test.sh
+./run_smoke_test.sh
 ```
 
 This will run only `b-smt` benchmark, with timeout `60s`, and runs only 
