@@ -1,7 +1,3 @@
-# automata.net using original inputs
-automata:
-    cmd: ./bin/automata ./programs/bool_comb_diff_sat.emp $1 $2
-
 # automata.net using mintermized inputs
 automata-min:
     cmd: ./scripts/run_automata.sh ./bin/automata ./programs/bool_comb_diff_sat.emp $1 $2

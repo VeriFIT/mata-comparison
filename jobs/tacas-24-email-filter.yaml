@@ -1,7 +1,3 @@
-# automata.net using original inputs
-automata:
-    cmd: ./bin/automata ./programs/email_filter.emp $1 $2 $3 $4 $5
-
 # automata.net using mintermized inputs
 automata-min:
     cmd: ./scripts/run_automata.sh ./bin/automata ./programs/email_filter.emp $1 $2 $3 $4 $5
