@@ -555,8 +555,8 @@ def stats(series, with_to):
     times_with_timeout = [t if (isinstance(t, float) or isinstance(t, int)) and t >= 0 else TIMEOUT for t in series]
 
     mean = int(round(1000 * numpy.mean(times or [60]), 6))
-    first = int(round(1000 * numpy.quantile(times_with_timeout, 0.5), 6))
-    third = int(round(1000 * numpy.std(times), 6))
+    first = int(round(1000 * numpy.quantile(times_with_timeout or [60], 0.5), 6))
+    third = int(round(1000 * numpy.std(times or [60]), 6))
 
     if with_to:
         return (
