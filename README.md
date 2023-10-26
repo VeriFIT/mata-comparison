@@ -36,10 +36,14 @@ For the sake of simplicity we prepared several master scripts `run_all.sh`
 
 ## Availability
 
+We make our replication package (and some of its parts) as available as possible:
+
+  * [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696): downloadable replication package.
   * [VM](https://zenodo.org/records/7113223): virtual machine, where one can run the experiments.
-  * [The Package](https://github.com/VeriFIT/mata-comparison): the repository with this package.
+  * [The Package Repository](https://github.com/VeriFIT/mata-comparison): the repository with this package.
   * [Benchmarks](https://github.com/VeriFIT/nfa-bench): source benchmarks that were used in the comparison.
-  * [Results](https://github.com/VeriFIT/mata-comparison-results): measured results.
+  * [Results](https://github.com/VeriFIT/mata-comparison-results): measured results presented in paper..
+  * [libmata](https://github.com/VeriFIT/mata): our `libmata` library.
   * [automata.net](https://github.com/VeriFIT/Automata/tree/tacas24): our fork of `automata.net` library.
   * [nfa-program-parser](https://github.com/VeriFIT/nfa-program-parser/tree/tacas24-ae): our interpreter for `mata`, `vata`, `awali`, `fado` and `automata.py`.
   * [brics](https://github.com/VeriFIT/mata-comparison-brics/tree/tacas24): our interpreter for `brics` and `automatalib`.
@@ -48,6 +52,15 @@ For the sake of simplicity we prepared several master scripts `run_all.sh`
 
 In the following we describe necessary steps for replicating (to a certain degree) our results
 presented in the tool paper.
+
+Download the `tacas-artifact.tar.gz` from [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696). Then unpack the artifact and change directory.
+
+```shell
+tar -xzvf tacas-artifact.tar.gz
+cd tacas-artifact
+```
+
+We assume, that everything is executed from the root (`tacas-artifact`) folder, executing from other folders might not work.
 
 ### Installing requirements
 
@@ -257,13 +270,30 @@ All results are in `.csv` format delimited by `;`. To manually inspect the data,
 `pandas` library to further interact with the results:
 
 ```python3
-    import pandas
-    pandas.read_csv("results/data/<DIR>/<FILE>.csv")
+import pandas
+pandas.read_csv("results/data/<DIR>/<FILE>.csv")
 ```
 
 This loads a `csv` file in `DataFrame` representation, that can be used easily to
 handle common grouping, statistics, and many other data operations.
 See [pandas](https://pandas.pydata.org/) for more information.
+
+### Estimated Runtimes of Benchmarks
+
+We estimate the runtimes of each benchmark (if run sequentially, i.e., run with `--jobs 1`) as follows (sorted by runtime):
+
+  1. `lia-explicit`: around half hour;
+  2. `lia-symbolic`: around 1 hour;
+  3. `armc-incl`: around 2 hours;
+  4. `noodler-compl`: around 2 hours;
+  5. `email-filter`:  around 4 hours;
+  6. `noodler-concat`: around 4 hours;
+  7. `b-smt`: around 6 hours;
+  8. `noodler-inter`: around 10 hours;
+  9. `param-union`: around 12 hours.
+  10. `param-inter`: around 30 hours;
+
+Note, this is estimated for 8 cores and 20GB, hence, if run in VM this might take longer. Running instances in parallel will speed up the experiments (however, the results might be less stable).
 
 ## Troubleshooting
 
@@ -419,7 +449,7 @@ If you wish to add a new tool to this package, please follow these recommendatio
   2. Generate `.input` files that will list benchmarks one per line. 
   3. Add your benchmark to `run_all.sh`.
 
-# Threats to Validity (known limitations)
+## Threats to Validity (known limitations)
 
   * Comparing the tools based on other metrics (e.g., memory
   peak) could further highlight the strengths of each tools. Nowadays, limiting
