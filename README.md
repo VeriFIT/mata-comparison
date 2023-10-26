@@ -1,6 +1,6 @@
 # A Replication package for reproducing the results of paper "Mata: A Fast and Simple Finite Automata Library"
 
-The link to the Zenodo archive: [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696)
+The link to the Zenodo archive: [10.5281/zenodo.10040695](https://doi.org/10.5281/zenodo.10040695)
 
 This repository contains data, tools, benchmark and scripts for
 replicating (and processing) tool paper describing `libmata` library.
@@ -38,7 +38,7 @@ For the sake of simplicity we prepared several master scripts `run_all.sh`
 
 We make our replication package (and some of its parts) as available as possible:
 
-  * [10.5281/zenodo.10040696](https://doi.org/10.5281/zenodo.10040696): downloadable replication package.
+  * [10.5281/zenodo.10040695](https://doi.org/10.5281/zenodo.10040695): downloadable replication package.
   * [VM](https://zenodo.org/records/7113223): virtual machine, where one can run the experiments.
   * [The Package Repository](https://github.com/VeriFIT/mata-comparison): the repository with this package.
   * [Benchmarks](https://github.com/VeriFIT/nfa-bench): source benchmarks that were used in the comparison.
