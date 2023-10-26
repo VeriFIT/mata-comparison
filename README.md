@@ -103,6 +103,8 @@ You can then test replicating of the images as follows:
 ./generate_figs.py ./results/data/smoke-test
 ```
 
+Note, alternatively try to run `python3 generate_figs.py ./results/data/smoke-test` if the command gives you an error.
+
 This will generate two figures (in `.png` and `.pdf` format), and five tables (in `.tex` format)
 stored in `./results/data/smoke-test/figs` directory. The script also print the five tables 
 in human readable to standard output.
